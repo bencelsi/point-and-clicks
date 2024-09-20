@@ -11,6 +11,7 @@
 // Remove other games... put into a fork, and periodically rebase
 // freeze game data?
 // Add 'menu' logic
+// Make rooms optional.
 
 const commonData = {
     standardBoxes : {
@@ -48,9 +49,8 @@ const SIDE_SPEED = 400
 const FADE_SPEED = 400
 
 // globals consts
-if (gameState != undefined) {
-	const inventory = state.inventory
-}
+const inventory = state.inventory
+
 const standardBoxes = commonData.standardBoxes;
 
 // global vars:
