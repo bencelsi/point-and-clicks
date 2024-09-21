@@ -12,6 +12,8 @@
 // freeze game data?
 // Add 'menu' logic
 // Make rooms optional.
+// tool to rename image files & frames in js
+// optional image size
 
 const commonData = {
     standardBoxes : {
