@@ -1,4 +1,3 @@
-
 // TODO - branch-based image caching
 // use format A1a.a - room A , position 1, direction a, variant (ie, power on, door open)
 // TODO - fluent interface for gifs, pics, boxes.
@@ -36,20 +35,43 @@ const commonData = {
     }
 }
 
-document.title = gameData.title
-const GAME = '../' + window.location.search.substring(1)
+document.title = location.hostname === "" ? "." + gameData.title : gameData.title
 
-const FRAME_PATH = GAME + '/assets/frames'
-const GIF_PATH = GAME + '/assets/gifs/'
-const AUDIO_PATH = GAME + '/assets/audio/'
-const PIC_PATH = GAME + '/assets/pics/'
-const INVENTORY_PATH = GAME + '/assets/inventory/'
-const CURSOR_PATH = 'assets/cursors/'
-const HEIGHT = 750
-const WIDTH = 750
-const SIDE_SPEED = 400
-const FADE_SPEED = 400
+get("favicon").href = gameFolder + "favicon.ico"
+console.log(gameFolder)
+const GAME_FOLDER = '../games/' + window.location.search.substring(1)
 
+const FRAME_PATH = GAME_FOLDER + '/assets/frames'
+const GIF_PATH = GAME_FOLDER + '/assets/gifs/'
+const AUDIO_PATH = GAME_FOLDER + '/assets/audio/'
+const PIC_PATH = GAME_FOLDER + '/assets/pics/'
+const INVENTORY_PATH = GAME_FOLDER + '/assets/inventory/'
+const CURSOR_PATH = gameData.customCursors === true ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
+const WIDTH = gameData.frameWidth === undefined ? 750 : gameData.frameWidth
+const HEIGHT = gameData.frameHeight === undefined ? 750 : gameData.frameHeight
+const SIDE_SPEED = .35
+const FADE_SPEED = 1
+
+get("screen").style.width = WIDTH + "px"
+get("screen").style.height = HEIGHT + "px"
+
+let animationStyle = 
+`
+@keyframes leftIn { from { transform: translateX(0) } to { transform: translateX(${WIDTH}px) }}
+@keyframes leftOut { from { transform: translateX(0) }}
+@keyframes rightIn { from { transform: translateX(0) } to { transform: translateX(-${WIDTH}px) }}
+@keyframes rightOut {  from { transform: translateX(0) }}
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 }}
+@keyframes fadeOut { from { opacity: 1 }}
+
+.leftIn { animation:leftIn ${SIDE_SPEED}s }
+.leftOut { animation:leftOut ${SIDE_SPEED}s; transform: translateX(${WIDTH}px) }
+.rightIn { animation:rightIn ${SIDE_SPEED}s} 
+.rightOut { animation:rightOut ${SIDE_SPEED}s; transform: translateX(-${WIDTH}px) } 
+.fadeIn { animation:fadeIn ${FADE_SPEED}s; } 
+.fadeOut { animation:fadeOut ${FADE_SPEED}s; opacity: 0 }
+`
+get("style").innerHTML = animationStyle
 // globals consts
 const inventory = state.inventory
 
@@ -78,18 +100,18 @@ window.onload = function() {
 }
 
 function init() {
-	standardBoxesDiv = getById('standardBoxes')
-	customBoxesDiv = getById('customBoxes')
-	picsDiv = getById('pics')
-	cacheDiv = getById('cache')
-    transitionsDiv = getById('transitions')
-    imgDiv = getById('img')
-    inventoryDiv = getById('inventory')
+	standardBoxesDiv = get('standardBoxes')
+	customBoxesDiv = get('customBoxes')
+	picsDiv = get('pics')
+	cacheDiv = get('cache')
+    transitionsDiv = get('transitions')
+    imgDiv = get('img')
+    inventoryDiv = get('inventory')
 
 	setupStandardBoxes()
 	transition(frame, 'fade')
 	refreshInventory()
-	//window.onclick = ()=>launchFullScreen(getById('window'))
+	//window.onclick = ()=>launchFullScreen(get('window'))
 }
 
 // DOM setup  ******************************************
@@ -104,6 +126,7 @@ function setupStandardBoxes() {
 
 // TRANSITIONS ******************************************
 function transition(newFrame, type) {
+	console.log(newFrame)
 	if (processes > 0) {
 		return
 	}
@@ -119,12 +142,12 @@ function transition(newFrame, type) {
 		transitionsDiv.innerHTML = ''
 		cacheResources()
 		processes--
-	}, SIDE_SPEED)
+	}, SIDE_SPEED * 1000)
 }
 
 function createTransition(type) {
 	let transition = document.createElement('div')
-	transition.appendChild(getById('img').cloneNode(true)) //creates duplicate img
+	transition.appendChild(get('img').cloneNode(true)) //creates duplicate img
 	let picBoxes = picsDiv.cloneNode(true)
 	picBoxes.id = null
 	transition.appendChild(picBoxes)
@@ -147,7 +170,7 @@ function refreshCustomBoxes() {
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
 			let boxData = boxes[i]
-			if (boxData.condition != null && !boxData.condition()) {
+			if (boxData.condition !== undefined && !boxData.condition()) {
 				continue
 			}
 			makeCustomBox(boxData)
@@ -157,6 +180,7 @@ function refreshCustomBoxes() {
 
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
+	console.log(boxData)
 	let hitbox = simpleEval(boxData.hitbox)
 	let cursor = simpleEval(boxData.cursor)
 	let onclick = boxData.onclick
@@ -218,7 +242,7 @@ function refreshInventory() {
 	if (inventory === undefined) {
 		return
 	}
-	getById('inventory').innerHTML = ''
+	get('inventory').innerHTML = ''
 	for (let item in inventory) {
 		if (inventory[item].state == 1){
 			makeInventoryItem(item)
@@ -236,7 +260,7 @@ function makeInventoryItem(id) {
 	img.src = INVENTORY_PATH + inventory[id].img + '.png'
 	item.appendChild(img)
 	makeDraggable(item, inventory[id].targetId, inventory[id].targetAction)
-	getById('inventory').appendChild(item)
+	get('inventory').appendChild(item)
 }
 
 // Make given inventory box draggable, execute action if dropped on targetId
@@ -258,7 +282,7 @@ function makeDraggable(item, targetId, targetAction) {
 			document.onmousemove = null
 			document.onmouseup = null
 			event.preventDefault()
-			let target = getById(targetId)
+			let target = get(targetId)
 			if (target != null && isCollide(item, target)){
 				targetAction()
 			} else {
@@ -312,10 +336,10 @@ function cacheFrame(frame) {
 //Plays the gif of the given name.  Takes the number of frames and the delay to calculate the time... (maybe make this automatic somehow?)
 function playGif(name, frames, delay) {
 	processes++
-	let gif = getById('fullGif')
+	let gif = get('fullGif')
 	gif.src = GIF_PATH + name + '.gif' + '?a='+Math.random()
 	gif.style.visibility = 'visible'
-	getById('movies').appendChild(gif)
+	get('movies').appendChild(gif)
 	setTimeout(() => {
 		gif.style.visibility = 'hidden'
 		processes--
@@ -351,7 +375,7 @@ function setVolume(n, volume, speed) {
 
 // HELPERS ******************************************	
 
-function getById(id) {
+function get(id) {
 	return document.getElementById(id)
 }
 
@@ -385,9 +409,7 @@ function isCollide(a, b) {
 }
 
 // TODO: do better.
-function setRoom(newRoom, newExtension) {
-	console.log(extension)
-	console.log(newExtension)
+function setRoom(newRoom, newExtension=extension) {
 	if (newRoom == null) {
 		roomData = gameData.frames
 	} else {
