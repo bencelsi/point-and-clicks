@@ -1,18 +1,15 @@
 // TODO - branch-based image caching
-// use format A1a.a - room A , position 1, direction a, variant (ie, power on, door open)
 // TODO - fluent interface for gifs, pics, boxes.
 // Ideal: smooth transition between standard box, custom, pic - all on 1 map
 // Idea: you move around, but scary creature keeps following you
-// Homepage w multiple games
-// Single file? or game data in separate
 // understand let vs var etc.
 // Add 'gameState' to data
-// Remove other games... put into a fork, and periodically rebase
 // freeze game data?
 // Add 'menu' logic
 // Make rooms optional.
 // tool to rename image files & frames in js
 // optional image size
+// gifs as frames option
 
 const commonData = {
     standardBoxes : {
@@ -63,7 +60,6 @@ let animationStyle =
 @keyframes rightOut {  from { transform: translateX(0) }}
 @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 }}
 @keyframes fadeOut { from { opacity: 1 }}
-
 .leftIn { animation:leftIn ${SIDE_SPEED}s }
 .leftOut { animation:leftOut ${SIDE_SPEED}s; transform: translateX(${WIDTH}px) }
 .rightIn { animation:rightIn ${SIDE_SPEED}s} 
@@ -71,10 +67,11 @@ let animationStyle =
 .fadeIn { animation:fadeIn ${FADE_SPEED}s; } 
 .fadeOut { animation:fadeOut ${FADE_SPEED}s; opacity: 0 }
 `
-get("style").innerHTML = animationStyle
-// globals consts
-const inventory = state.inventory
 
+get("style").innerHTML = animationStyle
+
+// globals consts
+const inventory = s.inventory
 const standardBoxes = commonData.standardBoxes;
 
 // global vars:
@@ -83,7 +80,6 @@ let room = gameData.startRoom
 let frame = gameData.startFrame
 let roomData = gameData.frames[room]
 let frameData = roomData[frame]
-
 let processes = 0 // whether or not to listen to user input
 
 // DOM globals:

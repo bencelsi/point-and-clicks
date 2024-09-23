@@ -1,7 +1,7 @@
 const gameData = {
     title: "Griven",
-    startRoom: 'room',
-    startFrame: 'A2',
+    startRoom: 'hall',
+    startFrame: 'A1',
     extension: 'png',
     frameWidth: 1000,
     frameHeight: 750,
@@ -33,10 +33,10 @@ const gameData = {
             'E1': { left: 'E3', right: 'E2', forward: 'G1' },
             'E2': { left: 'E1', right: 'E3' },
             'E3': { left: 'E2', right: 'E1', forward: 'B4' },
-            'F1' : { left: 'F2', right: 'F2' },
-            'F2' : { left: 'F1', right: 'F2', forward: 'D2' },
-            'G1' : { left: 'G2', right: 'G2', forward: 'H1' },
-            'G2' : { left: 'G1', right: 'G1', forward: 'E3' },
+            'F1': { left: 'F2', right: 'F2' },
+            'F2': { left: 'F1', right: 'F2', forward: 'D2' },
+            'G1': { left: 'G2', right: 'G2', forward: 'H1' },
+            'G2': { left: 'G1', right: 'G1', forward: 'E3' },
             'H1': { left: 'H4', right: 'H2', forward: 'I1' },
             'H2': { left: 'H1', right: 'H3', forward: () => {setRoom('pool'); return 'A1'} },
             'H3': { left: 'H2', right: 'H4', forward: 'G2' },
@@ -85,6 +85,97 @@ const gameData = {
             'D3': { left: 'D2', right: 'D4' },
             'D4': { left: 'D3', right: 'D1', forward: 'C2' },
         },
+        'hall': {
+            'A1': { 
+                left: () => { hallTurnLeft(); return 'A5' },
+                right: () => { hallTurnRight(); return 'A5' },
+                forward: () => { hallMoveForward(); return 'A2'}
+            },
+            'A2': {
+                left: () => {
+                    hallTurnLeft(); 
+                    switch(s.hallPosition) {
+                        case 2: return 'A7'
+                        case 6: return 'A9'
+                        default: return 'A5' }},
+                right: () => {
+                    hallTurnRight(); 
+                    switch(s.hallPosition) {
+                        case 2: return 'A6'
+                        case 6: return 'A8'
+                        default: return 'A5' }},
+                forward: () => { hallMoveForward(); return 'A3'}
+            },
+            'A3': {
+                left: () => {
+                    hallTurnLeft(); 
+                    switch(s.hallPosition) {
+                        case 2: return 'A6'
+                        case 6: return 'A8'
+                        default: return 'A5' }},
+                right: () => { hallTurnRight(); 
+                    switch(s.hallPosition) {
+                        case 2: return 'A7'
+                        case 6: return 'A9'
+                        default: return 'A5' }},
+                forward: () => { hallMoveForward(); return 'A4'}
+            },
+            'A4': {
+                left: () => { hallTurnLeft(); return 'A5' },
+                right: () => { hallTurnRight(); return 'A5' },
+            },
+            'A5': {
+                left: () => { 
+                    console.log('d ' + s.hallDirection)
+                    console.log('p ' + s.hallPosition)
+                    hallTurnLeft();
+                    console.log('d ' + s.hallDirection)
+                    console.log('p ' + s.hallPosition)
+                    switch (s.hallPosition % 4) {
+                        case 0: return s.hallDirection === 0 ? 'A1' : 'A4'
+                        case 1: return s.hallDirection === 0 ? 'A2' : 'A3'
+                        case 3: return s.hallDirection === 0 ? 'A4' : 'A1'
+                        default: alert('no!')
+                    }},
+                right: () => { 
+                    console.log('d ' + s.hallDirection)
+                    console.log('p ' + s.hallPosition)
+                    hallTurnRight(); 
+                    console.log('d ' + s.hallDirection)
+                    console.log('p ' + s.hallPosition)
+                    switch (s.hallPosition % 4) {
+                        case 0: return s.hallDirection == 0 ? 'A1' : 'A4'
+                        case 1: return s.hallDirection == 0 ? 'A2' : 'A3'
+                        case 3: return s.hallDirection == 0 ? 'A4' : 'A1'
+                        default: alert('no!')
+                    }}
+            },
+            'A6': {
+                left: () => { hallTurnLeft(); return 'A2' },
+                right: () => { hallTurnRight(); return 'A3' }
+            }, 
+            'A7': {
+                left: () => { hallTurnLeft(); return 'A3' },
+                right: () => { hallTurnRight(); return 'A2' },
+                forward: 'B2'
+            },
+            'A8': {
+                left: () => { hallTurnLeft(); return 'A2'},
+                right: () => { hallTurnRight(); return 'A3'},
+                forward: 'B4'
+            },
+            'A9': {
+                left: () => { hallTurnLeft(); return 'A3' },
+                right: () => { hallTurnRight(); return 'A2' }
+            }, 
+            'B1': { left: 'B4', right: 'B2' },
+            'B2': { left: 'B1', right: 'B3', 
+                forward: () => { s.hallDirection = 1; s.hallPosition = 6; return 'A9'}},
+            'B3': { left: 'B2', right: 'B4' },
+            'B4': { left: 'B3', right: 'B1',
+                forward: () => { s.hallDirection = 3; s.hallPosition = 2; return 'A6'}},
+
+        },
         'room': {
             'A1': { left: 'A4', right: 'A2', forward: 'A1a' },
             'A1a': { left: 'A4', right: 'A2', forward: 'D1' },
@@ -99,11 +190,12 @@ const gameData = {
             'C2': { left: 'C1', right: 'C3'},
             'C3': { left: 'C2', right: 'C4', forward: 'B3' },
             'C4': { left: 'C3', right: 'C1' },
-            'D1': { left: 'D4', right: 'D2' },
+            'D1': { left: 'D4', right: 'D2', forward: 'D5' },
             'D2': { left: 'D1', right: 'D3' },
             'D3': { left: 'D2', right: 'D4', forward: 'D3a' },
             'D3a': { left: 'D2', right: 'D4', forward: 'A3' },
-            'D4': { left: 'D3', right: 'D1' },
+            'D4': { left: 'D3', right: 'D1'},
+            'D5': { back: 'D1' }
         },
         'elevator': {
 
@@ -128,4 +220,21 @@ const gameData = {
     }
 }
 
-const state = {}
+// State
+const s = {
+    hallPosition: 0,
+    hallDirection: 0,
+    floor: 2
+}
+
+function hallTurnLeft() {
+    s.hallDirection = s.hallDirection == 0 ? 3 : s.hallDirection - 1
+}
+
+function hallTurnRight() {
+    s.hallDirection = s.hallDirection == 3 ? 0 : s.hallDirection + 1
+}
+
+function hallMoveForward() {
+    s.hallPosition += (s.hallDirection === 0 ? 1 : -1)
+}
