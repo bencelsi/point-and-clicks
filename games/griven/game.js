@@ -55,13 +55,17 @@ let elevatorButtons = [
 
 const gameData = {
     title: "Griven",
-    startRoom: 'lobby',
+    startRoom: 'opening',
     startFrame: 'A1',
     extension: 'png',
     frameWidth: 1000,
     frameHeight: 750,
     // customCursors: true,
     frames: {
+        'opening': {
+            'A1': { forward: () => { playSound('opening'); transition('A2', 'fade'); playGif('opening', 41 * 100 + 750) }},
+            'A2': { forward: () => {setRoom('lobby'); return 'A1' }}
+        },
         'cafe': {
             'A1': { left: 'A4', right: 'A2', forward: 'A1a' },
             'A1a': { left: 'A4', right: 'A2', forward: 'A5' },
@@ -159,16 +163,16 @@ const gameData = {
             'A4': { left: 'A3', right: 'A1' },
             'A5': { back: 'A2' },
             'B1': { left: 'B4', right: 'B2', forward: () => 
-                { transition('C1', 'fade'); playGif('grandUp', 9, 100); return 'C1'}},
-            'B2': { left: 'B1', right: 'B3', forward: 'E1' },
+                { transition('C1', 'none'); playGif('grandUp', 10 * 150)}},
+            'B2': { left: 'B1', right: 'B3', forward: 'E2' },
             'B3': { left: 'B2', right: 'B4', forward: 'A3' },
-            'B4': { left: 'B3', right: 'B1', forward: 'D1' },
+            'B4': { left: 'B3', right: 'B1', forward: 'D3' },
             'C1': { left: 'C4', right: 'C2', forward: () => { return s.elevatorFloor === 1 ? 'C1b' : 'C1a' }},
             'C1a':{ left: 'C4', right: 'C2', forward: 'C5' },
             'C1b':{ left: 'C4', right: 'C2', forward: () => { setRoom('elevator'); return 'A1' }},
             'C2': { left: 'C1', right: 'C3' },
             'C3': { left: 'C2', right: 'C4', 
-                forward: () => { transition('B3', 'fade'); playGif('grandDown', 11, 150); ; return 'B3' }},
+                forward: () => { transition('B3', 'fade'); playGif('grandDown', 10 * 150); ; return 'B3' }},
             'C4': { left: 'C3', right: 'C1',
                 boxes: [
                     {   hitbox: [.4, .61, .25, .36],
@@ -183,7 +187,9 @@ const gameData = {
             'E1': { left: 'E3', right: 'E2', forward: 'G1' },
             'E2': { left: 'E1', right: 'E3' },
             'E3': { left: 'E2', right: 'E1', forward: 'B4' },
-            'F1': { left: 'F2', right: 'F2', forward: () => { setRoom('stairs'); s.floor = 2; return 'A1' }},
+            'F1': { left: 'F2', right: 'F2', 
+                forward: () => { setRoom('stairs'); transition('A1', 'none'); s.floor = 2;
+                    playGif('stairsBottomUp', 13 * 150, () => { playGif('stairsMiddleUp1', 9 * 150)})}},
             'F2': { left: 'F1', right: 'F1', forward: 'D2' },
             'G1': { left: 'G2', right: 'G2', forward: 'H1' },
             'G2': { left: 'G1', right: 'G1', forward: 'E3' },
@@ -207,36 +213,44 @@ const gameData = {
             'A7': { back: 'A4'},
             'B1': { left: 'B4', right: 'B2' },
             'B2': { left: 'B1', right: 'B3', 
-                forward: () => { transition('C2', 'fade'); playGif('ladderUp', 10, 150);  return 'C2' }},
+                forward: () => { transition('C2', 'fade');
+                    playGif('ladderUp', 10 * 150, () => {  })}},
             'B3': { left: 'B2', right: 'B4' },
             'B4': { left: 'B3', right: 'B1', forward: 'A4' },
             'C1': { left: 'C4', right: 'C2' },
             'C2': { left: 'C1', right: 'C3' },
             'C3': { left: 'C2', right: 'C4', forward: 'C5' },
             'C4': { left: 'C3', right: 'C1', 
-                forward: () => { transition('B4', 'fade'); playGif('ladderDown', 10, 150);  return 'B4' }},
+                forward: () => { transition('B4', 'fade');
+                    playGif('ladderDown', 10 * 150);}},
             'C5': { back: 'C3' }
         },
         'stairs': {
-            'A1': { left: 'A4', right: 'A2', forward: () => { s.floor++; return s.floor === 10 ? 'B1': 'A1' }},
+            'A1': { left: 'A4', right: 'A2', 
+                forward: () => { 
+                    s.floor++; 
+                    if (s.floor === 10) {  transition('B1', 'fade') }
+                    playGif('stairsMiddleUp2', 9 * 150, () => { 
+                        if (s.floor === 10) { playGif('stairsTopUp', 10 * 150) }
+                        else {  playGif('stairsMiddleUp1', 9 * 150) }
+                })}},
             'A2': { left: 'A1', right: 'A3', forward: () => { 
-                s.hallDirection = 1
-                s.hallPosition = 2
-                setRoom('hall');
-                return 'A7'}},
-            'A2-a': { left: 'A1', right: 'A3', forward: 'B2'},
+                s.hallDirection = 1; s.hallPosition = 2; setRoom('hall'); return 'A7'}},
             'A3': { left: 'A2', right: 'A4', 
                 forward: () => { 
                     s.floor--
-                    if (s.floor === 1) {
-                        setRoom('lobby')
-                        return 'F2'
-                    } 
-                    return 'A3' }},
+                    if (s.floor === 1) { setRoom('lobby'); transition('F2', 'fade') }
+                    else { transition('A3', 'fade') }
+                    playGif('stairsMiddleDown2', 9 * 150,  () => { 
+                        if (s.floor === 1) { playGif('stairsBottomDown', 9 * 150) } 
+                        else { playGif('stairsMiddleDown1', 10 * 150) }})}},
             'A4': { left: 'A3', right: 'A1' },
             'B1': { left: 'B4', right: 'B2', forward: 'B5' },
             'B2': { left: 'B1', right: 'B3'},
-            'B3': { left: 'B2', right: 'B4', forward: 'A3' },
+            'B3': { left: 'B2', right: 'B4', forward: () => {
+                s.floor--; transition('A3', 'fade');
+                playGif('stairsTopDown', 9 * 150)
+            }},
             'B4': { left: 'B3', right: 'B1'},
             'B5': { back: 'B1' }
         },

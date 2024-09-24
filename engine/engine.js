@@ -40,7 +40,7 @@ const GAME_FOLDER = '../games/' + window.location.search.substring(1)
 
 const FRAME_PATH = GAME_FOLDER + '/assets/frames'
 const GIF_PATH = GAME_FOLDER + '/assets/gifs/'
-const AUDIO_PATH = GAME_FOLDER + '/assets/audio/'
+const SOUND_PATH = GAME_FOLDER + '/assets/sound/'
 const PIC_PATH = GAME_FOLDER + '/assets/pics/'
 const INVENTORY_PATH = GAME_FOLDER + '/assets/inventory/'
 const CURSOR_PATH = gameData.customCursors === true ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
@@ -176,7 +176,7 @@ function refreshCustomBoxes() {
 
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
-	console.log(boxData)
+	//console.log(boxData)
 	let hitbox = simpleEval(boxData.hitbox)
 	let cursor = simpleEval(boxData.cursor)
 	let onclick = boxData.onclick
@@ -215,6 +215,7 @@ function makeBox(hitbox, cursor, onclick = null, id = null) {
 // STANDARD BOXES ******************************************
 
 function refreshStandardBoxes() {
+	if (roomData[frame] === undefined) { return }
 	refreshStandardBox(standardBoxes.left, roomData[frame].left)
 	refreshStandardBox(standardBoxes.right, roomData[frame].right)
 	refreshStandardBox(standardBoxes.forward, roomData[frame].forward)
@@ -302,18 +303,12 @@ function cacheResources() {
 }
 
 function cacheFrame(frame) {
-	if (frame == null || frame instanceof Function) {
-		return
-	}
+	if (frame == null || frame instanceof Function) { return }
 	
 	let src = FRAME_PATH + '/' + room + '/' + frame + '.' + extension
-	if (cacheSet.has(src)) {
-		console.log('already cached')
-		return
-	}
+	if (cacheSet.has(src)) { return }
 
-	console.log("caching " + frame)
-
+	//console.log("caching " + frame)
 	if (cacheDiv.childNodes.length >= 20) {
 		let cachedImageToRemove = cacheDiv.childNodes[0]
 		console.log('removing ' + cachedImageToRemove)
@@ -330,27 +325,35 @@ function cacheFrame(frame) {
 // GIFS ••••••••••••••••••••••••••••••••••••••••••••••••••
 
 //Plays the gif of the given name.  Takes the number of frames and the delay to calculate the time... (maybe make this automatic somehow?)
-function playGif(name, frames, delay) {
+function playGif(name, delay, after = null) {
 	processes++
 	let gif = get('fullGif')
-	gif.src = GIF_PATH + name + '.gif' //'?a=' + Math.random()
+	gif.src = GIF_PATH + name + '.gif'//'?a=' + Math.random() 
+	// todo - use new object? so it 
 	gif.style.visibility = 'visible'
 	get('movies').appendChild(gif)
 	setTimeout(() => {
 		gif.style.visibility = 'hidden'
 		processes--
-	}, frames * delay)
+		if (after != null) { after() }
+	}, delay)
 }
 
+function wait(duration, then) {
+	setTimeout(() => {
+		then()
+	}, duration)
+}
 
 // SOUND ******************************************
 
-function playSound(name, volume, loop) {
-	let sound = new Audio(AUDIO_PATH + name + '.mp3')
+function playSound(name, volume=1, loop=false) {
+	let sound = new Audio(SOUND_PATH + name + '.mp3')
 	sound.volume = volume
 	sound.play()
 	return sound
 }
+
 
 /*
 function initSounds() {
