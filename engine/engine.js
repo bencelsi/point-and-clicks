@@ -333,7 +333,7 @@ function cacheFrame(frame) {
 function playGif(name, frames, delay) {
 	processes++
 	let gif = get('fullGif')
-	gif.src = GIF_PATH + name + '.gif' + '?a='+Math.random()
+	gif.src = GIF_PATH + name + '.gif' //'?a=' + Math.random()
 	gif.style.visibility = 'visible'
 	get('movies').appendChild(gif)
 	setTimeout(() => {
