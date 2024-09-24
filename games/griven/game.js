@@ -329,11 +329,13 @@ const gameData = {
             'C2': { left: 'C1', right: 'C1', forward: 'C2a' },
             'C2a':{ left: 'C1', right: 'C1', forward: 'D3' },
             'D1': { left: 'D4', right: 'D2', forward: 'C1' },
-            'D2': { left: 'D1', right: 'D3' },
-            'D3': { left: 'D2', right: 'D4' },
-            'D4': { left: 'D3', right: 'D1' }
+            'D2': { left: 'D1', right: 'D3', forward: 'D5' },
+            'D3': { left: 'D2', right: 'D4', forward: 
+                () => { playGif('exit', 13 * 150, 
+                    () => { playGif('fall', 22 * 100) })}},
+            'D4': { left: 'D3', right: 'D1' },
+            'D5': { back: 'D2'}
         },
-
     }
 }
 
