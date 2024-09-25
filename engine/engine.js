@@ -123,12 +123,15 @@ function setupStandardBoxes() {
 // TRANSITIONS ******************************************
 function transition(newFrame, type) {
 	console.log(newFrame)
-	if (processes > 0) {
-		return
-	}
+	if (processes > 0) { return }
 	processes++
-	frame = newFrame
-	frameData = roomData[frame]
+	setFrame(newFrame)
+	if (frameData === undefined) {
+		console.log('ok...')
+		let roomFrame = frame.split("/")
+		setRoom(roomFrame[0])
+		setFrame(roomFrame[1])
+	}
 	createTransition(type + 'Out')
 	imgDiv.src = FRAME_PATH + '/' + room + '/' + frame + '.' + extension
 	refreshStandardBoxes()
@@ -315,15 +318,19 @@ function cacheResources() {
 	cacheFrame(frameData.right)
 	cacheFrame(frameData.forward)
 	cacheFrame(frameData.back)
+	for (boxData in frameData.boxes ) {
+		if (boxData != undefined) {
+			cacheFrame(boxData.to)
+		}
+	}
 }
 
 function cacheFrame(frame) {
 	if (frame == null || frame instanceof Function) { return }
-	
+	// caching frame from other room?
 	let src = FRAME_PATH + '/' + room + '/' + frame + '.' + extension
 	if (cacheSet.has(src)) { return }
 
-	//console.log("caching " + frame)
 	if (cacheDiv.childNodes.length >= 20) {
 		let cachedImageToRemove = cacheDiv.childNodes[0]
 		console.log('removing ' + cachedImageToRemove)
@@ -419,13 +426,14 @@ function isCollide(a, b) {
 		a.x + a.width < b.x || a.x > b.x + b.width)
 }
 
-// TODO: do better.
-function setRoom(newRoom, newExtension=extension) {
-	if (newRoom == null) {
-		roomData = gameData.frames
-	} else {
-		extension = newExtension
-		room = newRoom;
-		roomData = gameData.frames[room]
-	}
+function setFrame(newFrame) {
+	frame = newFrame
+	frameData = roomData[frame]
+}
+
+function setRoom(newRoom, newExtension = extension) {
+	//console.log(newRoom)
+	room = newRoom;
+	extension = newExtension
+	roomData = gameData.frames[room]
 }
