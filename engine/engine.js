@@ -177,7 +177,7 @@ function refreshCustomBoxes() {
 // custom box params:
 //					type			required?		default			desc	
 // hitbox			[]				yes
-// to: 				string			no				none 			equivalent onclick: ()=> {transition(to, 'fade)} 
+// to: 				string			no				none 			equivalent onclick: () => {transition(to, 'fade)} 
 // onclick: 		function		no				none			
 // condition:		function		no				true			
 // cursor:			string			no				none
@@ -193,7 +193,7 @@ function makeCustomBox(boxData) {
 	if (boxData.to !== undefined && boxData.onclick !== undefined) {
 		onclick = () => { boxData.onclick(); transition(simpleEval(boxData.to), 'fade') }
 	} else if (boxData.to !== undefined) {
-		onclick = () => { transition(boxData.to, 'fade') }
+		onclick = () => { transition(simpleEval(boxData.to), 'fade') }
 	} else {
 		onclick = boxData.onclick
 	}

@@ -4,8 +4,6 @@
 // add music
 // better way to set room... like: forward: {'cafe' : 'A1'}... or just 'lobby-A1'
 
-
-
 let elevatorButtons = [
     {   hitbox: [.81, .84, .06, .09],
         cursor: 'forward',
@@ -51,7 +49,7 @@ let elevatorButtons = [
 
 const gameData = {
     title: "Griven",
-    startRoom: 'lobby',
+    startRoom: 'room',
     startFrame: 'A1',
     extension: 'png',
     frameWidth: 1000,
@@ -59,8 +57,8 @@ const gameData = {
     // customCursors: true,
     frames: {
         'opening': {
-            'A1': { forward: () => { playSound('opening'); transition('A2', 'fade'); playGif('opening', 300) }},
-            'A2': { forward: () => { setRoom('lobby'); return 'A1' }}
+            'A1': { forward: () => { playSound('opening'); transition('A2', 'fade'); playGif('opening', 41 * 100) }},
+            'A2': { forward: () => { playSound('moonlight', 1, true); setRoom('lobby'); return 'A1' }}
         },
         'cafe': {
             'A1': { left: 'A4', right: 'A2', forward: 'A1a' },
@@ -167,7 +165,7 @@ const gameData = {
             'B3': { left: 'B2', right: 'B4', forward: 'A3' },
             'B4': { left: 'B3', right: 'B1', forward: 'D3' },
             'C1': { left: 'C4', right: 'C2', boxes: [
-                { to: () => { return s.elevatorFloor === 1 ? 'C1b' : 'C1a'}, hitbox: [.28, .31, .48, .52] }]},
+                { to: () => { return s.elevatorFloor === 1 ? 'C1b' : 'C1a' }, hitbox: [.28, .31, .48, .52] }]},
             'C1a':{ left: 'C4', right: 'C2', forward: 'C5' },
             'C1b':{ left: 'C4', right: 'C2', forward: () => { setRoom('elevator'); return 'A1' }},
             'C2': { left: 'C1', right: 'C3' },
@@ -279,18 +277,32 @@ const gameData = {
         },
         'room': {
             'A1': { left: 'A4', right: 'A2', forward: 'A1a' },
-            'A1a': { left: 'A4', right: 'A2', forward: 'D1' },
+            'A1a':{ left: 'A4', right: 'A2', forward: 'D1' },
             'A2': { left: 'A1', right: 'A3', forward: 'B2' },
             'A3': { left: 'A2', right: 'A4' },
-            'A4': { left: 'A3', right: 'A1' },
+            'A4': { left: 'A3', right: 'A1', forward: () => { 
+                setRoom('hall'); s.hallDirection = 3; s.hallPosition = 7; return 'A5' }},
             'B1': { left: 'B4', right: 'B2', forward: 'C1' },
-            'B2': { left: 'B1', right: 'B3' },
+            'B2': { left: 'B1', right: 'B3', boxes: [
+                { to: 'B5', hitbox: [.2, .37, .7, .9] },
+                { to: 'B6', hitbox: [.43, .57, .57, .73] },
+                { to: 'B7', hitbox: [.55, .63, .35, .46] },
+                { to: 'B8', hitbox: [.6, .64, .18, .25] }]},
             'B3': { left: 'B2', right: 'B4' },
             'B4': { left: 'B3', right: 'B1', forward: 'A4' },
+            'B5': { back: 'B2', forward: 'B5a' },
+            'B5a':{ back: 'B2', forward: 'B5' },
+            'B6':{ back: 'B2' },
+            'B7': { back: 'B2' },
+            'B8': { back: 'B2', forward: 'B8a'},
+            'B8a':{ back: 'B2', forward: 'B8'},
             'C1': { left: 'C4', right: 'C2' },
-            'C2': { left: 'C1', right: 'C3'},
+            'C2': { left: 'C1', right: 'C3', forward: 'C5' },
             'C3': { left: 'C2', right: 'C4', forward: 'B3' },
-            'C4': { left: 'C3', right: 'C1' },
+            'C4': { left: 'C3', right: 'C1', boxes: [
+                { to: 'C6', hitbox: [.41, .57, .71, .93] }]},
+            'C5': { back: 'C2'},
+            'C6': { back: 'C4' },
             'D1': { left: 'D4', right: 'D2', forward: 'D5' },
             'D2': { left: 'D1', right: 'D3' },
             'D3': { left: 'D2', right: 'D4', forward: 'D3a' },
