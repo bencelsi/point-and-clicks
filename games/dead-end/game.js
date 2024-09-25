@@ -14,19 +14,19 @@ const gameData = {
 			'0f': { },
 			'0g': { forward: '1a' },
 			'1a': { forward: '3a', left: '1f', right: '1b' },
-			'1b': { left: () => state.power ? '1g' : '1a', right: '1c',
+			'1b': { left: () => s.power ? '1g' : '1a', right: '1c',
 					boxes: [{
 						hitbox: [.1, .75, .25, .75],
 						cursor: 'forward',
 							onclick: () => {
 						transition('2a', 'fade')
-						playGif('sidepath1', 9, 350)
+						playGif('sidepath1', 9 * 350)
 						playSound('sidepath', 1, false) }}],
 					toCache: { frames: ['2a', '1g', '1a'], gifs: ['sidepath1'] }},
 			'1c': { left: '1b', right: '1d' },
 			'1d': { left: '1c', right: '1e' },
 			'1e': { left: '1d', right: '1f' },
-			'1f': { left: '1e', right: () => state.power ? '1g' : '1a' },
+			'1f': { left: '1e', right: () => s.power ? '1g' : '1a' },
 			'1g': { left: '1f', right: '1b', forward: '3e' },
 			'2a': { left: '2d', right: '2b' },
 			'2b': { left: '2a', right: '2c' },
@@ -38,16 +38,16 @@ const gameData = {
 						onclick: () => transition('2e', 'fade')}]},
 			'2e': { left: '2c', right: '2a', back: '2d',
 					boxes: [
-					{	hitbox: () => { return (state.power ? [.45, .57, .23, .3] : [.45, .57, .4, .47]) },
+					{	hitbox: () => { return (s.power ? [.45, .57, .23, .3] : [.45, .57, .4, .47]) },
 						cursor: 'open',
-						onclick: () => { state.power = !state.power; refreshCustomBoxes() }},
-					{	condition: () => { return state.power },
+						onclick: () => { s.power = !s.power; refreshCustomBoxes() }},
+					{	condition: () => { return s.power },
 						img: 'x14.1' },
-					{	condition: () => { return state.power },
+					{	condition: () => { return s.power },
 						img: 'x14.2.1' }]},
 			'3a': { left: '3d', right: '3b' },
 			'3b': { left: '3a', right: '3c' },
-			'3c': { left: () => state.power ? '3f' : '3b', right: () => state.power ? '3g' : '3d', forward: '1d' },
+			'3c': { left: () => s.power ? '3f' : '3b', right: () => s.power ? '3g' : '3d', forward: '1d' },
 			'3d': { left: '3c', right: '3a' },
 			'3e': { left: '3g', right: '3f',
 					boxes: [
@@ -126,7 +126,7 @@ const gameData = {
 	},
 }
 
-const state = {
+const s = {
 	power: false,
 	inventory: {
 		key: {

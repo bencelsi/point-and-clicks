@@ -174,18 +174,37 @@ function refreshCustomBoxes() {
 	}
 }
 
+// custom box params:
+//					type			required?		default			desc	
+// hitbox			[]				yes
+// to: 				string			no				none 			equivalent onclick: ()=> {transition(to, 'fade)} 
+// onclick: 		function		no				none			
+// condition:		function		no				true			
+// cursor:			string			no				none
+// img:				string			no				none
+// id:				string			no				none
+
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
 	//console.log(boxData)
 	let hitbox = simpleEval(boxData.hitbox)
-	let cursor = simpleEval(boxData.cursor)
-	let onclick = boxData.onclick
+	let cursor = boxData.cursor === undefined ? 'forward' : simpleEval(boxData.cursor)
+	let onclick
+	if (boxData.to !== undefined && boxData.onclick !== undefined) {
+		onclick = () => { boxData.onclick(); transition(simpleEval(boxData.to), 'fade') }
+	} else if (boxData.to !== undefined) {
+		onclick = () => { transition(boxData.to, 'fade') }
+	} else {
+		onclick = boxData.onclick
+	}
+	
 	let id = simpleEval(boxData.id)
 	let img = simpleEval(boxData.img)
 	if (hitbox != null) {
 		let box = makeBox(hitbox, cursor, onclick, id)
 		customBoxesDiv.appendChild(box)
 	}
+	// TODO: combine? box can be pic & hitbox?
 	if (img != null) {
 		let pic = document.createElement('img')
 		pic.classList.add('picBox')
@@ -202,12 +221,8 @@ function makeBox(hitbox, cursor, onclick = null, id = null) {
 	box.style.bottom = hitbox[2] * HEIGHT + 'px'
 	box.style.height = (hitbox[3] - hitbox[2]) * HEIGHT + 'px'
 	setCursor(box, cursor)
-	if (id != null) {
-		box.id = id
-	}
-	if (onclick != null) {
-		box.onclick = onclick
-	}
+	if (id != null) { box.id = id }
+	if (onclick != null) { box.onclick = onclick }
 	return box
 }
 
@@ -374,12 +389,13 @@ function setVolume(n, volume, speed) {
 
 // HELPERS ******************************************	
 
-function get(id) {
-	return document.getElementById(id)
-}
+function get(id) { return document.getElementById(id) }
 
 function setCursor(element, cursor) {
-	element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png), auto'
+	console.log(cursor)
+	if (cursor != null) {
+		element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png), auto'
+	}
 }
 
 //launches full screen mode on the given element.
@@ -394,17 +410,13 @@ function launchFullScreen(element) {
 }
 
 // If x is a function, returns the result of evaluating x, otherwise returns x
-function simpleEval(x) {
-	return (x instanceof Function) ? x() : x
+function simpleEval(x) { return (x instanceof Function) ? x() : x
 }
 
 // Returns true if a and b are overlapping
 function isCollide(a, b) {
-	return !(
-		((a.y + a.height) < (b.y)) ||
-		(a.y > (b.y + b.height)) ||
-		((a.x + a.width) < b.x) ||
-		(a.x > (b.x + b.width)))
+	return !(a.y + a.height < b.y || a.y > b.y + b.height ||
+		a.x + a.width < b.x || a.x > b.x + b.width)
 }
 
 // TODO: do better.
