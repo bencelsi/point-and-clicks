@@ -10,6 +10,8 @@
 // tool to rename image files & frames in js
 // optional image size
 // gifs as frames option
+// no boxes while gif plays... 
+// TODO - fix gameData errors - wait?
 
 const commonData = {
     standardBoxes : {
@@ -34,10 +36,7 @@ const commonData = {
 
 document.title = location.hostname === "" ? "." + gameData.title : gameData.title
 
-get("favicon").href = gameFolder + "favicon.ico"
-console.log(gameFolder)
-const GAME_FOLDER = '../games/' + window.location.search.substring(1)
-
+get("favicon").href = GAME_FOLDER + "/favicon.ico"
 const FRAME_PATH = GAME_FOLDER + '/assets/frames'
 const GIF_PATH = GAME_FOLDER + '/assets/gifs/'
 const SOUND_PATH = GAME_FOLDER + '/assets/sound/'
@@ -52,8 +51,7 @@ const FADE_SPEED = 1
 get("screen").style.width = WIDTH + "px"
 get("screen").style.height = HEIGHT + "px"
 
-let animationStyle = 
-`
+let animationStyle = `
 @keyframes leftIn { from { transform: translateX(0) } to { transform: translateX(${WIDTH}px) }}
 @keyframes leftOut { from { transform: translateX(0) }}
 @keyframes rightIn { from { transform: translateX(0) } to { transform: translateX(-${WIDTH}px) }}
@@ -90,6 +88,7 @@ let cacheDiv
 let transitionsDiv
 let imgDiv
 let inventoryDiv
+let gif 
 
 window.onload = function() {
 	init()
@@ -103,7 +102,7 @@ function init() {
     transitionsDiv = get('transitions')
     imgDiv = get('img')
     inventoryDiv = get('inventory')
-
+	gif = get('fullGif')
 	setupStandardBoxes()
 	transition(frame, 'fade')
 	refreshInventory()
@@ -121,27 +120,28 @@ function setupStandardBoxes() {
 }
 
 // TRANSITIONS ******************************************
-function transition(newFrame, type) {
+function transition(newFrame, type, override = false) {
 	console.log(newFrame)
-	if (processes > 0) { return }
+	if (newFrame == null || (processes > 0 && !override)) { return }
 	processes++
 	setFrame(newFrame)
 	if (frameData === undefined) {
-		console.log('ok...')
 		let roomFrame = frame.split("/")
 		setRoom(roomFrame[0])
 		setFrame(roomFrame[1])
 	}
-	createTransition(type + 'Out')
+	if (type != 'none') { createTransition(type + 'Out') }
 	imgDiv.src = FRAME_PATH + '/' + room + '/' + frame + '.' + extension
 	refreshStandardBoxes()
 	refreshCustomBoxes()
-	createTransition(type + 'In')
+	if (type != 'none') { createTransition(type + 'In') }
+	delay = 1000 * (type === 'none' ? 0 : SIDE_SPEED)
+	 // if we wait full fade speed, it makes moving forward annoying.
 	setTimeout(() => {
 		transitionsDiv.innerHTML = ''
 		cacheResources()
 		processes--
-	}, SIDE_SPEED * 1000)
+	}, delay)
 }
 
 function createTransition(type) {
@@ -152,14 +152,10 @@ function createTransition(type) {
 	transition.appendChild(picBoxes)
 	transition.classList.add('transition')
 	transition.classList.add(type)
-	if (type == 'leftIn') {
-		transition.style.left = -WIDTH + 'px'
-	} else if (type == 'rightIn') {
-		transition.style.left = WIDTH + 'px'
-	}
+	if (type == 'leftIn') { transition.style.left = -WIDTH + 'px' } 
+	else if (type == 'rightIn') { transition.style.left = WIDTH + 'px' }
 	transitionsDiv.appendChild(transition)
 }
-
 
 // CUSTOM BOXES ******************************************
 function refreshCustomBoxes() {
@@ -169,9 +165,7 @@ function refreshCustomBoxes() {
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
 			let boxData = boxes[i]
-			if (boxData.condition !== undefined && !boxData.condition()) {
-				continue
-			}
+			if (boxData.condition !== undefined && !boxData.condition()) { continue }
 			makeCustomBox(boxData)
 		}
 	}
@@ -186,25 +180,26 @@ function refreshCustomBoxes() {
 // cursor:			string			no				none
 // img:				string			no				none
 // id:				string			no				none
+// transition		string			no				'fade'
 
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
-	//console.log(boxData)
 	let hitbox = simpleEval(boxData.hitbox)
 	let cursor = boxData.cursor === undefined ? 'forward' : simpleEval(boxData.cursor)
-	let onclick
-	if (boxData.to !== undefined && boxData.onclick !== undefined) {
-		onclick = () => { boxData.onclick(); transition(simpleEval(boxData.to), 'fade') }
+	let click
+	if (boxData.to !== undefined && boxData.click !== undefined) {
+		click = () => { boxData.click(); 
+			transition(simpleEval(boxData.to), boxData.transition === undefined ? 'fade' : boxData.transition) }
 	} else if (boxData.to !== undefined) {
-		onclick = () => { transition(simpleEval(boxData.to), 'fade') }
+		click = () => { transition(simpleEval(boxData.to), 'fade') }
 	} else {
-		onclick = boxData.onclick
+		click = boxData.click
 	}
 	
 	let id = simpleEval(boxData.id)
 	let img = simpleEval(boxData.img)
 	if (hitbox != null) {
-		let box = makeBox(hitbox, cursor, onclick, id)
+		let box = makeBox(hitbox, cursor, click, id)
 		customBoxesDiv.appendChild(box)
 	}
 	// TODO: combine? box can be pic & hitbox?
@@ -216,7 +211,7 @@ function makeCustomBox(boxData) {
 	}
 }
 
-function makeBox(hitbox, cursor, onclick = null, id = null) {
+function makeBox(hitbox, cursor, click = null, id = null) {
 	let box = document.createElement('div')
 	box.className = 'box'
 	box.style.left = hitbox[0] * WIDTH + 'px'
@@ -225,7 +220,7 @@ function makeBox(hitbox, cursor, onclick = null, id = null) {
 	box.style.height = (hitbox[3] - hitbox[2]) * HEIGHT + 'px'
 	setCursor(box, cursor)
 	if (id != null) { box.id = id }
-	if (onclick != null) { box.onclick = onclick }
+	if (click != null) { box.onclick = click }
 	return box
 }
 
@@ -254,14 +249,10 @@ function refreshStandardBox(boxData, destinationFrame) {
 // INVENTORY ••••••••••••••••••••••••••••••••••••••••••••••••••
 
 function refreshInventory() {
-	if (inventory === undefined) {
-		return
-	}
+	if (inventory === undefined) { return }
 	get('inventory').innerHTML = ''
 	for (let item in inventory) {
-		if (inventory[item].state == 1){
-			makeInventoryItem(item)
-		}
+		if (inventory[item].state == 1) { makeInventoryItem(item) }
 	}
 }
 
@@ -327,13 +318,15 @@ function cacheResources() {
 
 function cacheFrame(frame) {
 	if (frame == null || frame instanceof Function) { return }
-	// caching frame from other room?
-	let src = FRAME_PATH + '/' + room + '/' + frame + '.' + extension
+	
+	let src = FRAME_PATH + '/' +
+		(roomData[frame] === undefined ? '' : '/' + room)
+	+ frame + '.' + extension
+	
 	if (cacheSet.has(src)) { return }
-
+	
 	if (cacheDiv.childNodes.length >= 20) {
 		let cachedImageToRemove = cacheDiv.childNodes[0]
-		console.log('removing ' + cachedImageToRemove)
 		cacheSet.delete(cachedImageToRemove)
 	}
 
@@ -343,22 +336,22 @@ function cacheFrame(frame) {
 	cacheSet.add(src)
 }
 
-
 // GIFS ••••••••••••••••••••••••••••••••••••••••••••••••••
-
-//Plays the gif of the given name.  Takes the number of frames and the delay to calculate the time... (maybe make this automatic somehow?)
-function playGif(name, delay, after = null) {
+function playGif(name, newFrame, delay, after = null) {
+	cacheFrame(newFrame)
 	processes++
-	let gif = get('fullGif')
 	gif.src = GIF_PATH + name + '.gif'//'?a=' + Math.random() 
 	// todo - use new object? so it 
 	gif.style.visibility = 'visible'
 	get('movies').appendChild(gif)
-	setTimeout(() => {
-		gif.style.visibility = 'hidden'
-		processes--
-		if (after != null) { after() }
-	}, delay)
+	wait(delay / 2, () => {
+		console.log('changing')
+		transition(newFrame, 'none', true)
+		wait(delay / 2, () => {
+			gif.style.visibility = 'hidden'
+			processes--
+			if (after != null) { after() }
+		})})
 }
 
 function wait(duration, then) {
@@ -376,7 +369,6 @@ function playSound(name, volume=1, loop=false) {
 	return sound
 }
 
-
 /*
 function initSounds() {
 		//let rain = playSound('outsiderain', 1, true)
@@ -393,19 +385,14 @@ function setVolume(n, volume, speed) {
 }
 */
 
-
 // HELPERS ******************************************	
 
 function get(id) { return document.getElementById(id) }
 
 function setCursor(element, cursor) {
-	console.log(cursor)
-	if (cursor != null) {
-		element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png), auto'
-	}
+	if (cursor != null) { element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png), auto' }
 }
 
-//launches full screen mode on the given element.
 function launchFullScreen(element) {
 	if(element.requestFullScreen) {
 	   element.requestFullScreen()
@@ -417,8 +404,7 @@ function launchFullScreen(element) {
 }
 
 // If x is a function, returns the result of evaluating x, otherwise returns x
-function simpleEval(x) { return (x instanceof Function) ? x() : x
-}
+function simpleEval(x) { return (x instanceof Function) ? x() : x }
 
 // Returns true if a and b are overlapping
 function isCollide(a, b) {
@@ -432,7 +418,6 @@ function setFrame(newFrame) {
 }
 
 function setRoom(newRoom, newExtension = extension) {
-	//console.log(newRoom)
 	room = newRoom;
 	extension = newExtension
 	roomData = gameData.frames[room]
