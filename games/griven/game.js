@@ -21,7 +21,7 @@ let elevatorButtons = [
 ]
 
 const gameData = {
-    title: "Griven",
+    title: 'Griven',
     startRoom: 'opening',
     startFrame: 'A1',
     extension: 'png',
@@ -32,7 +32,7 @@ const gameData = {
         'opening': {
             'A1': { forward: () => { playSound('opening');
                 wait(800, () => { playGif('opening', 'A2', 41 * 100) })}},
-            'A2': { forward: () => { playSound('moonlight', 1, true); return 'lobby/A1' }}
+            'A2': { forward: () => { /*playSound('moonlight', 1, true);*/ return 'lobby/A1' }}
         },
         'cafe': {
             'A1': { left: 'A4', right: 'A2', boxes: [
@@ -107,7 +107,8 @@ const gameData = {
                 left: () => { hallTurnLeft(); return 'A3' },
                 right: () => { hallTurnRight(); return 'A2' }},
             'B1': { left: 'B4', right: 'B2', boxes: [
-                { to: () => { return s.floor === s.elevatorFloor ? 'B1b' : 'B1a' }, hitbox: [.28, .31, .48, .52] }]},
+                { to: () => { playSound('elevatorDoor');
+                    return s.floor === s.elevatorFloor ? 'B1b' : 'B1a' }, hitbox: [.28, .31, .48, .52] }]},
             'B1a': { left: 'B4', right: 'B2', boxes: [
                 { to: 'B1', hitbox: [.28, .31, .48, .52] },
                 { to: 'B5', hitbox: [.35, .66, .17, .88] }]},
@@ -121,14 +122,15 @@ const gameData = {
                 forward: () => { s.hallDirection = 3; s.hallPosition = 2; return 'A6'}},
             'B5': { back: 'B1a' }
         },
-        'lobby' : {
+        'lobby' : { //zlb
             'A1': { left: 'A4', right: 'A2', forward: 'B1' },
             'A2': { left: 'A1', right: 'A3', boxes: [
                 { to:'A5', hitbox: [.37, .76, .25, .7] }]},
             'A3': { left: 'A2', right: 'A4' },
             'A4': { left: 'A3', right: 'A1' },
             'A5': { back: 'A2' },
-            'B1': { left: 'B4', right: 'B2', forward: () => { playGif('grandUp', 'C1', 10 * 150)}, 
+            'B1': { left: 'B4', right: 'B2', forward: () => { playSound('grandUp'); 
+                playGif('grandUp', 'C1', 10 * 150)}, 
                 boxes: [
                     { to: 'D1', hitbox: [.15, .23, .4, .56] },
                     { to: 'E1', hitbox: [.84, .95, .4, .58] }]},
@@ -136,7 +138,8 @@ const gameData = {
             'B3': { left: 'B2', right: 'B4', forward: 'A3' },
             'B4': { left: 'B3', right: 'B1', forward: 'D3' },
             'C1': { left: 'C4', right: 'C2', boxes: [
-                { to: () => { return s.elevatorFloor === 1 ? 'C1b' : 'C1a' }, hitbox: [.28, .31, .48, .52] }]},
+                { to: () => { playSound('elevatorDoor');
+                    return s.elevatorFloor === 1 ? 'C1b' : 'C1a' }, hitbox: [.28, .31, .48, .52] }]},
             'C1a':{ left: 'C4', right: 'C2', boxes: [
                 { to: 'C1', hitbox: [.28, .31, .48, .52] },
                 { to: 'C5', hitbox: [.35, .66, .17, .88] }]},
@@ -145,7 +148,7 @@ const gameData = {
                 { to: 'C1', hitbox: [.28, .31, .48, .52] }]},
             'C2': { left: 'C1', right: 'C3' },  
             'C3': { left: 'C2', right: 'C4', 
-                forward: () => { playGif('grandDown', 'B3', 10 * 150)}},
+                forward: () => {  playSound('grandDown'); playGif('grandDown', 'B3', 10 * 150)}},
             'C4': { left: 'C3', right: 'C1', boxes: [
                 { to: 'C6', hitbox: [.4, .61, .25, .36] }]},
             'C5': { back: 'C1a' },
@@ -168,7 +171,7 @@ const gameData = {
             'E4': { back: 'E2'},
             'F1': { left: 'F2', right: 'F2',
                 forward: () => { s.floor = 2;
-                    playGif('stairsBottomUp', 'stairs/A1', 13 * 150, () => 
+                    playGif('stairsBottomUp', 'stairs/C1', 13 * 150, () => 
                         { playGif('stairsMiddleUp1', 'stairs/A1', 9 * 150 )})}},
             'F2': { left: 'F1', right: 'F1', forward: 'D2' },
             'G1': { left: 'G2', right: 'G2', forward: 'H1' },
@@ -190,7 +193,7 @@ const gameData = {
             'I4': { left: 'I3', right: 'I1' },
             'I5': { back: 'I1' }
         },
-        'pool': {
+        'pool': { //zpool
             'A1': { left: 'A4', right: 'A2', forward: 'A5' },
             'A2': { left: 'A1', right: 'A3', boxes: [
                 { to: 'A6', hitbox: [.54, .65, .3, .51] }]},
@@ -216,19 +219,19 @@ const gameData = {
             'C5': { back: 'C1' },
             'C6': { back: 'C3' }
         },
-        'stairs': {
+        'stairs': { //zstairs
             'A1': { left: 'A4', right: 'A2', 
                 forward: () => { 
                     s.floor++; 
-                    playGif('stairsMiddleUp2', null, 9 * 150, () => { 
+                    playGif('stairsMiddleUp2', 'C1', 9 * 150, () => { 
                         if (s.floor === 10) { playGif('stairsTopUp', 'B1', 10 * 150) }
-                        else { playGif('stairsMiddleUp1', null, 9 * 150) }})}},
+                        else { playGif('stairsMiddleUp1', 'A1', 9 * 150) }})}},
             'A2': { left: 'A1', right: 'A3', forward: () => { 
                 s.hallDirection = 1; s.hallPosition = 2; return 'hall/A7' }},
             'A3': { left: 'A2', right: 'A4', 
                 forward: () => { 
                     s.floor--
-                    playGif('stairsMiddleDown2', null, 9 * 150, () => { 
+                    playGif('stairsMiddleDown2', 'C1', 9 * 150, () => { 
                         if (s.floor === 1) { playGif('stairsBottomDown', 'lobby/F2', 9 * 150) } 
                         else { playGif('stairsMiddleDown1', 'A3', 10 * 150) }})}},
             'A4': { left: 'A3', right: 'A1' },
@@ -237,14 +240,15 @@ const gameData = {
             'B3': { left: 'B2', right: 'B4',
                 forward: () => {
                     s.floor--
-                    playGif('stairsTopDown', null, 9 * 150, () => {
+                    playGif('stairsTopDown', 'C1', 9 * 150, () => {
                         playGif('stairsMiddleDown1', 'A3', 10 * 150) })}},
             'B4': { left: 'B3', right: 'B1' },
             'B5': { back: 'B1', boxes: [
-                { to: 'B5a', hitbox: [.37, .52, .63, .78]}]},
-            'B5a':{ back: 'B1' }
+                { to: () => { playSound('drawer'); return 'B5a' }, hitbox: [.37, .52, .63, .78]}]},
+            'B5a':{ back: 'B1' },
+            'C1': {}
         },
-        'plumbingroom': {
+        'plumbingroom': { //plumbing
             'A1': { left: 'A4', right: 'A2' },
             'A2': { left: 'A1', right: 'A3', forward: 'B2'},
             'A3': { left: 'A2', right: 'A4' },
@@ -260,7 +264,7 @@ const gameData = {
             'B5': { back: 'B1' },
             'B6': { back: 'B3' }
         },
-        'room': {
+        'room': { //zroom
             'A1': { left: 'A4', right: 'A2', forward: 'A1a' },
             'A1a':{ left: 'A4', right: 'A2', forward: 'D1' },
             'A2': { left: 'A1', right: 'A3', forward: 'B2' },
@@ -296,8 +300,12 @@ const gameData = {
             'D5': { back: 'D1' }
         },
         'top': {
-            'A1': { left: 'A4', right: 'A2', forward: 'A1a' },
-            'A1a':{ left: 'A4', right: 'A2', forward: 'elevator/A1' },
+            'A1': { left: 'A4', right: 'A2', boxes: [
+                { to: () => { playSound('elevatorDoor'); return 'A1a'}, hitbox: [.28, .31, .48, .52]}
+            ] },
+            'A1a':{ left: 'A4', right: 'A2', boxes: [
+                { to: () => { playSound('elevatorDoor'); return 'A1'}, hitbox: [.28, .31, .48, .52]},
+                { to: 'elevator/A1', hitbox: [.35, .66, .17, .88]}]},
             'A2': { left: 'A1', right: 'A3' },
             'A3': { left: 'A2', right: 'A4', forward: 'B2' },
             'A4': { left: 'A3', right: 'A1' },
@@ -312,7 +320,7 @@ const gameData = {
             'D1': { left: 'D4', right: 'D2', forward: 'C1' },
             'D2': { left: 'D1', right: 'D3', forward: 'D5' },
             'D3': { left: 'D2', right: 'D4', forward: 
-                () => { playGif('exit', null, 13 * 150, 
+                () => { playGif('exit', 'C1', 13 * 150 + 200, 
                     () => { playGif('fall', 'opening/A1', 22 * 100) }); s.floor = 1; }},
             'D4': { left: 'D3', right: 'D1' },
             'D5': { back: 'D2' }
@@ -347,6 +355,7 @@ function hallTurnLogic() {
 }
 
 function setElevatorFloor(floor) {
+    playSound('elevatorBell')
     s.elevatorFloor = floor
     s.floor = floor
     let newFrame = s.elevatorFloor === 1? 'A2a' : (s.elevatorFloor === 10 ? 'A2c' : 'A2b')

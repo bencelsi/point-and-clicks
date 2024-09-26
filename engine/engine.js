@@ -318,18 +318,13 @@ function cacheResources() {
 
 function cacheFrame(frame) {
 	if (frame == null || frame instanceof Function) { return }
-	
-	let src = FRAME_PATH + '/' +
-		(roomData[frame] === undefined ? '' : '/' + room)
-	+ frame + '.' + extension
-	
+	let src = FRAME_PATH + '/' + (roomData[frame] === undefined ? '' : '/' + room)
+		+ frame + '.' + extension
 	if (cacheSet.has(src)) { return }
-	
-	if (cacheDiv.childNodes.length >= 20) {
+	if (cacheDiv.childNodes.length >= 25) {
 		let cachedImageToRemove = cacheDiv.childNodes[0]
 		cacheSet.delete(cachedImageToRemove)
 	}
-
 	let cachedImage = new Image()
 	cachedImage.src = src
 	cacheDiv.appendChild(cachedImage)
@@ -340,18 +335,20 @@ function cacheFrame(frame) {
 function playGif(name, newFrame, delay, after = null) {
 	cacheFrame(newFrame)
 	processes++
+	gif.onload = () => {
+		get('movies').appendChild(gif)
+		gif.style.visibility = 'visible' 
+		wait(delay / 2, () => {
+			console.log('changing')
+			transition(newFrame, 'none', true)
+			wait(delay / 2, () => {
+				gif.style.visibility = 'hidden'
+				processes--
+				if (after != null) { after() }
+			})})}
 	gif.src = GIF_PATH + name + '.gif'//'?a=' + Math.random() 
 	// todo - use new object? so it 
-	gif.style.visibility = 'visible'
-	get('movies').appendChild(gif)
-	wait(delay / 2, () => {
-		console.log('changing')
-		transition(newFrame, 'none', true)
-		wait(delay / 2, () => {
-			gif.style.visibility = 'hidden'
-			processes--
-			if (after != null) { after() }
-		})})
+	
 }
 
 function wait(duration, then) {
