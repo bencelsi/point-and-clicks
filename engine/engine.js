@@ -104,7 +104,7 @@ function init() {
     inventoryDiv = get('inventory')
 	gif = get('fullGif')
 	setupStandardBoxes()
-	transition(frame, 'fade')
+	transitionTo(frame, 'fade')
 	refreshInventory()
 	//window.onclick = ()=>launchFullScreen(get('window'))
 }
@@ -120,7 +120,7 @@ function setupStandardBoxes() {
 }
 
 // TRANSITIONS ******************************************
-function transition(newFrame, type, override = false) {
+function transitionTo(newFrame, type, override = false) {
 	console.log(newFrame)
 	if (newFrame == null || (processes > 0 && !override)) { return }
 	processes++
@@ -183,12 +183,12 @@ function refreshCustomBoxes() {
 
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
-	let transitionType = boxData.transition == undefined ? 'fade' : boxData.transition
+	let transition = boxData.transition == undefined ? 'fade' : boxData.transition
 	let click = boxData.click
 	if (boxData.to !== undefined && boxData.click !== undefined) {
-		click = () => { boxData.click(); transition(simpleEval(boxData.to), transitionType) }
+		click = () => { boxData.click(); transitionTo(simpleEval(boxData.to), transition) }
 	} else if (boxData.to !== undefined) {
-		click = () => { transition(simpleEval(boxData.to), transitionType) }
+		click = () => { transitionTo(simpleEval(boxData.to), transition) }
 	}
 	let pic = simpleEval(boxData.pic)
 	if (pic != null) {
@@ -236,7 +236,7 @@ function refreshStandardBox(boxData, destinationFrame) {
 		element.style.visibility = 'hidden'
 	} else {
 		element.style.visibility = 'visible'
-		element.onclick = () => { transition(simpleEval(destinationFrame), boxData.transition) }
+		element.onclick = () => { transitionTo(simpleEval(destinationFrame), boxData.transition) }
 	}
 }
 
@@ -337,7 +337,7 @@ function playGif(name, newFrame, delay, after = null) {
 		get('movies').appendChild(gif)
 		gif.style.visibility = 'visible' 
 		wait(delay / 2, () => {
-			transition(newFrame, 'none', true)
+			transitionTo(newFrame, 'none', true)
 			wait(delay / 2, () => {
 				gif.style.visibility = 'hidden'
 				processes--

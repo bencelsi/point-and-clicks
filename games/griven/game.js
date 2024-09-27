@@ -227,7 +227,7 @@ const gameData = {
             'C1': { left: 'C4', right: 'C2', boxes: [
                 { to: 'C5', hitbox: [.48,.6,.22,.3] }]},
             'C2': { left: 'C1', right: 'C3' },
-            'C3': { left: 'C2', right: 'C4', forward: 'C5' },
+            'C3': { left: 'C2', right: 'C4', forward: 'C6' },
             'C4': { left: 'C3', right: 'C1',
                 forward: () => { playGif('ladderDown', 'B4', 10 * 150) }},
             'C5': { back: 'C1' },
@@ -389,6 +389,6 @@ function setElevatorFloor(floor) {
     s.floor = floor
     let newFrame = s.elevatorFloor === 1? 'A2a' : (s.elevatorFloor === 10 ? 'A2c' : 'A2b')
     if (frame != newFrame) {
-        transition(newFrame, 'fade')
+        transitionTo(newFrame, 'fade')
     }
 }
