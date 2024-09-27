@@ -159,8 +159,7 @@ function createTransition(type) {
 
 // CUSTOM BOXES ******************************************
 function refreshCustomBoxes() {
-	picsDiv.innerHTML = ''
-	customBoxesDiv.innerHTML = ''
+	picsDiv.innerHTML = ''; customBoxesDiv.innerHTML = ''
 	let boxes = roomData[frame].boxes
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
@@ -184,8 +183,6 @@ function refreshCustomBoxes() {
 
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
-	let hitbox = simpleEval(boxData.hitbox)
-	let cursor = boxData.cursor === undefined ? 'forward' : simpleEval(boxData.cursor)
 	let click
 	if (boxData.to !== undefined && boxData.click !== undefined) {
 		click = () => { boxData.click(); 
@@ -195,19 +192,19 @@ function makeCustomBox(boxData) {
 	} else {
 		click = boxData.click
 	}
-	
-	let id = simpleEval(boxData.id)
 	let pic = simpleEval(boxData.pic)
-	if (hitbox != null) {
-		let box = makeBox(hitbox, cursor, click, id)
-		customBoxesDiv.appendChild(box)
-	}
-	// TODO: combine? box can be pic & hitbox?
 	if (pic != null) {
 		let img = document.createElement('img')
 		img.classList.add('picBox')
-		img.src = PIC_PATH + simpleEval(boxData.pic) + '.png'
+		img.src = PIC_PATH + pic + '.png'
 		picsDiv.appendChild(img)
+	}
+	let hitbox = simpleEval(boxData.hitbox)
+	if (hitbox != null) {
+		let cursor = boxData.cursor === undefined ? 'forward' : simpleEval(boxData.cursor)
+		let id = simpleEval(boxData.id)
+		let box = makeBox(hitbox, cursor, click, id)
+		customBoxesDiv.appendChild(box)
 	}
 }
 

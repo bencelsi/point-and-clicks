@@ -216,7 +216,9 @@ const gameData = {
                 { to: 'A7', hitbox: [.37, .65, .35, .75] }]},
             'A5': { back: 'A1'},
             'A6': { forward: () => { playSound('doorOpen.wav'); return 'A2a'}},
-            'A7': { back: 'A4'},
+            'A7': { back: 'A4', boxes: [
+                { hitbox: [.48, .55, .91, 1], click: () => { s.valves[0] = !s.valves[0]; refreshCustomBoxes()},
+                    pic: () => { return s.valves[0] ? 'A6-valve' : null }}]},
             'B1': { left: 'B4', right: 'B2' },
             'B2': { left: 'B1', right: 'B3', 
                 forward: () => { playGif('ladderUp', 'C2', 10 * 150) }},
@@ -354,6 +356,7 @@ const gameData = {
 
 // State
 const s = {
+    valves: [false],
     hallPosition: 0,
     hallDirection: 0,
     floor: 1,
@@ -365,7 +368,6 @@ const s = {
     fire: false,
     shower: 0
 }
-
 
 function hallTurnLeft() { s.hallDirection = s.hallDirection == 0 ? 3 : s.hallDirection - 1 }
 
