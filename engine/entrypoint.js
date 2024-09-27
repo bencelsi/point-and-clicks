@@ -2,7 +2,7 @@
 
 // find the game folder, "game" if none provided
 let gameName = window.location.search === "" ? "game" : window.location.search.substring(1).split('&')[0]
-
+console.log(gameName)
 const GAME_FOLDER = "../games/" + gameName
 
 function wait(duration, then) {
@@ -11,8 +11,8 @@ function wait(duration, then) {
 
 // first, load the game data
 // then, load the engine which wil run the game
-addScript(GAME_FOLDER + "/game.js", 
-    () => { addScript("engine.js") })
+addScript(GAME_FOLDER + "/game.js")
+addScript("engine.js")
 
 function addScript(src, onload=null) {
     console.log(src)
