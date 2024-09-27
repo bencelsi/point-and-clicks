@@ -1,4 +1,3 @@
-// TODO - branch-based image caching
 // TODO - fluent interface for gifs, pics, boxes.
 // Ideal: smooth transition between standard box, custom, pic - all on 1 map
 // Idea: you move around, but scary creature keeps following you
@@ -8,10 +7,11 @@
 // Add 'menu' logic
 // Make rooms optional.
 // tool to rename image files & frames in js
-// optional image size
 // gifs as frames option
 // no boxes while gif plays... 
 // TODO - fix gameData errors - wait?
+// TODO - how to cache when left/right returns fn? framesToCache, or...
+
 
 const commonData = {
     standardBoxes : {
@@ -37,7 +37,7 @@ const commonData = {
 document.title = location.hostname === "" ? "." + gameData.title : gameData.title
 
 get("favicon").href = GAME_FOLDER + "/favicon.ico"
-const FRAME_PATH = GAME_FOLDER + '/assets/frames'
+const FRAME_PATH = GAME_FOLDER + '/assets/frames/'
 const GIF_PATH = GAME_FOLDER + '/assets/gifs/'
 const SOUND_PATH = GAME_FOLDER + '/assets/sound/'
 const PIC_PATH = GAME_FOLDER + '/assets/pics/'
@@ -131,7 +131,7 @@ function transition(newFrame, type, override = false) {
 		setFrame(roomFrame[1])
 	}
 	if (type != 'none') { createTransition(type + 'Out') }
-	imgDiv.src = FRAME_PATH + '/' + room + '/' + frame + '.' + extension
+	imgDiv.src = FRAME_PATH + room + '/' + frame + '.' + extension
 	refreshStandardBoxes()
 	refreshCustomBoxes()
 	if (type != 'none') { createTransition(type + 'In') }
@@ -309,21 +309,26 @@ function cacheResources() {
 	cacheFrame(frameData.right)
 	cacheFrame(frameData.forward)
 	cacheFrame(frameData.back)
-	for (boxData in frameData.boxes ) {
-		if (boxData != undefined) {
-			cacheFrame(boxData.to)
-		}
+	for (i in frameData.boxes ) {
+		cacheFrame(frameData.boxes[i].to)
 	}
 }
 
 function cacheFrame(frame) {
+	console.log('caching ' + frame)
 	if (frame == null || frame instanceof Function) { return }
-	let src = FRAME_PATH + '/' + (roomData[frame] === undefined ? '' : '/' + room)
-		+ frame + '.' + extension
+	console.log('... ' + frame)
+	let src
+	if (roomData[frame] === undefined) {
+		src = FRAME_PATH + frame + '.' + extension
+	} else {
+		src = FRAME_PATH + room  + '/' + frame + '.' + extension
+	}
 	if (cacheSet.has(src)) { return }
-	if (cacheDiv.childNodes.length >= 25) {
+	if (cacheDiv.childNodes.length >= 20) {
 		let cachedImageToRemove = cacheDiv.childNodes[0]
 		cacheSet.delete(cachedImageToRemove)
+		cacheDiv.removeChild(cachedImageToRemove)
 	}
 	let cachedImage = new Image()
 	cachedImage.src = src
