@@ -4,16 +4,16 @@
 let gameName = window.location.search === "" ? "game" : window.location.search.substring(1)
 const GAME_FOLDER = "../games/" + gameName
 
-// first, load game data
-addScript(GAME_FOLDER + "/game.js")
+// first, load the game data
+// then, load the engine which wil run the game
+addScript(GAME_FOLDER + "/game.js", 
+    () => { addScript("engine.js") })
 
-// next, load engine JS which wil run the game
-addScript("engine.js")
-
-function addScript(src) {
+function addScript(src, onload=null) {
     console.log(src)
     let script = document.createElement("script")
     script.type = "text/javascript"
     script.src = src
+    if (onload != null) { script.onload = onload }
     document.head.appendChild(script);
 }

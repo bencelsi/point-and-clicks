@@ -12,7 +12,6 @@
 // TODO - fix gameData errors - wait?
 // TODO - how to cache when left/right returns fn? framesToCache, or...
 
-
 const commonData = {
     standardBoxes : {
         left: {
@@ -90,9 +89,7 @@ let imgDiv
 let inventoryDiv
 let gif 
 
-window.onload = function() {
-	init()
-}
+window.onload = init
 
 function init() {
 	standardBoxesDiv = get('standardBoxes')
@@ -121,7 +118,6 @@ function setupStandardBoxes() {
 
 // TRANSITIONS ******************************************
 function transitionTo(newFrame, type, override = false) {
-	console.log(newFrame)
 	if (newFrame == null || (processes > 0 && !override)) { return }
 	processes++
 	setFrame(newFrame)
