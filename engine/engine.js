@@ -315,9 +315,7 @@ function cacheResources() {
 }
 
 function cacheFrame(frame) {
-	console.log('caching ' + frame)
 	if (frame == null || frame instanceof Function) { return }
-	console.log('... ' + frame)
 	let src
 	if (roomData[frame] === undefined) {
 		src = FRAME_PATH + frame + '.' + extension
@@ -344,7 +342,6 @@ function playGif(name, newFrame, delay, after = null) {
 		get('movies').appendChild(gif)
 		gif.style.visibility = 'visible' 
 		wait(delay / 2, () => {
-			console.log('changing')
 			transition(newFrame, 'none', true)
 			wait(delay / 2, () => {
 				gif.style.visibility = 'hidden'

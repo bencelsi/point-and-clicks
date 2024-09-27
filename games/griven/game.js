@@ -22,7 +22,7 @@ let elevatorButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'lobby',
+    startRoom: 'opening',
     startFrame: 'A1',
     extension: 'png',
     frameWidth: 1000,
