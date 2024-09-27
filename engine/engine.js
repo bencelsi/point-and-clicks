@@ -111,7 +111,7 @@ function init() {
 
 // DOM setup  ******************************************
 function setupStandardBoxes() {
-	for (let standardBox in standardBoxes) {
+	for (let standardBox in standardBoxes) { //todo: better
 		let boxData = standardBoxes[standardBox]
 		let box = makeBox(boxData.hitbox, boxData.cursor)
 		boxData.element = box
@@ -197,17 +197,17 @@ function makeCustomBox(boxData) {
 	}
 	
 	let id = simpleEval(boxData.id)
-	let img = simpleEval(boxData.img)
+	let pic = simpleEval(boxData.pic)
 	if (hitbox != null) {
 		let box = makeBox(hitbox, cursor, click, id)
 		customBoxesDiv.appendChild(box)
 	}
 	// TODO: combine? box can be pic & hitbox?
-	if (img != null) {
-		let pic = document.createElement('img')
-		pic.classList.add('picBox')
-		pic.src = PIC_PATH + simpleEval(boxData.img) + '.png'
-		picsDiv.appendChild(pic)
+	if (pic != null) {
+		let img = document.createElement('img')
+		img.classList.add('picBox')
+		img.src = PIC_PATH + simpleEval(boxData.pic) + '.png'
+		picsDiv.appendChild(img)
 	}
 }
 

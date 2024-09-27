@@ -32,7 +32,7 @@ const gameData = {
         'opening': {
             'A1': { forward: () => { playSound('opening');
                 wait(800, () => { playGif('opening', 'A2', 41 * 100) })}},
-            'A2': { forward: () => { wait('2000', () => {playSound('moonlight', 1, true )}); return 'lobby/A1' }}
+            'A2': { forward: () => { wait('2000', () => { playSound('moonlight', 1, true ) }); return 'lobby/A1' }}
         },
         'cafe': { //zcafe
             'A1': { left: 'A4', right: 'A2', boxes: [
@@ -86,7 +86,7 @@ const gameData = {
             'A5': {
                 left: () => { hallTurnLeft(); return hallTurnLogic() },
                 right: () => { hallTurnRight(); return hallTurnLogic() },
-                forward: () => { playSound('doorOpen.wav'); return 'A5a' }},
+                boxes: [{ to: 'A10', hitbox: [.6, .67, .32, .45]}]},
             'A5a': {
                 left: () => { hallTurnLeft(); return hallTurnLogic() },
                 right: () => { hallTurnRight(); return hallTurnLogic() },
@@ -106,6 +106,10 @@ const gameData = {
             'A9': {
                 left: () => { hallTurnLeft(); return 'A3' },
                 right: () => { hallTurnRight(); return 'A2' }},
+            'A10': {
+                forward: () => { playSound('doorOpen.wav'); return 'A5a' },
+                back: 'A5'
+            },
             'B1': { left: 'B4', right: 'B2', boxes: [
                 { to: () => { playSound('elevatorDoor');
                     return s.floor === s.elevatorFloor ? 'B1b' : 'B1a' }, hitbox: [.28, .31, .48, .52] }]},
@@ -125,7 +129,7 @@ const gameData = {
         'lobby' : { //zlobby
             'A1': { left: 'A4', right: 'A2', forward: 'B1' },
             'A2': { left: 'A1', right: 'A3', boxes: [
-                { to:'A5', hitbox: [.37, .76, .25, .7] }]},
+                { to: 'A5', hitbox: [.37, .76, .25, .7] }]},
             'A3': { left: 'A2', right: 'A4' },
             'A4': { left: 'A3', right: 'A1' },
             'A5': { back: 'A2' },
@@ -136,7 +140,9 @@ const gameData = {
                     { to: 'E1', hitbox: [.84, .95, .4, .58] }]},
             'B2': { left: 'B1', right: 'B3', forward: 'E2' },
             'B3': { left: 'B2', right: 'B4', forward: 'A3' },
-            'B4': { left: 'B3', right: 'B1', forward: 'D3' },
+            'B4': { left: 'B3', right: 'B1', forward: 'D3', boxes: [
+                { pic: 'B4-down', condition: () => {return s.cabinetDown} }
+            ]},
             'C1': { left: 'C4', right: 'C2', boxes: [
                 { to: () => { playSound('elevatorDoor');
                     return s.elevatorFloor === 1 ? 'C1b' : 'C1a' }, hitbox: [.28, .31, .48, .52] }]},
@@ -160,7 +166,7 @@ const gameData = {
                 { to: 'B3', hitbox: [.4, .8, .2, .8] }]},
             'D3': { left: 'D2', right: 'D1', boxes: [
                 { to: 'D4', hitbox: [.2, .31, .36 ,.48]},
-                { click: () => { playSound('bell') }, hitbox: [.47, .53, .33 ,.41]}]},
+                { click: () => { playSound('bell') }, hitbox: [.49, .56, .33, .4]}]},
             'D4': { back: 'D3' },
             'E1': { left: 'E3', right: 'E2', boxes: [
                 { to: 'G1', hitbox: [.57, .73, .35, .62]}]},
@@ -253,10 +259,14 @@ const gameData = {
             'B4': { left: 'B3', right: 'B1' },
             'B5': { back: 'B1', boxes: [
                 { to: () => { playSound('drawer'); return 'B5a' }, hitbox: [.37, .52, .63, .78]}]},
-            'B5a':{ back: () => { playSound('drawer'); return'B1' }},
+            'B5a':{ back: () => { playSound('drawer'); return'B1' }, boxes: [
+                { pic: 'B5a-card', condition: () => { return s.coffeeNote }},
+                { pic: 'B5a-note', condition: () => { return s.coffeeNote }},
+                { pic: 'B5a-coffee', condition: () => { return s.coffeeNote }}
+            ]},
             'C1': {}
         },
-        'plumbingroom': { //plumbing
+        'plumbingroom': { //zplumbing
             'A1': { left: 'A4', right: 'A2' },
             'A2': { left: 'A1', right: 'A3', forward: 'B2'},
             'A3': { left: 'A2', right: 'A4' },
@@ -275,7 +285,8 @@ const gameData = {
         'room': { //zroom
             'A1': { left: 'A4', right: 'A2', forward: 'A1a' },
             'A1a':{ left: 'A4', right: 'A2', forward: 'D1' },
-            'A2': { left: 'A1', right: 'A3', forward: 'B2' },
+            'A2': { left: 'A1', right: 'A3', forward: 'B2', boxes: [
+                { pic: 'A2-fire', condition: () => { return s.fire }}] },
             'A3': { left: 'A2', right: 'A4' },
             'A4': { left: 'A3', right: 'A1', forward: () => { 
                 s.hallDirection = 3; s.hallPosition = 7; return 'hall/A5' }},
@@ -284,15 +295,16 @@ const gameData = {
                 { to: 'B5', hitbox: [.2, .37, .7, .9] },
                 { to: 'B6', hitbox: [.43, .57, .57, .73] },
                 { to: 'B7', hitbox: [.55, .63, .35, .46] },
-                { to: 'B8', hitbox: [.6, .64, .18, .25] }]},
+                { to: () => { return s.fire ? 'B8a' : 'B8' }, hitbox: [.6, .64, .18, .25] },
+                { pic: 'B2-fire', condition: () => { return s.fire }}]},
             'B3': { left: 'B2', right: 'B4' },
             'B4': { left: 'B3', right: 'B1', forward: 'A4' },
             'B5': { back: 'B2', forward: 'B5a' },
             'B5a':{ back: 'B2', forward: 'B5' },
-            'B6':{ back: 'B2' },
+            'B6': { back: 'B2' },
             'B7': { back: 'B2' },
-            'B8': { back: 'B2', forward: 'B8a'},
-            'B8a':{ back: 'B2', forward: 'B8'},
+            'B8': { back: 'B2', forward: () => { s.fire = true; return 'B8a'}},
+            'B8a':{ back: 'B2', forward: () => { s.fire = false; return 'B8'}},
             'C1': { left: 'C4', right: 'C2' },
             'C2': { left: 'C1', right: 'C3', forward: 'C5' },
             'C3': { left: 'C2', right: 'C4', forward: 'B3' },
@@ -304,7 +316,9 @@ const gameData = {
             'D2': { left: 'D1', right: 'D3' },
             'D3': { left: 'D2', right: 'D4', forward: 'D3a' },
             'D3a': { left: 'D2', right: 'D4', forward: 'A3' },
-            'D4': { left: 'D3', right: 'D1'},
+            'D4': { left: 'D3', right: 'D1', boxes: [
+                { condition: () => { return s.shower !== 0 }, // could also be just condition: 'shower'!!!  
+                pic: () => { return s.shower === 1 ? 'D4-cold' : 'D4-hot' }}]},
             'D5': { back: 'D1' }
         },
         'top': {
@@ -344,10 +358,14 @@ const s = {
     hallDirection: 0,
     floor: 1,
     elevatorFloor: 1,
+    cabinetDown: false,
+    coffeeNote: false,
     plumbingDoorOpen: false,
     clockDoorOpen: false,
-    fireplaceOn: false
+    fire: false,
+    shower: 0
 }
+
 
 function hallTurnLeft() { s.hallDirection = s.hallDirection == 0 ? 3 : s.hallDirection - 1 }
 
