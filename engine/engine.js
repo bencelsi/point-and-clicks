@@ -12,86 +12,33 @@
 // TODO - fix gameData errors - wait?
 // TODO - how to cache when left/right returns fn? framesToCache, or...
 
-const commonData = {
-    standardBoxes : {
-        left: {
-            hitbox: [0, .2, .2, .8],
-            transition: 'left',
-            cursor: 'left' },
-        right: {
-            hitbox: [.8, 1, .2, .8],
-            transition: 'right',
-            cursor: 'right' },
-        forward: {
-            hitbox: [.25, .75, .25, .75],
-            transition: 'fade',
-            cursor: 'forward' },
-        back: {
-            hitbox: [0, 1, 0, .2],
-            transition: 'fade',
-            cursor: 'back' }
-    }
-}
-
-document.title = location.hostname === "" ? "." + gameData.title : gameData.title
-
 get("favicon").href = GAME_FOLDER + "/favicon.ico"
 const FRAME_PATH = GAME_FOLDER + '/assets/frames/'
 const GIF_PATH = GAME_FOLDER + '/assets/gifs/'
 const SOUND_PATH = GAME_FOLDER + '/assets/sound/'
 const PIC_PATH = GAME_FOLDER + '/assets/pics/'
 const INVENTORY_PATH = GAME_FOLDER + '/assets/inventory/'
-const CURSOR_PATH = gameData.customCursors === true ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
-const WIDTH = gameData.frameWidth === undefined ? 750 : gameData.frameWidth
-const HEIGHT = gameData.frameHeight === undefined ? 750 : gameData.frameHeight
-const SIDE_SPEED = .35
-const FADE_SPEED = 1
 
-get("screen").style.width = WIDTH + "px"
-get("screen").style.height = HEIGHT + "px"
-
-let animationStyle = `
-@keyframes leftIn { from { transform: translateX(0) } to { transform: translateX(${WIDTH}px) }}
-@keyframes leftOut { from { transform: translateX(0) }}
-@keyframes rightIn { from { transform: translateX(0) } to { transform: translateX(-${WIDTH}px) }}
-@keyframes rightOut {  from { transform: translateX(0) }}
-@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 }}
-@keyframes fadeOut { from { opacity: 1 }}
-.leftIn { animation:leftIn ${SIDE_SPEED}s }
-.leftOut { animation:leftOut ${SIDE_SPEED}s; transform: translateX(${WIDTH}px) }
-.rightIn { animation:rightIn ${SIDE_SPEED}s} 
-.rightOut { animation:rightOut ${SIDE_SPEED}s; transform: translateX(-${WIDTH}px) } 
-.fadeIn { animation:fadeIn ${FADE_SPEED}s; } 
-.fadeOut { animation:fadeOut ${FADE_SPEED}s; opacity: 0 }
-`
-
-get("style").innerHTML = animationStyle
-
-// globals consts
-const inventory = s.inventory
-const standardBoxes = commonData.standardBoxes;
-
-// global vars:
-let extension = gameData.extension
-let room = gameData.startRoom
-let frame = gameData.startFrame
-let roomData = gameData.frames[room]
-let frameData = roomData[frame]
 let processes = 0 // whether or not to listen to user input
 
-// DOM globals:
-let standardBoxesDiv
-let customBoxesDiv
-let picsDiv
-let cacheDiv
-let transitionsDiv
-let imgDiv
-let inventoryDiv
-let gif 
+// DEPENDENT ON GAME DATA
 
-window.onload = init
+window.onload = waitForGameData
+// hacky way to wait for gameData & s (state) to load
+function waitForGameData() {
+	try { gameData; s; init() } 
+	catch (e) { console.log('waiting!'); wait(500, waitForGameData) }
+}
+
+// DOM globals:
+let standardBoxesDiv, customBoxesDiv, picsDiv, cacheDiv, transitionsDiv, imgDiv, inventoryDiv, gif 
+// Constants:
+let CURSOR_PATH, WIDTH, HEIGHT, SIDE_SPEED, FADE_SPEED, INVENTORY
 
 function init() {
+	document.title = location.hostname === "" ? "." + gameData.title : gameData.title
+
+	//DOM elements:
 	standardBoxesDiv = get('standardBoxes')
 	customBoxesDiv = get('customBoxes')
 	picsDiv = get('pics')
@@ -100,16 +47,55 @@ function init() {
     imgDiv = get('img')
     inventoryDiv = get('inventory')
 	gif = get('fullGif')
+	
+	// global vars:
+	extension = gameData.extension
+	room = gameData.startRoom
+	frame = gameData.startFrame
+	roomData = gameData.frames[room]
+	frameData = roomData[frame]
+	inventory = s.inventory
+	
+	// constants
+	CURSOR_PATH = gameData.customCursors === true ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
+	WIDTH = gameData.frameWidth === undefined ? 750 : gameData.frameWidth
+	HEIGHT = gameData.frameHeight === undefined ? 750 : gameData.frameHeight
+	SIDE_SPEED = .35 // could be customized
+	FADE_SPEED = 1
+	get("screen").style.width = WIDTH + "px"
+	get("screen").style.height = HEIGHT + "px"
+	get("style").innerHTML =  `
+	@keyframes leftIn { from { transform: translateX(0) } to { transform: translateX(${WIDTH}px) }}
+	@keyframes leftOut { from { transform: translateX(0) }}
+	@keyframes rightIn { from { transform: translateX(0) } to { transform: translateX(-${WIDTH}px) }}
+	@keyframes rightOut {  from { transform: translateX(0) }}
+	@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 }}
+	@keyframes fadeOut { from { opacity: 1 }}
+	.leftIn { animation:leftIn ${SIDE_SPEED}s }
+	.leftOut { animation:leftOut ${SIDE_SPEED}s; transform: translateX(${WIDTH}px) }
+	.rightIn { animation:rightIn ${SIDE_SPEED}s} 
+	.rightOut { animation:rightOut ${SIDE_SPEED}s; transform: translateX(-${WIDTH}px) } 
+	.fadeIn { animation:fadeIn ${FADE_SPEED}s; } 
+	.fadeOut { animation:fadeOut ${FADE_SPEED}s; opacity: 0 }`
+
 	setupStandardBoxes()
 	transitionTo(frame, 'fade')
 	refreshInventory()
+	processes = 0
 	//window.onclick = ()=>launchFullScreen(get('window'))
+}
+
+const standardBoxes = {
+	left: { hitbox: [0, .2, .2, .8], transition: 'left', cursor: 'left' },
+	right: { hitbox: [.8, 1, .2, .8], transition: 'right', cursor: 'right' },
+	forward: { hitbox: [.25, .75, .25, .75], transition: 'fade', cursor: 'forward' },
+	back: { hitbox: [0, 1, 0, .2], transition: 'fade', cursor: 'back' }
 }
 
 // DOM setup  ******************************************
 function setupStandardBoxes() {
-	for (let standardBox in standardBoxes) { //todo: better
-		let boxData = standardBoxes[standardBox]
+	for (let i in standardBoxes) { //todo: better
+		let boxData = standardBoxes[i]
 		let box = makeBox(boxData.hitbox, boxData.cursor)
 		boxData.element = box
 		standardBoxesDiv.appendChild(box)
@@ -142,7 +128,7 @@ function transitionTo(newFrame, type, override = false) {
 
 function createTransition(type) {
 	let transition = document.createElement('div')
-	transition.appendChild(get('img').cloneNode(true)) //creates duplicate img
+	transition.appendChild(imgDiv.cloneNode(true)) //creates duplicate img
 	let picBoxes = picsDiv.cloneNode(true)
 	picBoxes.id = null
 	transition.appendChild(picBoxes)
@@ -236,14 +222,13 @@ function refreshStandardBox(boxData, destinationFrame) {
 	}
 }
 
-
 // INVENTORY ••••••••••••••••••••••••••••••••••••••••••••••••••
 
 function refreshInventory() {
-	if (inventory === undefined) { return }
-	get('inventory').innerHTML = ''
-	for (let item in inventory) {
-		if (inventory[item].state == 1) { makeInventoryItem(item) }
+	if (INVENTORY === undefined) { return }
+	inventoryDiv.innerHTML = ''
+	for (let i in inventory) {
+		if (INVENTORY[i].state == 1) { makeInventoryItem(i) }
 	}
 }
 
@@ -257,7 +242,7 @@ function makeInventoryItem(id) {
 	img.src = INVENTORY_PATH + inventory[id].img + '.png'
 	item.appendChild(img)
 	makeDraggable(item, inventory[id].targetId, inventory[id].targetAction)
-	get('inventory').appendChild(item)
+	inventoryDiv.appendChild(item)
 }
 
 // Make given inventory box draggable, execute action if dropped on targetId
@@ -340,14 +325,7 @@ function playGif(name, newFrame, delay, after = null) {
 				if (after != null) { after() }
 			})})}
 	gif.src = GIF_PATH + name + '.gif'//'?a=' + Math.random() 
-	// todo - use new object? so it 
-	
-}
-
-function wait(duration, then) {
-	setTimeout(() => {
-		then()
-	}, duration)
+	// todo - use new object? so it 	
 }
 
 // SOUND ******************************************
