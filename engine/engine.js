@@ -360,7 +360,7 @@ function wait(duration, then) {
 // SOUND ******************************************
 
 function playSound(name, volume=1, loop=false) {
-	let sound = new Audio(SOUND_PATH + name + '.mp3')
+	let sound = new Audio(SOUND_PATH + (name.includes('.') ? name : name + '.mp3'))
 	sound.volume = volume
 	sound.play()
 	return sound

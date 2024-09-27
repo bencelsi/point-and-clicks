@@ -35,4 +35,4 @@ const gameData = {
     }
 }
 
-const state = {}
+const s = {}
