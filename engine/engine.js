@@ -183,14 +183,13 @@ function refreshCustomBoxes() {
 
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
-	let click
+	let transition = boxData.transition == undefined ? 'fade' : boxData.transition
+	console.log(transition)
+	let click = boxData.click
 	if (boxData.to !== undefined && boxData.click !== undefined) {
-		click = () => { boxData.click(); 
-			transition(simpleEval(boxData.to), boxData.transition === undefined ? 'fade' : boxData.transition) }
+		click = () => { boxData.click(); transition(simpleEval(boxData.to), transition) }
 	} else if (boxData.to !== undefined) {
-		click = () => { transition(simpleEval(boxData.to), 'fade') }
-	} else {
-		click = boxData.click
+		click = () => { transition(simpleEval(boxData.to), transition) }
 	}
 	let pic = simpleEval(boxData.pic)
 	if (pic != null) {
