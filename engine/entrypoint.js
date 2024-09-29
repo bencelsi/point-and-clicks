@@ -4,8 +4,8 @@
 const GAME_FOLDER = "../games/" + window.location.search.substring(1).split('&')[0]
 
 // first, load the game data
-// then, load the engine which wil run the game
 addScript(GAME_FOLDER + "/game.js")
+// then, load the engine which wil run the game
 addScript("engine.js")
 
 function addScript(src) {

@@ -86,17 +86,17 @@ function init() {
 }
 
 const standardBoxes = {
-	left: { hitbox: [0, .2, .2, .8], transition: 'left', cursor: 'left' },
-	right: { hitbox: [.8, 1, .2, .8], transition: 'right', cursor: 'right' },
-	forward: { hitbox: [.25, .75, .25, .75], transition: 'fade', cursor: 'forward' },
-	back: { hitbox: [0, 1, 0, .2], transition: 'fade', cursor: 'back' }
+	left: { xy: [0, .2, .2, .8], transition: 'left', cursor: 'left' },
+	right: { xy: [.8, 1, .2, .8], transition: 'right', cursor: 'right' },
+	forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'forward' },
+	back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'back' }
 }
 
 // DOM setup  ******************************************
 function setupStandardBoxes() {
 	for (let i in standardBoxes) { //todo: better
 		let boxData = standardBoxes[i]
-		let box = makeBox(boxData.hitbox, boxData.cursor)
+		let box = makeBox(boxData.xy, boxData.cursor)
 		boxData.element = box
 		standardBoxesDiv.appendChild(box)
 	}
@@ -104,7 +104,10 @@ function setupStandardBoxes() {
 
 // TRANSITIONS ******************************************
 function transitionTo(newFrame, type, override = false) {
+	console.log('a')
 	if (newFrame == null || (processes > 0 && !override)) { return }
+	console.log('b')
+	
 	processes++
 	setFrame(newFrame)
 	if (frameData === undefined) {
@@ -119,11 +122,11 @@ function transitionTo(newFrame, type, override = false) {
 	if (type != 'none') { createTransition(type + 'In') }
 	delay = 1000 * (type === 'none' ? 0 : SIDE_SPEED)
 	 // if we wait full fade speed, it makes moving forward annoying.
-	setTimeout(() => {
+	wait(delay, () => {
 		transitionsDiv.innerHTML = ''
 		cacheResources()
 		processes--
-	}, delay)
+	})
 }
 
 function createTransition(type) {
@@ -146,7 +149,7 @@ function refreshCustomBoxes() {
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
 			let boxData = boxes[i]
-			if (boxData.condition !== undefined && !boxData.condition()) { continue }
+			if (boxData.if !== undefined && !boxData.if()) { continue }
 			makeCustomBox(boxData)
 		}
 	}
@@ -154,10 +157,10 @@ function refreshCustomBoxes() {
 
 // custom box params:
 //					type			required?		default			desc	
-// hitbox			[]				yes
+// xy			[]				yes
 // to: 				string			no				none 			equivalent onclick: () => {transition(to, 'fade)} 
-// onclick: 		function		no				none			
-// condition:		function		no				true			
+// fn: 		function		no				none			
+// if:		function		no				true			
 // cursor:			string			no				none
 // img:				string			no				none
 // id:				string			no				none
@@ -166,11 +169,11 @@ function refreshCustomBoxes() {
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
 	let transition = boxData.transition == undefined ? 'fade' : boxData.transition
-	let click = boxData.click
-	if (boxData.to !== undefined && boxData.click !== undefined) {
-		click = () => { boxData.click(); transitionTo(simpleEval(boxData.to), transition) }
+	let fn = boxData.fn
+	if (boxData.to !== undefined && boxData.fn !== undefined) {
+		fn = () => { boxData.fn(); transitionTo(simpleEval(boxData.to), transition) }
 	} else if (boxData.to !== undefined) {
-		click = () => { transitionTo(simpleEval(boxData.to), transition) }
+		fn = () => { transitionTo(simpleEval(boxData.to), transition) }
 	}
 	let pic = simpleEval(boxData.pic)
 	if (pic != null) {
@@ -179,25 +182,25 @@ function makeCustomBox(boxData) {
 		img.src = PIC_PATH + pic + '.png'
 		picsDiv.appendChild(img)
 	}
-	let hitbox = simpleEval(boxData.hitbox)
-	if (hitbox != null) {
+	let xy = simpleEval(boxData.xy)
+	if (xy != null) {
 		let cursor = boxData.cursor === undefined ? 'forward' : simpleEval(boxData.cursor)
 		let id = simpleEval(boxData.id)
-		let box = makeBox(hitbox, cursor, click, id)
+		let box = makeBox(xy, cursor, fn, id)
 		customBoxesDiv.appendChild(box)
 	}
 }
 
-function makeBox(hitbox, cursor, click = null, id = null) {
+function makeBox(xy, cursor, fn = null, id = null) {
 	let box = document.createElement('div')
 	box.className = 'box'
-	box.style.left = hitbox[0] * WIDTH + 'px'
-	box.style.width = (hitbox[1] - hitbox[0]) * WIDTH + 'px'
-	box.style.bottom = hitbox[2] * HEIGHT + 'px'
-	box.style.height = (hitbox[3] - hitbox[2]) * HEIGHT + 'px'
+	box.style.left = xy[0] * WIDTH + 'px'
+	box.style.width = (xy[1] - xy[0]) * WIDTH + 'px'
+	box.style.bottom = xy[2] * HEIGHT + 'px'
+	box.style.height = (xy[3] - xy[2]) * HEIGHT + 'px'
 	setCursor(box, cursor)
 	if (id != null) { box.id = id }
-	if (click != null) { box.onclick = click }
+	if (fn != null) { box.onclick = fn }
 	return box
 }
 
