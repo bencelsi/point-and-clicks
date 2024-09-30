@@ -7,6 +7,8 @@
 // idea: instead of lobby/A1, try assigning numbers... so, lB1,cA2, etc... for ease of use
 // TODO: you can break halldirections by clicking repeatedly - should block on locks
 // TODO: fix elevator num framing
+// TODO: switch grandup gif
+// TODO: shower gif, clockroom gif
 
 const elevatorBoxes = [
     { xy: [.81, .84, .06, .1], fn: () => { setElevatorFloor(1)} },
@@ -42,7 +44,7 @@ const keypadButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'opening',
+    startRoom: 'room',
     startFrame: 'A1',
     extension: 'png',
     frameWidth: 1000,
@@ -198,13 +200,13 @@ const gameData = {
                 { fn: () => { s.lightsOn = !s.lightsOn; refreshCustomBoxes()}, xy: [.82, .88, .58, .64]},
                 { pic: 'D3-switch', if: () => { return s.lightsOn }},
                 { to: 'D4', xy: [.2, .31, .36 ,.48], if: () => { return s.smallKey != 2 && !s.cabinetDown }},
-                { xy: [.22, .37, .38, .48], fn: () => { s.drawers[0] = !s.drawers[0]; refreshCustomBoxes()}},
+                { xy: [.22, .37, .38, .48], fn: () => { changeDrawer(0) }},
                 { pic: 'D3-drawer0', if: () => { return s.drawers[0] }},
-                { xy: [.22, .37, .48, .57], fn: () => { s.drawers[1] = !s.drawers[1]; refreshCustomBoxes()}},
+                { xy: [.22, .37, .48, .57], fn: () => { changeDrawer(1) }},
                 { pic: 'D3-drawer1', if: () => { return s.drawers[1] }},
-                { xy: [.22, .37, .57 ,.66], fn: () => { s.drawers[2] = !s.drawers[2]; refreshCustomBoxes()}},
+                { xy: [.22, .37, .57 ,.66], fn: () => { changeDrawer(2) }},
                 { pic: 'D3-drawer2', if: () => { return s.drawers[2] }},
-                { xy: [.22, .37, .66 ,.76], fn: () => { s.drawers[3] = !s.drawers[3]; refreshCustomBoxes()}},
+                { xy: [.22, .37, .66 ,.76], fn: () => { changeDrawer(3) }},
                 { pic: 'D3-drawer3', if: () => { return s.drawers[3] }},
                 { pic: 'D3-leftLight', if: () => { return s.lightsOn && !s.cabinetDown }},
                 { pic: 'D3-rightLight', if: () => { return s.lightsOn && !s.smallKey != 0 }},
@@ -219,7 +221,8 @@ const gameData = {
                 { to: 'E4', xy: [.4, .85, .8, 1] }]},
             'E3': { left: 'E2', right: 'E1', boxes: [
                 { to: 'B3', xy: [.2, .5, .2, .8] },
-                { to: 'B4', xy: [.5, .8, .2, .8] }]},
+                { to: 'B4', xy: [.5, .8, .2, .8] },
+                { if: () => { return s.cabinetDown}, pic: 'E3-down'}]},
             'E4': { back: 'E2'},
             'F1': { left: 'F2', right: 'F2',
                 forward: () => { s.floor = 2; 
@@ -271,7 +274,10 @@ const gameData = {
             'B4': { left: 'B3', right: 'B1', forward: 'A4' },
             'C1': { left: 'C4', right: 'C2', boxes: [
                 { to: 'C5', xy: [.48,.6,.22,.3] }]},
-            'C2': { left: 'C1', right: 'C3' },
+            'C2': { left: 'C1', right: 'C3', boxes: [
+                { pic: 'C2-gear0' }, { pic: 'C2-gear2' }, { pic: 'C2-gear4'}, { pic: 'C2-gear6'},
+                { pic: 'C2-gear1' }, { pic: 'C2-gear3' }, { pic: 'C2-gear5' }, 
+            ] },
             'C3': { left: 'C2', right: 'C4', forward: 'C6' },
             'C4': { left: 'C3', right: 'C1',
                 forward: () => { playGif('ladderDown', 'B4', 10 * 150) }},
@@ -372,7 +378,8 @@ const gameData = {
                 { xy: [.39, .42, .44, .48], fn: () => { s.shower = 1; refreshCustomBoxes() }},
                 { xy: [.42, .45, .44, .48], fn: () => { s.shower = 0; refreshCustomBoxes() }},
                 { xy: [.45, .48, .44, .48], fn: () => { s.shower = 2; refreshCustomBoxes() }},
-                { if: () => { return s.shower !== 0 }, pic: () => { return s.shower === 1 ? 'D4-cold' : 'D4-hot' }}]},
+                { if: () => { return s.shower !== 0 }, pic: () => { return s.shower === 1 ? 'D4-cold' : 'D4-hot' }},
+                { if: () => { return s.shower !== 0 }, pic: 'shower.gif', offset: [.5, 1], class: 'fullHeight'}]},
             'D5': { back: 'D1' }
         },
         'top': {
@@ -423,6 +430,15 @@ const s = {
     fire: false,
     shower: 0,
     combo: []
+}
+
+function changeDrawer(n) {
+    s.drawers[n] = !s.drawers[n];
+    if (s.drawers[0] && s.drawers[1] && s.drawers[2] && s.drawers[3]) {
+        s.lightsOn = false
+        s.cabinetDown = true
+    }
+    refreshCustomBoxes()
 }
 
 function pushKeypad(n) {

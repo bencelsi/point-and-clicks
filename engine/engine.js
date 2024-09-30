@@ -180,6 +180,7 @@ function makeCustomBox(boxData) {
 	if (pic != null) {
 		let img = document.createElement('img')
 		img.classList.add('picBox')
+		if (boxData.class != null) { img.classList.add(boxData.class) }
 		if (boxData.scale != undefined) {
 			img.style.width = boxData.scale + '%'
 			img.style.height = 'auto'
@@ -190,7 +191,7 @@ function makeCustomBox(boxData) {
 		} else {
 			img.classList.add('full') 
 		}
-		img.src = PIC_PATH + pic + '.png'
+		img.src = PIC_PATH + pic + (pic.includes('.') ? '' : '.png')
 		picsDiv.appendChild(img)
 	}
 	let xy = simpleEval(boxData.xy)
