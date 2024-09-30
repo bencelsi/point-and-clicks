@@ -2,7 +2,7 @@ const gameData = {
 	title: 'Dead End',
 	gameName: 'dead-end',
 	startRoom: 'A',
-	startFrame: '0a',
+	startFrame: '3a',
 	extension: 'png',
 	frames: {
 		A: {
@@ -10,18 +10,14 @@ const gameData = {
 			'0b': { forward: '0c' },
 			'0c': { forward: '0d' },
 			'0d': { forward: '0e' },
-			'0e': { forward: () => { playSound('churchbell', 1); setTimeout(() => { transition('0g', 'fade') }, 3000); return '0f'} },
+			'0e': { forward: () => { playSound('churchbell', 1); wait(3000, () => { transitionTo('0g', 'fade')}); return '0f'} },
 			'0f': { },
 			'0g': { forward: '1a' },
 			'1a': { forward: '3a', left: '1f', right: '1b' },
-			'1b': { left: () => s.power ? '1g' : '1a', right: '1c',
-					boxes: [{
-						hitbox: [.1, .75, .25, .75],
-						cursor: 'forward',
-							onclick: () => {
-						transition('2a', 'fade')
-						playGif('sidepath1', 9 * 350)
-						playSound('sidepath', 1, false) }}],
+			'1b': { left: () => s.power ? '1g' : '1a', right: '1c', boxes: [
+				{ xy: [.1, .75, .25, .75],  fn: () => {
+					playGif('sidepath1', '2a', 9 * 350)
+					playSound('sidepath', 1, false) }}],
 					toCache: { frames: ['2a', '1g', '1a'], gifs: ['sidepath1'] }},
 			'1c': { left: '1b', right: '1d' },
 			'1d': { left: '1c', right: '1e' },
@@ -31,63 +27,53 @@ const gameData = {
 			'2a': { left: '2d', right: '2b' },
 			'2b': { left: '2a', right: '2c' },
 			'2c': { left: '2b', right: '2d', forward: '1d' },
-			'2d': { left: '2c', right: '2a',
-					boxes: [
-					{	hitbox: [.05, .2, .25, .75],
-						cursor: 'zoom',
-						onclick: () => transition('2e', 'fade')}]},
-			'2e': { left: '2c', right: '2a', back: '2d',
-					boxes: [
-					{	hitbox: () => { return (s.power ? [.45, .57, .23, .3] : [.45, .57, .4, .47]) },
+			'2d': { left: '2c', right: '2a', boxes: [
+				{ xy: [.05, .2, .25, .75], cursor: 'zoom', fn: () => transitionTo('2e', 'fade')}]},
+			'2e': { left: '2c', right: '2a', back: '2d', boxes: [
+					{	xy: () => { return (s.power ? [.45, .57, .23, .3] : [.45, .57, .4, .47]) },
 						cursor: 'open',
-						onclick: () => { s.power = !s.power; refreshCustomBoxes() }},
-					{	condition: () => { return s.power },
-						img: 'x14.1' },
-					{	condition: () => { return s.power },
-						img: 'x14.2.1' }]},
+						fn: () => { s.power = !s.power; refreshCustomBoxes() }},
+					{	if: () => { return s.power },
+						pic: 'x14.1' },
+					{	if: () => { return s.power },
+						pic: 'x14.2.1' }]},
 			'3a': { left: '3d', right: '3b' },
 			'3b': { left: '3a', right: '3c' },
 			'3c': { left: () => s.power ? '3f' : '3b', right: () => s.power ? '3g' : '3d', forward: '1d' },
 			'3d': { left: '3c', right: '3a' },
-			'3e': { left: '3g', right: '3f',
-					boxes: [
-					{	hitbox: () => { return(inventory['key'].state == 3 ? [.4, .5, .2, .6] : [.45, .5, .33, .42]) },
-						img: () => {
-							if (inventory['key'].state == 2) {
-								return 'x16.1'
-							} else if (inventory['key'].state == 3) {
-								return 'x16.2'
-							} else {
-								return null }},
+			'3e': { left: '3g', right: '3f', boxes: [
+					{	xy: () => { return(inventory['key'].state == 3 ? [.4, .5, .2, .6] : [.45, .5, .33, .42]) },
+						pic: () => {
+							if (inventory['key'].state == 2) { return 'x16.1' } 
+							else if (inventory['key'].state == 3) { return 'x16.2' }
+							return null },
 						cursor: () => { return(inventory['key'].state == 3 ? 'forward' : 'open') },
 						id: () => { return(inventory['key'].state <= 2 ? 'frontDoor' : null) },
-						onclick: () => {
+						fn: () => {
 							if (inventory['key'].state <= 1) {
 								//playSound('momoko', 1, true)
 							} else if (inventory['key'].state == 2) {
 								inventory['key'].state = 3
 								refreshCustomBoxes() 
 							} else if (inventory['key'].state == 3) {
-								setRoom('B', 'jpeg'); transition('1a', 'fade') 
+								setRoom('B', 'jpeg'); transitionTo('1a', 'fade') 
 							}
 						}
 					}]
 				},
 			'3f': { left: '3e', right: '3c' },
-			'3g': { left: '3c', right: '3e',
-					boxes: [
-					{	hitbox: [.48, .57, .87, .93],
+			'3g': { left: '3c', right: '3e', boxes: [
+					{	xy: [.48, .57, .87, .93],
 						cursor: 'zoom',
-						onclick: () => transition('3h', 'fade') }],
+						fn: () => transitionTo('3h', 'fade') }],
 					},
-			'3h': { back: '3g',
-					boxes: [
-					{	condition: () => { return inventory['key'].state == 0 },
-						hitbox: [.32, .65, .4, .48],
+			'3h': { back: '3g', boxes: [
+					{	if: () => { return inventory['key'].state == 0 },
+						xy: [.32, .65, .4, .48],
 						cursor: 'open',
-						onclick: () => { inventory['key'].state = 1; refreshCustomBoxes(); refreshInventory() }},
-					{ 	condition: () => { return inventory['key'].state == 0 },	
-						img: 'x12' }]},
+						fn: () => { inventory['key'].state = 1; refreshCustomBoxes(); refreshInventory() }},
+					{ 	if: () => { return inventory['key'].state == 0 },	
+						pic: 'x12' }]},
 			'3i': { forward: () => { setRoom('B', 'jpeg'); return '1a' }},
 		},
 		B: {
@@ -127,7 +113,7 @@ const gameData = {
 }
 
 const s = {
-	power: false,
+	power: true,
 	inventory: {
 		key: {
 			state: 0,

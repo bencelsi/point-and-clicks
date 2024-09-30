@@ -5,9 +5,10 @@
 // better way to set room... like: forward: {'cafe' : 'A1'}... or just 'lobby-A1'
 // fn/to are redundant?
 // idea: instead of lobby/A1, try assigning numbers... so, lB1,cA2, etc... for ease of use
-// TODO shorten box params: xy -> xy, condition: if, fn -> fn
+// TODO: you can break halldirections by clicking repeatedly - should block on locks
+// TODO: fix elevator num framing
 
-const elevatorButtons = [
+const elevatorBoxes = [
     { xy: [.81, .84, .06, .1], fn: () => { setElevatorFloor(1)} },
     { xy: [.87, .9, .06, .1], fn: () => { setElevatorFloor(2)} },
     { xy: [.81, .84, .16, .2], fn: () => { setElevatorFloor(3)} },
@@ -19,13 +20,30 @@ const elevatorButtons = [
     { xy: [.81, .84, .48, .52], fn: () => { setElevatorFloor(9)} },
     { xy: [.87, .9, .48, .52], fn: () => { setElevatorFloor(10)} },
     { xy: [.81, .9, .52, .6], to: 'A3' },
-    { xy: [.92, 1, .2, .8], to: 'A1', cursor: 'right', transition: 'right' }
+    { xy: [.92, 1, .2, .8], to: 'A1', cursor: 'right', transition: 'right' },
+    { pic: () => { return 'scratch/elevator' + s.floor }, offset: [.82, .97], scale: '6'},
+    { pic: () => { return 'scratch/floor' + s.floor }, offset: [.467, .663], scale: '8', if: () => { return s.floor > 1 && s.floor < 10}}
+]
+
+const outerElevatorBox = { pic: () => { return  'scratch/elevator' + s.floor }, offset: [.275, .842], scale: '4'}
+
+const keypadButtons = [
+    { xy: [.16, .29, .68, .86], fn: () => { pushKeypad(0) }},
+    { xy: [.3, .42, .68, .86], fn: () => { pushKeypad(1) }},
+    { xy: [.44, .56, .68, .86], fn: () => { pushKeypad(2) }},
+    { xy: [.58, .7, .68, .86], fn: () => { pushKeypad(3) }},
+    { xy: [.72, .84, .68, .86], fn: () => { pushKeypad(4) }},
+    { xy: [.16, .29, .46, .66], fn: () => { pushKeypad(5) }},
+    { xy: [.3, .42, .46, .66], fn: () => { pushKeypad(6) }},
+    { xy: [.44, .56, .46, .66], fn: () => { pushKeypad(7) }},
+    { xy: [.58, .7, .46, .66], fn: () => { pushKeypad(8) }},
+    { xy: [.72, .84, .46, .66], fn: () => { pushKeypad(9) }}
 ]
 
 const gameData = {
     title: 'Griven',
     startRoom: 'opening',
-    startFrame: 'A1',
+    startFrame: 'B1',
     extension: 'png',
     frameWidth: 1000,
     frameHeight: 750,
@@ -46,8 +64,8 @@ const gameData = {
             'A2': { left: 'A1', right: 'A3', forward: 'lobby/H2' },
             'A3': { left: 'A2', right: 'A4', forward: 'H4' },
             'A4': { left: 'A3', right: 'A1', forward: 'B4' },
-            'A6': { forward: () => { playSound('doorOpen.wav'); plumbingDoorOpen = true; return 'A1a' }}, 
-            'A7': { back: () => { return plumbingDoorOpen ? 'A1a' : 'A1' }},
+            'A6': { back: 'A1', boxes: keypadButtons }, 
+            'A7': { back: () => { return s.plumbingDoorOpen ? 'A1a' : 'A1' }},
             'A5': { forward: 'plumbingroom/A1', back: 'A1a' },
             'B1': { left: 'B4', right: 'B2', forward: 'B5' },
             'B2': { left: 'B1', right: 'B3', forward: 'A2' },
@@ -60,9 +78,9 @@ const gameData = {
             'A1': {
                 left: () => { return (s.elevatorFloor === 1? 'A2a' : (s.elevatorFloor === 10 ? 'A2c' : 'A2b')) },
                 right: () => { return (s.elevatorFloor === 1? 'A2a' : (s.elevatorFloor === 10 ? 'A2c' : 'A2b')) }},
-            'A2a': { left: 'A1', forward: () => { playSound('elevatorDoor'); return 'lobby/C3'}, boxes: elevatorButtons },
-            'A2b': { left: 'A1', forward: () => { playSound('elevatorDoor'); return 'hall/B3'}, boxes: elevatorButtons },
-            'A2c': { left: 'A1', forward: () => { playSound('elevatorDoor'); return 'top/A3'}, boxes: elevatorButtons },
+            'A2a': { left: 'A1', forward: () => { playSound('elevatorDoor'); return 'lobby/C3'}, boxes: elevatorBoxes },
+            'A2b': { left: 'A1', forward: () => { playSound('elevatorDoor'); return 'hall/B3'}, boxes: elevatorBoxes },
+            'A2c': { left: 'A1', forward: () => { playSound('elevatorDoor'); return 'top/A3'}, boxes: elevatorBoxes },
             'A3': { forward: 'A3a', back: () => { return s.floor === 1? 'A2a' : (s.floor === 10 ? 'A2c' : 'A2b') }},
             'A3a': { back: () => { return s.floor === 1? 'A2a' : (s.floor === 10 ? 'A2c' : 'A2b') }}
         },
@@ -88,11 +106,18 @@ const gameData = {
             'A5': {
                 left: () => { hallTurnLeft(); return hallTurnLogic() },
                 right: () => { hallTurnRight(); return hallTurnLogic() },
-                boxes: [{ to: 'A10', xy: [.6, .67, .32, .45]}]},
+                boxes: [{ to: 'A10', xy: [.6, .67, .32, .45]},
+                { pic: () => { return 'scratch/roomFloor' + s.floor }, offset: [.44,.94]},
+                { pic: () => { return 'scratch/room' 
+                    + (s.hallPosition + (s.hallDirection == 1 ? 1 : 4) + (s.hallPosition < 4 ? 0 : 2) - (s.hallPosition % 4 == 3 ? 1 : 0))}
+                , offset: [.46,.94]}
+                ]},
             'A5a': {
                 left: () => { hallTurnLeft(); return hallTurnLogic() },
                 right: () => { hallTurnRight(); return hallTurnLogic() },
-                forward: 'room/A2' },
+                forward: 'room/A2', boxes: [
+                    { pic: 'scratch/roomFloor2', offset: [.44,.94]},
+                    { pic: 'scratch/room9', offset: [.46,.94]}]},
             'A6': {
                 left: () => { hallTurnLeft(); return 'A2' },
                 right: () => { hallTurnRight(); return 'A3' },
@@ -109,21 +134,24 @@ const gameData = {
                 left: () => { hallTurnLeft(); return 'A3' },
                 right: () => { hallTurnRight(); return 'A2' }},
             'A10': {
-                forward: () => { playSound('doorOpen.wav'); return 'A5a' },
+                boxes: [
+                    { xy: [.5, .72, .2, .35], if: () => { return s.floor == 2 && s.hallPosition == 7 && s.hallDirection == 1},
+                    to: () => { playSound('doorOpen.wav'); return 'A5a' }}
+                ],
                 back: 'A5'
             },
-            'B1': { left: 'B4', right: 'B2', boxes: [
+            'B1': { left: 'B4', right: 'B2', boxes: [ outerElevatorBox,
                 { to: () => { playSound('elevatorDoor');
                     return s.floor === s.elevatorFloor ? 'B1b' : 'B1a' }, xy: [.28, .31, .48, .52] }]},
-            'B1a': { left: 'B4', right: 'B2', boxes: [
+            'B1a': { left: 'B4', right: 'B2', boxes: [ outerElevatorBox,
                 { to: () => { playSound('elevatorDoor'); return'B1' }, xy: [.28, .31, .48, .52] },
                 { to: 'B5', xy: [.35, .66, .17, .88] }]},
-            'B1b': { left: 'B4', right: 'B2', boxes: [
+            'B1b': { left: 'B4', right: 'B2', boxes: [ outerElevatorBox,
                 { to: () => { playSound('elevatorDoor'); return 'B1'}, xy: [.28, .31, .48, .52] },
                 { to: 'elevator/A1', xy: [.35, .66, .17, .88]}]},
             'B2': { left: 'B1', right: 'B3', 
                 forward: () => { s.hallDirection = 1; s.hallPosition = 6; return 'A9'}},
-            'B3': { left: 'B2', right: 'B4' },
+            'B3': { left: 'B2', right: 'B4', boxes: [{ pic: () => { return 'scratch/floor' + s.floor}, offset: [.5,.74] }]},
             'B4': { left: 'B3', right: 'B1',
                 forward: () => { s.hallDirection = 3; s.hallPosition = 2; return 'A6'}},
             'B5': { back: 'B1a' }
@@ -144,13 +172,13 @@ const gameData = {
             'B3': { left: 'B2', right: 'B4', forward: 'A3' },
             'B4': { left: 'B3', right: 'B1', forward: 'D3', boxes: [
                 { pic: 'B4-down', if: () => { return s.cabinetDown } }]},
-            'C1': { left: 'C4', right: 'C2', boxes: [
-                { to: () => { playSound('elevatorDoor');
-                    return s.elevatorFloor === 1 ? 'C1b' : 'C1a' }, xy: [.28, .31, .48, .52] }]},
-            'C1a':{ left: 'C4', right: 'C2', boxes: [
+            'C1': { left: 'C4', right: 'C2', boxes: [ outerElevatorBox,
+                { to: () => { playSound('elevatorDoor'); return s.elevatorFloor === 1 ? 'C1b' : 'C1a' }, 
+                    xy: [.28, .31, .48, .52] }]},
+            'C1a':{ left: 'C4', right: 'C2', boxes: [ outerElevatorBox,
                 { to: 'C1', xy: [.28, .31, .48, .52] },
                 { to: 'C5', xy: [.35, .66, .17, .88] }]},
-            'C1b':{ left: 'C4', right: 'C2', boxes: [
+            'C1b':{ left: 'C4', right: 'C2', boxes: [ outerElevatorBox,
                 { to: 'elevator/A1', xy: [.35, .66, .17, .88] },
                 { to: 'C1', xy: [.28, .31, .48, .52] }]},
             'C2': { left: 'C1', right: 'C3' },  
@@ -227,12 +255,12 @@ const gameData = {
                 { to: 'A6', xy: [.54, .65, .3, .51] }]},
             'A2a':{ left: () => { playSound('doorClose.wav'); return 'A1'}, 
                     right: () => { playSound('doorClose.wav'); return 'A3'}, boxes: [
-                { to: 'B2', xy: [.54, .65, .3, .51] }]},
+                        { to: 'B2', xy: [.54, .65, .3, .51] }]},
             'A3': { left: 'A2', right: 'A4', forward: 'lobby/H4' },
             'A4': { left: 'A3', right: 'A1', boxes: [
                 { to: 'A7', xy: [.37, .65, .35, .75] }]},
             'A5': { back: 'A1'},
-            'A6': { forward: () => { playSound('doorOpen.wav'); return 'A2a'}},
+            'A6': { back: 'A2', boxes: keypadButtons },
             'A7': { back: 'A4', boxes: [
                 { xy: [.48, .55, .91, 1], fn: () => { s.valves[0] = !s.valves[0]; refreshCustomBoxes()},
                     pic: () => { return s.valves[0] ? 'A6-valve' : null }}]},
@@ -258,7 +286,9 @@ const gameData = {
                         if (s.floor === 10) { playGif('stairsTopUp', 'B1', 10 * 150) }
                         else { playGif('stairsMiddleUp1', 'A1', 9 * 150) }})}},
             'A2': { left: 'A1', right: 'A3', forward: () => { 
-                s.hallDirection = 1; s.hallPosition = 2; return 'hall/A7' }},
+                s.hallDirection = 1; s.hallPosition = 2; return 'hall/A7' }, boxes: [
+                    { pic: () => { return 'scratch/floor' + s.floor}, offset: [.865, .91] }
+                ]},
             'A3': { left: 'A2', right: 'A4', 
                 forward: () => { s.floor--
                     playSound('stairsDown')
@@ -268,7 +298,7 @@ const gameData = {
                         else { playGif('stairsMiddleDown1', 'A3', 10 * 150) }})}},
             'A4': { left: 'A3', right: 'A1' },
             'B1': { left: 'B4', right: 'B2', forward: 'B5' },
-            'B2': { left: 'B1', right: 'B3'},
+            'B2': { left: 'B1', right: 'B3', boxes: [{ pic: 'scratch/floor10', offset: [.87, .98] }]},
             'B3': { left: 'B2', right: 'B4',
                 forward: () => { s.floor--
                     playSound('stairsDown')
@@ -302,7 +332,8 @@ const gameData = {
             'B6': { back: 'B3' }
         },
         'room': { //zroom
-            'A1': { left: 'A4', right: 'A2', forward: 'A1a' },
+            'A1': { left: 'A4', right: 'A2', boxes: [
+                { xy: [.62, .73, .1, .25], to: 'A1a' }]},
             'A1a':{ left: 'A4', right: 'A2', forward: 'D1' },
             'A2': { left: 'A1', right: 'A3', forward: 'B2', boxes: [
                 { pic: 'A2-fire', if: () => { return s.fire }}] },
@@ -332,19 +363,22 @@ const gameData = {
             'C5': { back: 'C2'},
             'C6': { back: 'C4' },
             'D1': { left: 'D4', right: 'D2', forward: 'D5' },
-            'D2': { left: 'D1', right: 'D3' },
+            'D2': { left: 'D1', right: 'D3', boxes: [
+                { pic: 'scratch/mirror', offset: [.37, .98] }
+            ]},
             'D3': { left: 'D2', right: 'D4', forward: 'D3a' },
             'D3a': { left: 'D2', right: 'D4', forward: 'A3' },
             'D4': { left: 'D3', right: 'D1', boxes: [
-                { if: () => { return s.shower !== 0 }, // TODO: could also be just condition: 'shower'!!!  
-                pic: () => { return s.shower === 1 ? 'D4-cold' : 'D4-hot' }}]},
+                { xy: [.39, .42, .44, .48], fn: () => { s.shower = 1; refreshCustomBoxes() }},
+                { xy: [.42, .45, .44, .48], fn: () => { s.shower = 0; refreshCustomBoxes() }},
+                { xy: [.45, .48, .44, .48], fn: () => { s.shower = 2; refreshCustomBoxes() }},
+                { if: () => { return s.shower !== 0 }, pic: () => { return s.shower === 1 ? 'D4-cold' : 'D4-hot' }}]},
             'D5': { back: 'D1' }
         },
         'top': {
-            'A1': { left: 'A4', right: 'A2', boxes: [
-                { to: () => { playSound('elevatorDoor'); return 'A1a'}, xy: [.28, .31, .48, .52]}
-            ] },
-            'A1a':{ left: 'A4', right: 'A2', boxes: [
+            'A1': { left: 'A4', right: 'A2', boxes: [ outerElevatorBox,
+                { to: () => { playSound('elevatorDoor'); return 'A1a'}, xy: [.28, .31, .48, .52]}]},
+            'A1a':{ left: 'A4', right: 'A2', boxes: [ outerElevatorBox,
                 { to: () => { playSound('elevatorDoor'); return 'A1'}, xy: [.28, .31, .48, .52]},
                 { to: 'elevator/A1', xy: [.35, .66, .17, .88]}]},
             'A2': { left: 'A1', right: 'A3' },
@@ -357,7 +391,7 @@ const gameData = {
                 { to: 'C3', xy: [.6, .65, .51, .63] }]},
             'C2a':{ left: 'C1', right: 'C1', boxes: [
                 { to: 'D3', xy: [.35, .65, .22, .82] }]},
-            'C3': { forward: () => { playSound('doorOpen'); return 'C2a'}},    
+            'C3': { boxes: keypadButtons, back: 'C2' },    
             'D1': { left: 'D4', right: 'D2', forward: 'C1' },
             'D2': { left: 'D1', right: 'D3', forward: 'D5' },
             'D3': { left: 'D2', right: 'D4', forward: 
@@ -371,7 +405,7 @@ const gameData = {
 
 // TODO: store variants as separate var? some level of indirection beyond frame and image.
 
-// State
+// Saveable State
 const s = {
     smallKey: 0, // 0 - on chair, 1- in inventory, 2- in drawer
     lightsOn: false,
@@ -387,7 +421,23 @@ const s = {
     plumbingDoorOpen: false,
     clockDoorOpen: false,
     fire: false,
-    shower: 0
+    shower: 0,
+    combo: []
+}
+
+function pushKeypad(n) {
+    // playSound()
+    s.combo.push(n)
+    if (s.combo.length > 5) { s.combo.shift() }
+    if (room == 'pool') { checkCombo([3, 5, 2, 9, 9], 'A2a') } 
+    else if (room == 'cafe') { checkCombo([8, 7, 0, 1, 2], 'A1a') }
+    else { checkCombo([1, 2, 6, 6, 9], 'C2a') }
+}
+
+function checkCombo(desired, destination) {
+    for (i in desired) { if (s.combo[i] != desired[i]) { return } }
+    playSound('doorOpen.wav')
+    transitionTo(destination, 'fade')
 }
 
 function hallTurnLeft() { s.hallDirection = s.hallDirection == 0 ? 3 : s.hallDirection - 1 }
@@ -411,5 +461,5 @@ function setElevatorFloor(floor) {
     console.log(frame)
     let newFrame = s.elevatorFloor === 1 ? 'A2a' : (s.elevatorFloor === 10 ? 'A2c' : 'A2b')
     console.log(newFrame)
-    if (frame != newFrame) { transitionTo(newFrame, 'fade'); console.log('c') }
+    transitionTo(newFrame, 'fade'); console.log('c')
 }

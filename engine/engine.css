@@ -17,8 +17,6 @@ body {
   	left: 50%;
 	margin-top: -425px;
 	margin-left: -475px;
-	/* height: 750px;
-	width: 950px;*/
 }
 
 #cursor {
@@ -94,17 +92,20 @@ body {
 
 .picBox {
 	position: absolute;
-	width: 100%;
-	height: 100%;
 	left: 0px;
 	top: 0px;
 	z-index: 4;
 }
 
+.full {
+	width: 100%;
+	height: 100%;
+}
+
 .box {
 	z-index: 10;
 	position: absolute;
-	/* border: 1px greenyellow solid; */
+	/* border: 1px pink solid; */
 }
 
 .gif {

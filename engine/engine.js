@@ -9,8 +9,9 @@
 // tool to rename image files & frames in js
 // gifs as frames option
 // no boxes while gif plays... 
-// TODO - fix gameData errors - wait?
 // TODO - how to cache when left/right returns fn? framesToCache, or...
+// TODO - cache pics/gifs
+
 
 get("favicon").href = GAME_FOLDER + "/favicon.ico"
 const FRAME_PATH = GAME_FOLDER + '/assets/frames/'
@@ -19,7 +20,7 @@ const SOUND_PATH = GAME_FOLDER + '/assets/sound/'
 const PIC_PATH = GAME_FOLDER + '/assets/pics/'
 const INVENTORY_PATH = GAME_FOLDER + '/assets/inventory/'
 
-let processes = 0 // whether or not to listen to user input
+let locks = 0 // whether or not to listen to user input
 
 // DEPENDENT ON GAME DATA
 
@@ -33,7 +34,7 @@ function waitForGameData() {
 // DOM globals:
 let standardBoxesDiv, customBoxesDiv, picsDiv, cacheDiv, transitionsDiv, imgDiv, inventoryDiv, gif 
 // Constants:
-let CURSOR_PATH, WIDTH, HEIGHT, SIDE_SPEED, FADE_SPEED, INVENTORY
+let CURSOR_PATH, WIDTH, HEIGHT, SIDE_SPEED, FADE_SPEED, inventory
 
 function init() {
 	document.title = location.hostname === "" ? "." + gameData.title : gameData.title
@@ -81,7 +82,7 @@ function init() {
 	setupStandardBoxes()
 	transitionTo(frame, 'fade')
 	refreshInventory()
-	processes = 0
+	locks = 0
 	//window.onclick = ()=>launchFullScreen(get('window'))
 }
 
@@ -104,11 +105,11 @@ function setupStandardBoxes() {
 
 // TRANSITIONS ******************************************
 function transitionTo(newFrame, type, override = false) {
-	console.log('a')
-	if (newFrame == null || (processes > 0 && !override)) { return }
+	console.log(newFrame)
+	if (newFrame == null || (locks > 0 && !override)) { return }
 	console.log('b')
 	
-	processes++
+	locks++
 	setFrame(newFrame)
 	if (frameData === undefined) {
 		let roomFrame = frame.split("/")
@@ -125,7 +126,7 @@ function transitionTo(newFrame, type, override = false) {
 	wait(delay, () => {
 		transitionsDiv.innerHTML = ''
 		cacheResources()
-		processes--
+		locks--
 	})
 }
 
@@ -179,6 +180,16 @@ function makeCustomBox(boxData) {
 	if (pic != null) {
 		let img = document.createElement('img')
 		img.classList.add('picBox')
+		if (boxData.scale != undefined) {
+			img.style.width = boxData.scale + '%'
+			img.style.height = 'auto'
+		}
+		if (boxData.offset !== undefined) { 
+			img.style.left = WIDTH * boxData.offset[0] + 'px'
+			img.style.top = HEIGHT * (1 - boxData.offset[1]) + 'px'
+		} else {
+			img.classList.add('full') 
+		}
 		img.src = PIC_PATH + pic + '.png'
 		picsDiv.appendChild(img)
 	}
@@ -228,14 +239,18 @@ function refreshStandardBox(boxData, destinationFrame) {
 // INVENTORY ••••••••••••••••••••••••••••••••••••••••••••••••••
 
 function refreshInventory() {
-	if (INVENTORY === undefined) { return }
+	console.log('a')
+	if (inventory === undefined) { return }
 	inventoryDiv.innerHTML = ''
 	for (let i in inventory) {
-		if (INVENTORY[i].state == 1) { makeInventoryItem(i) }
+		console.log('a')
+	
+		if (inventory[i].state == 1) { makeInventoryItem(i) }
 	}
 }
 
 function makeInventoryItem(id) {
+	console.log(id)
 	let item = document.createElement('div')
 	item.classList.add('inventory')
 	item.classList.add('box')
@@ -316,7 +331,7 @@ function cacheFrame(frame) {
 // GIFS ••••••••••••••••••••••••••••••••••••••••••••••••••
 function playGif(name, newFrame, delay, after = null) {
 	cacheFrame(newFrame)
-	processes++
+	locks++
 	gif.onload = () => {
 		get('movies').appendChild(gif)
 		gif.style.visibility = 'visible' 
@@ -324,7 +339,7 @@ function playGif(name, newFrame, delay, after = null) {
 			transitionTo(newFrame, 'none', true)
 			wait(delay / 2, () => {
 				gif.style.visibility = 'hidden'
-				processes--
+				locks--
 				if (after != null) { after() }
 			})})}
 	gif.src = GIF_PATH + name + '.gif'//'?a=' + Math.random() 
@@ -334,7 +349,7 @@ function playGif(name, newFrame, delay, after = null) {
 // SOUND ******************************************
 
 function playSound(name, volume=1, loop=false) {
-	let sound = new Audio(SOUND_PATH + (name.includes('.') ? name : name + '.mp3'))
+	let sound = new Audio(SOUND_PATH + name + (name.includes('.') ? '' : '.mp3'))
 	sound.volume = volume
 	sound.play()
 	return sound
