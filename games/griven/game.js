@@ -43,7 +43,7 @@ const keypadButtons = [
 const gameData = {
     title: 'Griven',
     startRoom: 'opening',
-    startFrame: 'B1',
+    startFrame: 'A1',
     extension: 'png',
     frameWidth: 1000,
     frameHeight: 750,
