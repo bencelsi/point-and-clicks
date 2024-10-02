@@ -26,7 +26,7 @@ const elevatorBoxes = [
     { pic: () => { return 'scratch/elevator' + s.floor }, offset: [.82, .97], scale: '6'},
     { pic: () => { return 'scratch/floor' + s.floor }, offset: [.471, .65], scale: '6', if: () => { return s.floor > 1 && s.floor < 10}}]
 
-const outerElevatorBox = { pic: () => { return  'scratch/elevator' + s.floor }, offset: [.275, .842], scale: '4'}
+const outerElevatorBox = { pic: () => { return  'scratch/elevator' + s.elevatorFloor }, offset: [.275, .842], scale: '4'}
 
 const keypadButtons = [
     { xy: [.16, .29, .68, .86], fn: () => { pushKeypad(0) }},
@@ -42,11 +42,9 @@ const keypadButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'cafe',
-    startFrame: 'A1',
+    startRoom: 'lobby', startFrame: 'C1',
     extension: 'png',
-    frameWidth: 1000,
-    frameHeight: 750,
+    frameWidth: 1000, frameHeight: 750,
     // customCursors: true,
     frames: {
         'opening': {
@@ -67,7 +65,7 @@ const gameData = {
             'A4': { left: 'A3', right: 'A1', forward: 'B4' },
             'A6': { back: 'A1', boxes: keypadButtons }, 
             'A7': { back: () => { return s.plumbingDoorOpen ? 'A1a' : 'A1' }, boxes: [
-                { pic: 'A7-coffee', xy: [.34, .44, .18, .4], fn: () => { s.coffee = 0; refreshInventory(); refreshCustomBoxes()},
+                { pic: 'coffee1', xy: [.34, .44, .18, .4], fn: () => { s.coffee = 0; refreshInventory(); refreshCustomBoxes()},
                     if: () => { return s.coffee == 1 }},
                 { xy: [.34, .4, .46, .52], fn: () => {
                     if (s.heaterLevel >= 0 && !s.valves[2] && s.valves[4] && s.pipe == 3) { alert('coffeeee') }}}]},
@@ -102,7 +100,9 @@ const gameData = {
             'A2b': { left: 'A1', forward: () => { playSound('elevatorDoor'); return 'hall/B3'}, boxes: elevatorBoxes },
             'A2c': { left: 'A1', forward: () => { playSound('elevatorDoor'); return 'top/A3'}, boxes: elevatorBoxes },
             'A3': { forward: 'A3a', back: () => { return s.floor === 1? 'A2a' : (s.floor === 10 ? 'A2c' : 'A2b') }},
-            'A3a': { back: () => { return s.floor === 1? 'A2a' : (s.floor === 10 ? 'A2c' : 'A2b') }}
+            'A3a': { back: () => { return s.floor === 1? 'A2a' : (s.floor === 10 ? 'A2c' : 'A2b') }, boxes: [
+                { pic: 'scratch/elevatorLightGreen', offset: [.47, .96]}
+            ]}
         },
         'hall': { //zhall
             'A1': { left: () => { hallTurnLeft(); return 'A5' },
@@ -344,7 +344,7 @@ const gameData = {
             'B5': { back: 'B1', boxes: [
                 { to: () => { playSound('drawer'); return 'B5a' }, xy: [.37, .52, .63, .78]}]},
             'B5a':{ back: () => { playSound('drawer'); return'B1' }, boxes: [
-                { pic: 'B5a-card', xy: [.03,.1,.5,.68], fn: () => { s.card = 0; refreshInventory(); refreshCustomBoxes() },
+                { pic: 'card2', xy: [.03,.1,.5,.68], fn: () => { s.card = 0; refreshInventory(); refreshCustomBoxes() },
                     if: () => { return s.card == 2 }},
                 { },
                 { pic: 'B5a-coffee', if: () => { return s.coffee == 2 }},
@@ -480,46 +480,38 @@ const gameData = {
 // non-saveable state
 let topFloorWaitId = 0
 
+let combo = []
 // TODO: store variants as separate var? some level of indirection beyond frame and image.
 
 // Saveable State
 const s = {
     // inventory:
-    smallKey: 1,
-    pipe: 1,
-    coffee: 1,
-    card: 1,
-    pig: 1,
-    goldKey: 1,
-
+    smallKey: 1, pipe: 1, coffee: 1, card: 1, pig: 1, goldKey: 1,
     // front desk:
     lightsOn: false, cabinetDown: false, drawers: [false, true, false, true],
     //clockroom:
     clockUnlocked: false,
-    
+    gears: [],
     //cafe
-    cafeUnlocked,
+    cafeUnlocked: false,
     currentSalad: 0,
     salads: [3, 3, 3, 3, 3],
-
     //plumbingroom:
     plumbingUnlocked: false,
     plumbingDoorOpen: false,
     valves: [false, true, true, true, true, true, 10],
     heaterLevel: 0,
-
+    // hall 
     hallPosition: 0,
     hallDirection: 0,
     floor: 1,
     elevatorFloor: 1,
-
+    circuits: [],
     //room
     fire: false,
     shower: 0,
 
     officeUnlocked: false,
-
-    combo: [],
 }
 
 const inventory = {
@@ -539,16 +531,14 @@ const inventory = {
 function changeDrawer(n) {
     s.drawers[n] = !s.drawers[n];
     if (s.drawers[0] && s.drawers[1] && s.drawers[2] && s.drawers[3]) {
-        s.lightsOn = false
-        s.cabinetDown = true
-    }
+        s.lightsOn = false; s.cabinetDown = true }
     refreshCustomBoxes()
 }
 
 function pushKeypad(n) {
     // playSound()
-    s.combo.push(n)
-    if (s.combo.length > 5) { s.combo.shift() }
+    combo.push(n)
+    if (combo.length > 5) { combo.shift() }
     if (room == 'pool') { if (checkCombo([3, 5, 2, 9, 9], 'A2a')) {
         s.clockUnlocked = true  }} 
     else if (room == 'cafe') { if (checkCombo([8, 7, 0, 1, 2], 'A1a')) {
@@ -558,7 +548,7 @@ function pushKeypad(n) {
 }
 
 function checkCombo(desired, destination) {
-    for (i in desired) { if (s.combo[i] != desired[i]) { return false } }
+    for (i in desired) { if (combo[i] != desired[i]) { return false } }
     playSound('doorOpen.wav'); transitionTo(destination, 'fade'); return true
 }
 
@@ -578,10 +568,7 @@ function hallTurnLogic() {
 
 function setElevatorFloor(floor) {
     playSound('elevatorBell')
-    s.elevatorFloor = floor
-    s.floor = floor
-    console.log(frame)
+    s.elevatorFloor = s.floor = floor
     let newFrame = s.elevatorFloor === 1 ? 'A2a' : (s.elevatorFloor === 10 ? 'A2c' : 'A2b')
-    console.log(newFrame)
-    transitionTo(newFrame, 'fade'); console.log('c')
+    transitionTo(newFrame, 'fade')
 }
