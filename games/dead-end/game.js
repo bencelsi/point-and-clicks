@@ -114,16 +114,11 @@ const gameData = {
 
 const s = {
 	power: true,
+	key: 0,
 	inventory: {
-		key: {
-			state: 0,
-			img: 'burger',
-			targetId: 'frontDoor',
-			targetAction: () => {
-				inventory['key'].state = 2
-				refreshCustomBoxes()
-				refreshInventory()
-			}
+		key: { img: 'burger', targets: [
+				{ id: 'frontDoor', fn: () => { inventory['key'].state = 2; refreshCustomBoxes(); refreshInventory() }}
+			],
 		}
 	}
 }

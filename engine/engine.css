@@ -108,10 +108,11 @@ body {
 .fullWidth {
 	width: 100%; height: auto
 }
+
 .box {
 	z-index: 10;
 	position: absolute;
-	/* border: 1px pink solid; */
+	border: 1px blueviolet solid;
 }
 
 .gif {

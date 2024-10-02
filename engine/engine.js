@@ -9,10 +9,9 @@
 // tool to rename image files & frames in js
 // gifs as frames option
 // no boxes while gif plays... 
-// TODO - how to cache when left/right returns fn? framesToCache, or...
+// TODO - how to cache when left/right returns fn? framesToCache, or... left: {to: 'A1', fn: ()=> {...}}
 // TODO - cache pics/gifs
-
-
+ 
 get("favicon").href = GAME_FOLDER + "/favicon.ico"
 const FRAME_PATH = GAME_FOLDER + '/assets/frames/'
 const GIF_PATH = GAME_FOLDER + '/assets/gifs/'
@@ -22,19 +21,17 @@ const INVENTORY_PATH = GAME_FOLDER + '/assets/inventory/'
 
 let locks = 0 // whether or not to listen to user input
 
-// DEPENDENT ON GAME DATA
-
 window.onload = waitForGameData
 // hacky way to wait for gameData & s (state) to load
 function waitForGameData() {
 	try { gameData; s; init() } 
-	catch (e) { console.log('waiting!'); wait(500, waitForGameData) }
+	catch (e) { wait(100, waitForGameData) }
 }
 
 // DOM globals:
 let standardBoxesDiv, customBoxesDiv, picsDiv, cacheDiv, transitionsDiv, imgDiv, inventoryDiv, gif 
 // Constants:
-let CURSOR_PATH, WIDTH, HEIGHT, SIDE_SPEED, FADE_SPEED, inventory
+let CURSOR_PATH, WIDTH, HEIGHT, SIDE_SPEED, FADE_SPEED
 
 function init() {
 	document.title = location.hostname === "" ? "." + gameData.title : gameData.title
@@ -55,7 +52,6 @@ function init() {
 	frame = gameData.startFrame
 	roomData = gameData.frames[room]
 	frameData = roomData[frame]
-	inventory = s.inventory
 	
 	// constants
 	CURSOR_PATH = gameData.customCursors === true ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
@@ -69,7 +65,7 @@ function init() {
 	@keyframes leftIn { from { transform: translateX(0) } to { transform: translateX(${WIDTH}px) }}
 	@keyframes leftOut { from { transform: translateX(0) }}
 	@keyframes rightIn { from { transform: translateX(0) } to { transform: translateX(-${WIDTH}px) }}
-	@keyframes rightOut {  from { transform: translateX(0) }}
+	@keyframes rightOut { from { transform: translateX(0) }}
 	@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 }}
 	@keyframes fadeOut { from { opacity: 1 }}
 	.leftIn { animation:leftIn ${SIDE_SPEED}s }
@@ -107,8 +103,6 @@ function setupStandardBoxes() {
 function transitionTo(newFrame, type, override = false) {
 	console.log(newFrame)
 	if (newFrame == null || (locks > 0 && !override)) { return }
-	console.log('b')
-	
 	locks++
 	setFrame(newFrame)
 	if (frameData === undefined) {
@@ -169,6 +163,7 @@ function refreshCustomBoxes() {
 
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
+	console.log(boxData)
 	let transition = boxData.transition == undefined ? 'fade' : boxData.transition
 	let fn = boxData.fn
 	if (boxData.to !== undefined && boxData.fn !== undefined) {
@@ -177,22 +172,8 @@ function makeCustomBox(boxData) {
 		fn = () => { transitionTo(simpleEval(boxData.to), transition) }
 	}
 	let pic = simpleEval(boxData.pic)
-	if (pic != null) {
-		let img = document.createElement('img')
-		img.classList.add('picBox')
-		if (boxData.class != null) { img.classList.add(boxData.class) }
-		if (boxData.scale != undefined) {
-			img.style.width = boxData.scale + '%'
-			img.style.height = 'auto'
-		}
-		if (boxData.offset !== undefined) { 
-			img.style.left = WIDTH * boxData.offset[0] + 'px'
-			img.style.top = HEIGHT * (1 - boxData.offset[1]) + 'px'
-		} else {
-			img.classList.add('full') 
-		}
-		img.src = PIC_PATH + pic + (pic.includes('.') ? '' : '.png')
-		picsDiv.appendChild(img)
+	if (pic != null) { // TODO - combine with makeBox()
+		makePicBox(pic, boxData)
 	}
 	let xy = simpleEval(boxData.xy)
 	if (xy != null) {
@@ -201,6 +182,25 @@ function makeCustomBox(boxData) {
 		let box = makeBox(xy, cursor, fn, id)
 		customBoxesDiv.appendChild(box)
 	}
+}
+
+function makePicBox(pic, boxData){
+	let img = document.createElement('img')
+	img.classList.add('picBox')
+	if (boxData.style != null) { img.style = boxData.style }
+	if (boxData.class != null) { img.classList.add(boxData.class) }
+	if (boxData.scale != undefined) {
+		img.style.width = boxData.scale + '%'
+		img.style.height = 'auto'
+	}
+	if (boxData.offset !== undefined) { 
+		img.style.left = WIDTH * boxData.offset[0] + 'px'
+		img.style.top = HEIGHT * (1 - boxData.offset[1]) + 'px'
+	} else {
+		img.classList.add('full') 
+	}
+	img.src = PIC_PATH + pic + (pic.includes('.') ? '' : '.png')
+	picsDiv.appendChild(img)
 }
 
 function makeBox(xy, cursor, fn = null, id = null) {
@@ -240,14 +240,9 @@ function refreshStandardBox(boxData, destinationFrame) {
 // INVENTORY ••••••••••••••••••••••••••••••••••••••••••••••••••
 
 function refreshInventory() {
-	console.log('a')
 	if (inventory === undefined) { return }
 	inventoryDiv.innerHTML = ''
-	for (let i in inventory) {
-		console.log('a')
-	
-		if (inventory[i].state == 1) { makeInventoryItem(i) }
-	}
+	Object.keys(inventory).forEach(key => { if (s[key] == 0) { makeInventoryItem(key) }})
 }
 
 function makeInventoryItem(id) {
@@ -260,12 +255,12 @@ function makeInventoryItem(id) {
 	let img = document.createElement('img')
 	img.src = INVENTORY_PATH + inventory[id].img + '.png'
 	item.appendChild(img)
-	makeDraggable(item, inventory[id].targetId, inventory[id].targetAction)
+	makeDraggable(item, inventory[id].targets)
 	inventoryDiv.appendChild(item)
 }
 
 // Make given inventory box draggable, execute action if dropped on targetId
-function makeDraggable(item, targetId, targetAction) {
+function makeDraggable(item, targets) {
 	setCursor(item, 'open')
 	item.onmousedown = function(event) {
 		event.preventDefault()
@@ -283,15 +278,25 @@ function makeDraggable(item, targetId, targetAction) {
 			document.onmousemove = null
 			document.onmouseup = null
 			event.preventDefault()
-			let target = get(targetId)
-			if (target != null && isCollide(item, target)){
-				targetAction()
-			} else {
-				item.style.left = itemX
-				item.style.top = itemY
-				document.onmousemove = null
-				setCursor(item, 'open')
+			for (let i in targets) {
+				console.log(targets)
+				if (targets[i].frame != null) {
+					console.log('frame...')
+					let roomFrame = targets[i].frame.split('/')
+					if (room == roomFrame[0] && frame == roomFrame[1]) {
+						console.log('ok...')
+						targets[i].fn(); return
+					}
+				}
+				let targetObject = get(targets[i].id)
+				if (targetObject != null && isCollide(item, targetObject)) {
+					targets[i].fn(); return
+				}
 			}
+			item.style.left = itemX
+			item.style.top = itemY
+			document.onmousemove = null
+			setCursor(item, 'open')
 		}
 	}
 }
@@ -304,9 +309,7 @@ function cacheResources() {
 	cacheFrame(frameData.right)
 	cacheFrame(frameData.forward)
 	cacheFrame(frameData.back)
-	for (i in frameData.boxes ) {
-		cacheFrame(frameData.boxes[i].to)
-	}
+	for (i in frameData.boxes) { cacheFrame(frameData.boxes[i].to) }
 }
 
 function cacheFrame(frame) {
@@ -381,13 +384,9 @@ function setCursor(element, cursor) {
 }
 
 function launchFullScreen(element) {
-	if(element.requestFullScreen) {
-	   element.requestFullScreen()
-	} else if(element.mozRequestFullScreen) {
-	   element.mozRequestFullScreen()
-	} else if(element.webkitRequestFullScreen) {
-	   element.webkitRequestFullScreen()
-	}
+	if(element.requestFullScreen) { element.requestFullScreen() } 
+	else if(element.mozRequestFullScreen) { element.mozRequestFullScreen() }
+	else if(element.webkitRequestFullScreen) { element.webkitRequestFullScreen() }
 }
 
 // If x is a function, returns the result of evaluating x, otherwise returns x

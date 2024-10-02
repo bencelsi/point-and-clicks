@@ -17,5 +17,5 @@ function addScript(src) {
 
 // shared functions
 function wait(duration, then) {
-	setTimeout(() => { then() }, duration)
+	return setTimeout(() => { then() }, duration)
 }
