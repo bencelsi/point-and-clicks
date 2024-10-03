@@ -2,13 +2,15 @@
 // fix cursors
 // change pool image orientations
 // add music
-// better way to set room... like: forward: {'cafe' : 'A1'}... or just 'lobby-A1'
 // fn/to are redundant?
 // idea: instead of lobby/A1, try assigning numbers... so, lB1,cA2, etc... for ease of use
 // TODO: you can break halldirections by clicking repeatedly - should block on locks
 // TODO: fix elevator num framing
 // TODO: switch grandup gif
 // TODO: shower gif, clockroom gif
+// TODO: fix inventory sizing
+// TODO: convert & add sound effects
+
 
 const elevatorBoxes = [
     { xy: [.81, .84, .06, .1], fn: () => { setElevatorFloor(1)} },
@@ -42,7 +44,7 @@ const keypadButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'lobby', startFrame: 'C1',
+    startRoom: 'opening', startFrame: 'A1',
     extension: 'png',
     frameWidth: 1000, frameHeight: 750,
     // customCursors: true,
@@ -108,7 +110,7 @@ const gameData = {
             'A1': { left: () => { hallTurnLeft(); return 'A5' },
                 right: () => { hallTurnRight(); return 'A5' },
                 forward: () => { hallMoveForward(); return 'A2' }},
-            'A2': { 
+            'A2': {
                 left: () => { hallTurnLeft(); 
                     return s.hallPosition == 2 ? 'A7' : (s.hallPosition == 6 ? 'A9' : 'A5')},
                 right: () => { hallTurnRight(); 
@@ -155,11 +157,10 @@ const gameData = {
                 right: () => { hallTurnRight(); return 'A2' }},
             'A10': {
                 boxes: [
-                    { xy: [.5, .72, .2, .35], if: () => { return s.floor == 2 && s.hallPosition == 7 && s.hallDirection == 1},
-                    to: () => { playSound('doorOpen.wav'); return 'A5a' }}
-                ],
-                back: 'A5'
-            },
+                    { xy: [.5, .72, .2, .35], fn: () => { makeEphemeralBox('doorHandle2', 1000); 
+                        if (s.floor == 2 && s.hallPosition == 7 && s.hallDirection == 1) {
+                            playSound('doorOpen.wav'); transition('A5a' , 'fade') }}}],
+                back: 'A5' },
             'B1': { left: 'B4', right: 'B2', boxes: [ outerElevatorBox,
                 { to: () => { playSound('elevatorDoor');
                     return s.floor === s.elevatorFloor ? 'B1b' : 'B1a' }, xy: [.28, .31, .48, .52] }]},
@@ -273,7 +274,12 @@ const gameData = {
             'I1': { left: 'I4', right: 'I2', boxes: [
                 { to: 'I5', xy: [.57, .8, .53, .68] }]},
             'I2': { left: 'I1', right: 'I3', boxes: [
-                { xy: [.39, .43, .53, .64], pic: 'toiletHandle', fn: () => { alert('flush') }}]},
+                { xy: [.39, .43, .53, .64], fn: () => { 
+                    playSound(s.valves[0] ? '' : '')
+                    makeEphemeralBox('toiletHandle', 1000); 
+                    if (s.valves[0] && s.pipe == 2 && s.valves[1]) {
+                        heaterLevel = Math.min(100, heaterLevel + 10) }
+                 }}]},
             'I3': { left: 'I2', right: 'I4', forward: 'H3' },
             'I4': { left: 'I3', right: 'I1' },
             'I5': { back: 'I1' }
@@ -295,7 +301,7 @@ const gameData = {
             'A6': { back: 'A2', boxes: keypadButtons },
             'A7': { back: 'A4', boxes: [
                 { xy: [.48, .55, .91, 1], fn: () => { s.valves[0] = !s.valves[0]; refreshCustomBoxes()},
-                    pic: () => { return s.valves[0] ? 'valve0s' : null }}]},
+                    pic: () => { return s.valves[0] ? 'valve0' : null }}]},
             'B1': { left: 'B4', right: 'B2' },
             'B2': { left: 'B1', right: 'B3', 
                 forward: () => { playGif('ladderUp', 'C2', 10 * 150) }},
@@ -304,8 +310,8 @@ const gameData = {
             'C1': { left: 'C4', right: 'C2', boxes: [
                 { to: 'C5', xy: [.48,.6,.22,.3] }]},
             'C2': { left: 'C1', right: 'C3', boxes: [
-                { pic: 'C2-gear0' }, { pic: 'C2-gear2' }, { pic: 'C2-gear4'}, { pic: 'C2-gear6'},
-                { pic: 'C2-gear1' }, { pic: 'C2-gear3' }, { pic: 'C2-gear5' }]},
+                { pic: 'gear0' }, { pic: 'gear2' }, { pic: 'gear4' }, { pic: 'gear6'}, 
+                { pic: 'gear1' }, { pic: 'gear3' }, { pic: 'gear5' }]},
             'C3': { left: 'C2', right: 'C4', forward: 'C6' },
             'C4': { left: 'C3', right: 'C1',
                 forward: () => { playGif('ladderDown', 'B4', 10 * 150) }},

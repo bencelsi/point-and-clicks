@@ -137,7 +137,7 @@ function createTransition(type) {
 	transitionsDiv.appendChild(transition)
 }
 
-// CUSTOM BOXES ******************************************
+// BOXES ******************************************
 function refreshCustomBoxes() {
 	picsDiv.innerHTML = ''; customBoxesDiv.innerHTML = ''
 	let boxes = roomData[frame].boxes
@@ -161,6 +161,14 @@ function refreshCustomBoxes() {
 // id:				string			no				none
 // transition		string			no				'fade'
 
+function makeEphemeralBox(img, life) { // TODO: ephemeral hitbox too
+	if (get(img) != null) { return }
+	let ephemeralBox = makePicBox(img, img)
+	wait(life, () => {
+		picsDiv.removeChild(get(img))
+	})
+}
+
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
 	console.log(boxData)
@@ -172,9 +180,7 @@ function makeCustomBox(boxData) {
 		fn = () => { transitionTo(simpleEval(boxData.to), transition) }
 	}
 	let pic = simpleEval(boxData.pic)
-	if (pic != null) { // TODO - combine with makeBox()
-		makePicBox(pic, boxData)
-	}
+	if (pic != null) { makePicBox(pic, boxData.id, boxData.offset, boxData.style, boxData.class, boxData.scale) }
 	let xy = simpleEval(boxData.xy)
 	if (xy != null) {
 		let cursor = boxData.cursor === undefined ? 'forward' : simpleEval(boxData.cursor)
@@ -184,18 +190,21 @@ function makeCustomBox(boxData) {
 	}
 }
 
-function makePicBox(pic, boxData){
+// todo - consolidate into single 'makeBox' method.
+
+function makePicBox(pic, id, offset = null, style = null, className = null, scale = null) {
 	let img = document.createElement('img')
 	img.classList.add('picBox')
-	if (boxData.style != null) { img.style = boxData.style }
-	if (boxData.class != null) { img.classList.add(boxData.class) }
-	if (boxData.scale != undefined) {
-		img.style.width = boxData.scale + '%'
+	if (id != null) { img.id = id }
+	if (style != null) { img.style = style }
+	if (className != null) { img.classList.add(className) }
+	if (scale != null) {
+		img.style.width = scale + '%'
 		img.style.height = 'auto'
 	}
-	if (boxData.offset !== undefined) { 
-		img.style.left = WIDTH * boxData.offset[0] + 'px'
-		img.style.top = HEIGHT * (1 - boxData.offset[1]) + 'px'
+	if (offset != null) { 
+		img.style.left = WIDTH * offset[0] + 'px'
+		img.style.top = HEIGHT * (1 - offset[1]) + 'px'
 	} else {
 		img.classList.add('full') 
 	}
@@ -301,8 +310,26 @@ function makeDraggable(item, targets) {
 	}
 }
 
-// CACHING
 
+// GIFS ••••••••••••••••••••••••••••••••••••••••••••••••••
+function playGif(name, newFrame, delay, after = null) {
+	cacheFrame(newFrame)
+	locks++
+	gif.onload = () => {
+		get('movies').appendChild(gif)
+		gif.style.visibility = 'visible' 
+		wait(delay / 2, () => {
+			transitionTo(newFrame, 'none', true)
+			wait(delay / 2, () => {
+				gif.style.visibility = 'hidden'
+				locks--
+				if (after != null) { after() }
+			})})}
+	gif.src = GIF_PATH + name + '.gif'//'?a=' + Math.random() 
+	// todo - use new object? so it 	
+}
+
+// CACHING
 let cacheSet = new Set()
 function cacheResources() {
 	cacheFrame(frameData.left) //these may be null
@@ -332,23 +359,6 @@ function cacheFrame(frame) {
 	cacheSet.add(src)
 }
 
-// GIFS ••••••••••••••••••••••••••••••••••••••••••••••••••
-function playGif(name, newFrame, delay, after = null) {
-	cacheFrame(newFrame)
-	locks++
-	gif.onload = () => {
-		get('movies').appendChild(gif)
-		gif.style.visibility = 'visible' 
-		wait(delay / 2, () => {
-			transitionTo(newFrame, 'none', true)
-			wait(delay / 2, () => {
-				gif.style.visibility = 'hidden'
-				locks--
-				if (after != null) { after() }
-			})})}
-	gif.src = GIF_PATH + name + '.gif'//'?a=' + Math.random() 
-	// todo - use new object? so it 	
-}
 
 // SOUND ******************************************
 
