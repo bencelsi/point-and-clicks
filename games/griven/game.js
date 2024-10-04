@@ -44,7 +44,7 @@ const keypadButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'opening', startFrame: 'A1',
+    startRoom: 'pool', startFrame: 'C1',
     extension: 'png',
     frameWidth: 1000, frameHeight: 750,
     // customCursors: true,
@@ -307,16 +307,20 @@ const gameData = {
                 forward: () => { playGif('ladderUp', 'C2', 10 * 150) }},
             'B3': { left: 'B2', right: 'B4' },
             'B4': { left: 'B3', right: 'B1', forward: 'A4' },
-            'C1': { left: 'C4', right: 'C2', boxes: [
-                { to: 'C5', xy: [.48,.6,.22,.3] }]},
-            'C2': { left: 'C1', right: 'C3', boxes: [
+            },
+        'clockroom' : {
+            'A1': { left: 'A4', right: 'A2',
+                forward: () => { playGif('ladderDown', 'pool/B4', 10 * 150) }},
+            'A2': { left: 'A4', right: 'A2', boxes: [
+                { xy: [.29, .34, .42, .48], fn: () => makeEphemeralBox('lever', 1000)},
+                { to: 'A5', xy: [.48,.6,.22,.3] }]},
+            'A3': { left: 'A1', right: 'A3', boxes: [
                 { pic: 'gear0' }, { pic: 'gear2' }, { pic: 'gear4' }, { pic: 'gear6'}, 
                 { pic: 'gear1' }, { pic: 'gear3' }, { pic: 'gear5' }]},
-            'C3': { left: 'C2', right: 'C4', forward: 'C6' },
-            'C4': { left: 'C3', right: 'C1',
-                forward: () => { playGif('ladderDown', 'B4', 10 * 150) }},
-            'C5': { back: 'C1' },
-            'C6': { back: 'C3' }
+            'A4': { left: 'A2', right: 'A4', forward: () => { extension = 'gif'; return 'A6m' }},
+            'A5': { back: 'A1' },
+            'A6': { back: 'A3' },
+            'A6m': { back: 'A3' }
         },
         'stairs': { //zstairs
             'A1': { left: 'A4', right: 'A2', 
@@ -350,7 +354,7 @@ const gameData = {
             'B5': { back: 'B1', boxes: [
                 { to: () => { playSound('drawer'); return 'B5a' }, xy: [.37, .52, .63, .78]}]},
             'B5a':{ back: () => { playSound('drawer'); return'B1' }, boxes: [
-                { pic: 'card2', xy: [.03,.1,.5,.68], fn: () => { s.card = 0; refreshInventory(); refreshCustomBoxes() },
+                { pic: 'card2', xy: [.03,.1,.5,.68], fn: () => { s.card = 0; refresh() },
                     if: () => { return s.card == 2 }},
                 { },
                 { pic: 'B5a-coffee', if: () => { return s.coffee == 2 }},
@@ -383,10 +387,10 @@ const gameData = {
                 { xy: [.88, .95, .71, .8], pic: () => { return s.valves[5] ? 'valve5' : null },
                     fn: () => { s.valves[5] = !s.valves[5]; refreshCustomBoxes() }}, 
                 { xy: [.25, .5, .86, 1], pic: () => { return s.pipe == 3 ? 'pipe3' : null }, id: 'pipe3',
-                    fn: () => { if (s.pipe == 3) { s.pipe = 0; refreshCustomBoxes(); refreshInventory() }}}]},
+                    fn: () => { if (s.pipe == 3) { s.pipe = 0; refreshCustomBoxes(); refresh() }}}]},
             'A4': { left: 'A3', right: 'A1', boxes: 
                 [{ to: 'A5', xy: [.15, .3, .08, .9]},
-                { xy: [.6,.7,.25,.32], fn: () => { s.pipe = 0; refreshCustomBoxes(); refreshInventory()},
+                { xy: [.6,.7,.25,.32], fn: () => { s.pipe = 0; refreshCustomBoxes(); refresh()},
                 pic: 'pipe1', if: () => { return s.pipe == 1 }}]},
             'A5': { forward: () => { playSound('doorClose.wav'); return 'cafe/A3' }, back: 'A4' },
             'B1': { left: 'B4', right: 'B2', boxes: [
@@ -395,7 +399,7 @@ const gameData = {
                 { xy: [.64, .69, .43, .5], pic: () => { return s.valves[1] ? 'valve1' : null }, 
                     fn: () => { s.valves[1] = !s.valves[1]; refreshCustomBoxes() }},
                 { xy: [.38, .57, .6, .71], pic: () => { return s.pipe == 2 ? 'pipe2' : null }, id: 'pipe2',
-                    fn: () => { if (s.pipe == 2) { s.pipe = 0 }; refreshCustomBoxes(); refreshInventory() }},
+                    fn: () => { if (s.pipe == 2) { s.pipe = 0 }; refreshCustomBoxes(); refresh() }},
                 { pic: 'scratch/heaterMeter', offset: [.22, .3], scale: 4 }
             ]},
             'B3': { left: 'B2', right: 'B4', boxes: [
@@ -437,7 +441,7 @@ const gameData = {
             'C3': { left: 'C2', right: 'C4', forward: 'B3' },
             'C4': { left: 'C3', right: 'C1', boxes: [
                 { to: 'C6', xy: [.41, .57, .71, .93] },
-                { if: () => { return s.pig == 1 }, xy: [.25, .35, .4, .53], fn: () => { s.pig = 0; refreshCustomBoxes(); refreshInventory() }, },
+                { if: () => { return s.pig == 1 }, xy: [.25, .35, .4, .53], fn: () => { s.pig = 0; refresh() }, },
                 { if: () => { return s.pig == 1 }, pic: 'pig' }]},
             'C5': { back: 'C2'},
             'C6': { back: 'C4' },
@@ -497,6 +501,7 @@ const s = {
     lightsOn: false, cabinetDown: false, drawers: [false, true, false, true],
     //clockroom:
     clockUnlocked: false,
+    jesusCount: 0,
     gears: [],
     //cafe
     cafeUnlocked: false,
@@ -522,14 +527,14 @@ const s = {
 
 const inventory = {
     smallKey: { img: 'smallkeyFree', targets: [{ id: 'keyhole', 
-        fn: () => { s.smallKey = 2; refreshInventory(); transitionTo('D3', 'fade'); }}]},
+        fn: () => { s.smallKey = 2; refresh(); transitionTo('D3', 'fade'); }}]},
     pipe: { img: 'pipeFree', targets: [
-        { id: 'pipe2', fn: () => { s.pipe = 2; refreshCustomBoxes(); refreshInventory()} },
-        { id: 'pipe3', fn: () => { s.pipe = 3; refreshCustomBoxes(); refreshInventory()} }]},
-    coffee: { img: 'coffeeFree', targets: [{ frame: 'stairs/B5a', fn: () => { s.coffee = 2; refreshInventory(); refreshCustomBoxes() }}] },
+        { id: 'pipe2', fn: () => { s.pipe = 2; refresh()} },
+        { id: 'pipe3', fn: () => { s.pipe = 3; refresh()} }]},
+    coffee: { img: 'coffeeFree', targets: [{ frame: 'stairs/B5a', fn: () => { s.coffee = 2; refresh() }}] },
     card: { img: 'cardFree' },
     pig: { img: 'pigFree', targets: [
-        { id: 'pigWindow', fn: () => { s.pig = 2; s.goldKey = 2; refreshInventory() }},
+        { id: 'pigWindow', fn: () => { s.pig = 2; s.goldKey = 2; refresh() }},
         { frames: ['stairs/A1', 'stairs/A2', 'stairs/A3', 'stairs/A4'], fn: () => { s.pig = 3; s.goldKey = 3; refreshInventory() }}]},
     goldKey: { state: 1, img: 'goldKeyFree', targets: [{ id: 'goldKeyhole', fn: () => { s.goldKey = 4; refreshInventory()}}] }
 }

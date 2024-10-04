@@ -138,6 +138,10 @@ function createTransition(type) {
 }
 
 // BOXES ******************************************
+function refresh() {
+	refreshCustomBoxes(); refreshStandardBoxes(); refreshInventory()
+}
+
 function refreshCustomBoxes() {
 	picsDiv.innerHTML = ''; customBoxesDiv.innerHTML = ''
 	let boxes = roomData[frame].boxes
@@ -386,6 +390,8 @@ function setVolume(n, volume, speed) {
 */
 
 // HELPERS ******************************************	
+
+function parseFrame() {} // optional /, optional .
 
 function get(id) { return document.getElementById(id) }
 
