@@ -1,13 +1,7 @@
-// TODO - fluent interface for gifs, pics, boxes.
-// Ideal: smooth transition between standard box, custom, pic - all on 1 map
 // Idea: you move around, but scary creature keeps following you
-// understand let vs var etc.
-// Add 'gameState' to data
-// freeze game data?
-// Add 'menu' logic
+// TODO: Add 'menu' logic
 // Make rooms optional.
 // tool to rename image files & frames in js
-// gifs as frames option
 // no boxes while gif plays... 
 // TODO - how to cache when left/right returns fn? framesToCache, or... left: {to: 'A1', fn: ()=> {...}}
 // TODO - cache pics/gifs
@@ -50,8 +44,6 @@ function init() {
 	extension = gameData.extension
 	room = gameData.startRoom
 	frame = gameData.startFrame
-	roomData = gameData.frames[room]
-	frameData = roomData[frame]
 	
 	// constants
 	CURSOR_PATH = gameData.customCursors === true ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
@@ -104,22 +96,29 @@ function transitionTo(newFrame, type, override = false) {
 	console.log(newFrame)
 	if (newFrame == null || (locks > 0 && !override)) { return }
 	locks++
-	setFrame(newFrame)
-	if (frameData === undefined) {
-		let roomFrame = frame.split("/")
-		setRoom(roomFrame[0])
-		setFrame(roomFrame[1])
-	}
+	
 	if (type != 'none') { createTransition(type + 'Out') }
-	imgDiv.src = FRAME_PATH + room + '/' + frame + '.' + extension
-	refreshStandardBoxes()
+	[frame, newRoom, newExtension] = parseFrame(newFrame)
+	if (newRoom != null) { room = newRoom }
+	
+	let frameData = gameData.rooms[room][frame]
+	let frameImg
+	if (frameData.alt != null && frameData.alt.if()) {
+		frameImg = frameData.alt.name //
+	} else {
+		frameImg = frame + '.' + (newExtension == null ? extension : newExtension)
+	}
+
+	imgDiv.src = FRAME_PATH + room + '/' + frameImg
+	console.log(frameImg)
+	refreshStandardBoxes(frameData)
 	refreshCustomBoxes()
 	if (type != 'none') { createTransition(type + 'In') }
 	delay = 1000 * (type === 'none' ? 0 : SIDE_SPEED)
 	 // if we wait full fade speed, it makes moving forward annoying.
 	wait(delay, () => {
 		transitionsDiv.innerHTML = ''
-		cacheResources()
+		cacheResources(frameData)
 		locks--
 	})
 }
@@ -144,7 +143,7 @@ function refresh() {
 
 function refreshCustomBoxes() {
 	picsDiv.innerHTML = ''; customBoxesDiv.innerHTML = ''
-	let boxes = roomData[frame].boxes
+	let boxes = gameData.rooms[room][frame].boxes
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
 			let boxData = boxes[i]
@@ -154,23 +153,12 @@ function refreshCustomBoxes() {
 	}
 }
 
-// custom box params:
-//					type			required?		default			desc	
-// xy			[]				yes
-// to: 				string			no				none 			equivalent onclick: () => {transition(to, 'fade)} 
-// fn: 		function		no				none			
-// if:		function		no				true			
-// cursor:			string			no				none
-// img:				string			no				none
-// id:				string			no				none
-// transition		string			no				'fade'
-
 function makeEphemeralBox(img, life) { // TODO: ephemeral hitbox too
 	if (get(img) != null) { return }
 	let ephemeralBox = makePicBox(img, img)
 	wait(life, () => {
-		picsDiv.removeChild(get(img))
-	})
+		let toRemove = get(img)
+		if (toRemove != null) { picsDiv.removeChild(toRemove) }})
 }
 
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
@@ -232,12 +220,12 @@ function makeBox(xy, cursor, fn = null, id = null) {
 
 // STANDARD BOXES ******************************************
 
-function refreshStandardBoxes() {
-	if (roomData[frame] === undefined) { return }
-	refreshStandardBox(standardBoxes.left, roomData[frame].left)
-	refreshStandardBox(standardBoxes.right, roomData[frame].right)
-	refreshStandardBox(standardBoxes.forward, roomData[frame].forward)
-	refreshStandardBox(standardBoxes.back, roomData[frame].back)
+function refreshStandardBoxes(frameData) {
+	if (frameData == null) { return }
+	refreshStandardBox(standardBoxes.left, frameData.left)
+	refreshStandardBox(standardBoxes.right, frameData.right)
+	refreshStandardBox(standardBoxes.forward, frameData.forward)
+	refreshStandardBox(standardBoxes.back, frameData.back)
 }
 
 function refreshStandardBox(boxData, destinationFrame) {
@@ -292,19 +280,12 @@ function makeDraggable(item, targets) {
 			document.onmouseup = null
 			event.preventDefault()
 			for (let i in targets) {
-				console.log(targets)
 				if (targets[i].frame != null) {
-					console.log('frame...')
-					let roomFrame = targets[i].frame.split('/')
-					if (room == roomFrame[0] && frame == roomFrame[1]) {
-						console.log('ok...')
-						targets[i].fn(); return
-					}
+					let parsed = parseFrame(targets[i].frame)
+					if (room == parsed[1] && frame == parsed[0]) { targets[i].fn(); return }
 				}
-				let targetObject = get(targets[i].id)
-				if (targetObject != null && isCollide(item, targetObject)) {
-					targets[i].fn(); return
-				}
+				let targetObj = get(targets[i].id)
+				if (targetObj != null && isCollide(item, targetObj)) { targets[i].fn(); return }
 			}
 			item.style.left = itemX
 			item.style.top = itemY
@@ -317,7 +298,7 @@ function makeDraggable(item, targets) {
 
 // GIFS ••••••••••••••••••••••••••••••••••••••••••••••••••
 function playGif(name, newFrame, delay, after = null) {
-	cacheFrame(newFrame)
+	//cacheFrame(gameData.rooms[room][newFrame]) //todo - parse here
 	locks++
 	gif.onload = () => {
 		get('movies').appendChild(gif)
@@ -335,7 +316,7 @@ function playGif(name, newFrame, delay, after = null) {
 
 // CACHING
 let cacheSet = new Set()
-function cacheResources() {
+function cacheResources(frameData) {
 	cacheFrame(frameData.left) //these may be null
 	cacheFrame(frameData.right)
 	cacheFrame(frameData.forward)
@@ -346,7 +327,7 @@ function cacheResources() {
 function cacheFrame(frame) {
 	if (frame == null || frame instanceof Function) { return }
 	let src
-	if (roomData[frame] === undefined) {
+	if (gameData.rooms[room][frame] === undefined) {
 		src = FRAME_PATH + frame + '.' + extension
 	} else {
 		src = FRAME_PATH + room  + '/' + frame + '.' + extension
@@ -391,7 +372,19 @@ function setVolume(n, volume, speed) {
 
 // HELPERS ******************************************	
 
-function parseFrame() {} // optional /, optional .
+function parseFrame(frame) {
+	let room = null
+	let extension = null
+	if (frame.includes('/')) {
+		let roomFrame = frame.split('/')
+		room = roomFrame[0]; frame = roomFrame[1]
+	} 
+	if (frame.includes('.')) {
+		let frameExtension = frame.split('/')
+		frame = frameExtension[0]; extension = frameExtension[1]
+	} 
+	return [frame, room, extension]
+}
 
 function get(id) { return document.getElementById(id) }
 
@@ -412,15 +405,4 @@ function simpleEval(x) { return (x instanceof Function) ? x() : x }
 function isCollide(a, b) {
 	return !(a.y + a.height < b.y || a.y > b.y + b.height ||
 		a.x + a.width < b.x || a.x > b.x + b.width)
-}
-
-function setFrame(newFrame) {
-	frame = newFrame
-	frameData = roomData[frame]
-}
-
-function setRoom(newRoom, newExtension = extension) {
-	room = newRoom;
-	extension = newExtension
-	roomData = gameData.frames[room]
 }

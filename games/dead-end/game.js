@@ -56,7 +56,7 @@ const gameData = {
 								inventory['key'].state = 3
 								refreshCustomBoxes() 
 							} else if (inventory['key'].state == 3) {
-								setRoom('B', 'jpeg'); transitionTo('1a', 'fade') 
+								extension = 'jpeg'; transitionTo('B/1a', 'fade') 
 							}
 						}
 					}]
@@ -74,7 +74,7 @@ const gameData = {
 						fn: () => { inventory['key'].state = 1; refreshCustomBoxes(); refreshInventory() }},
 					{ 	if: () => { return inventory['key'].state == 0 },	
 						pic: 'x12' }]},
-			'3i': { forward: () => { setRoom('B', 'jpeg'); return '1a' }},
+			'3i': { forward: () => { extension = 'jpeg'; return 'B/1a' }},
 		},
 		B: {
 			'1a': { left: '1d', right: '1b', forward: '2a' },
