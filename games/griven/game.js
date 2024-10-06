@@ -1,17 +1,24 @@
-// TODO: fix cursor alignment
-// TODO: change pool image orientations
 // TODO: add music
+// TODO: Steam puzzle
+// TODO: Salad puzzle
+// TODO: Clock puzzle
+// TODO: Clockhand rotation
+// TODO: Fix gifs
+// TODO: fix cursor alignment
 // TODO: you can break halldirections by clicking repeatedly - should block on locks
 // TODO: fix elevator num framing
-// TODO: switch grandup gif
 // TODO: compress all images
 // TODO: fix inventory sizing
-// TODO: Add 'extra' music 
 // TODO: options - classic cursor / screech transitions / new music / volume
 // TODO: don't use gifs - .mov? cycle frames?
 // TODO: photoshop for valve states
 // TODO: wait for toilet to refill before flushing
 // TODO: live update for heater level
+
+// small TODO:
+    // TODO: change pool image orientations
+    // make room B8a a pic
+    // TODO: switch grandup gif
 
 // fn/to are redundant? eval should not have side effects.
 // idea: instead of lobby/A1, try assigning numbers... so, lB1,cA2, etc... for ease of use
@@ -421,7 +428,7 @@ const gameData = {
                 { xy: [.74, .8, .13, .22], fn: () => { setFloorValve(8) }},
                 { xy: [.8, .86, .13, .22], fn: () => { setFloorValve(9) }},
                 { xy: [.86, .93, .13, .22], fn: () => { setFloorValve(10) }},
-                { pic: () => { return 'valve6-' + s.valves[6] }}]},
+                { pic: () => { return 'valve6-' + s.floorValve }}]},
             'A2': { left: 'A1', right: 'A3', forward: 'B2', boxes: [
                 { pic: 'pipe2-2', if: () => { return s.pipe == 2 }},
                 { xy: [.92, .99, .31, .41], pic: () => { return s.valves[3] ? 'valve3-2' : null }, 
@@ -499,7 +506,7 @@ const gameData = {
             'D2': { left: 'D1', right: 'D3', boxes: [
                 { pic: 'scratch/mirror', offset: [.37, .98] }]},
             'D3': { left: 'D2', right: 'D4', forward: () => { playSound('doorOpen'); return 'D3a' }},
-            'D3a': { left: () => { playSound('doorClose'); return 'D2' }, right: () => { playSound('doorClose'); return 'D4'},
+            'D3a': { left: () => { playSound('doorClose'); return 'D2' }, right: () => { playSound('doorClose'); return 'D4' },
                  forward: () => { playSound('doorClose'); return 'A3' }},
             'D4': { left: 'D3', right: 'D1', boxes: [
                 { xy: [.39, .42, .44, .48], fn: () => { s.shower = 1; refreshCustomBoxes() }},
@@ -537,14 +544,12 @@ const gameData = {
         }
     }
 }
-
 // non-saveable state
 let topFloorWaitId = 0
-
 let combo = []
 // TODO: store variants as separate var? some level of indirection beyond frame and image.
 
-// Saveable State
+// STATE
 const s = {
     // inventory:
     smallKey: 1, pipe: 1, coffee: 1, card: 1, pig: 1, goldKey: 1,
@@ -555,7 +560,7 @@ const s = {
     //cafe
     cafeUnlocked: true, currentSalad: 0, salads: [3, 3, 3, 3, 3],
     //plumbingroom:
-    plumbingUnlocked: false, plumbingDoorOpen: false, valves: [false, true, true, true, true, true, 10], heaterLevel: 0,
+    plumbingUnlocked: false, plumbingDoorOpen: false, valves: [false, true, true, true, true, true], floorValve: 10, heaterLevel: 0,
     //elevator:
     elevatorFloor: 5, elevatorGoal: 5, elevatorMoving: false, elevatorFixed: false, circuits: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     // hall 
@@ -618,7 +623,7 @@ function saladButton(n) {
 
 function flipValve(n) { playSound('valve'); s.valves[n] = !s.valves[n]; refreshCustomBoxes() }
 
-function setFloorValve(n) { playSound('valve'); s.valves[6] = n; refreshCustomBoxes() }
+function setFloorValve(n) { playSound('valve'); s.floorValve = n; refreshCustomBoxes() }
 
 function hallTurnLeft() { s.hallDirection = s.hallDirection == 0 ? 3 : s.hallDirection - 1 }
 

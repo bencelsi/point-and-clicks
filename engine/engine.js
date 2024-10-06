@@ -38,7 +38,7 @@ function init() {
     transitionsDiv = get('transitions')
     imgDiv = get('img')
     inventoryDiv = get('inventory')
-	gif = get('fullGif')
+	moviesDiv = get('movies')
 	
 	// global vars:
 	extension = gameData.extension
@@ -68,10 +68,10 @@ function init() {
 	.fadeOut { animation:fadeOut ${FADE_SPEED}s; opacity: 0 }`
 
 	setupStandardBoxes()
-	transitionTo(frame, 'fade')
+	goTo(frame, 'fade')
 	refreshInventory()
 	locks = 0
-	//window.onclick = ()=>launchFullScreen(get('window'))
+	//window.onclick = launchFullScreen(get('window'))
 }
 
 const standardBoxes = {
@@ -92,7 +92,7 @@ function setupStandardBoxes() {
 }
 
 // TRANSITIONS ******************************************
-function transitionTo(newFrame, type, override = false) {
+function goTo(newFrame, type, override = false) {
 	console.log(newFrame)
 	if (newFrame == null || (locks > 0 && !override)) { return }
 	locks++
@@ -167,9 +167,9 @@ function makeCustomBox(boxData) {
 	let transition = boxData.transition == undefined ? 'fade' : boxData.transition
 	let fn = boxData.fn
 	if (boxData.to !== undefined && boxData.fn !== undefined) {
-		fn = () => { boxData.fn(); transitionTo(simpleEval(boxData.to), transition) }
+		fn = () => { boxData.fn(); goTo(simpleEval(boxData.to), transition) }
 	} else if (boxData.to !== undefined) {
-		fn = () => { transitionTo(simpleEval(boxData.to), transition) }
+		fn = () => { goTo(simpleEval(boxData.to), transition) }
 	}
 	let pic = simpleEval(boxData.pic)
 	let offset = simpleEval(boxData.offset)
@@ -235,7 +235,7 @@ function refreshStandardBox(boxData, destinationFrame) {
 		element.style.visibility = 'hidden'
 	} else {
 		element.style.visibility = 'visible'
-		element.onclick = () => { transitionTo(simpleEval(destinationFrame), boxData.transition) }
+		element.onclick = () => { goTo(simpleEval(destinationFrame), boxData.transition) }
 	}
 }
 
@@ -299,19 +299,18 @@ function makeDraggable(item, targets) {
 
 // GIFS ••••••••••••••••••••••••••••••••••••••••••••••••••
 function playGif(name, newFrame, delay, after = null) {
+	console.log('name: ' + name)
 	//cacheFrame(gameData.rooms[room][newFrame]) //todo - parse here
-	locks++
+	locks++; let gif = document.createElement('img')
+	gif.classList.add('fullGif')
 	gif.onload = () => {
-		get('movies').appendChild(gif)
-		gif.style.visibility = 'visible' 
+		moviesDiv.appendChild(gif)
 		wait(delay / 2, () => {
-			transitionTo(newFrame, 'none', true)
+			goTo(newFrame, 'none', true)
 			wait(delay / 2, () => {
-				gif.style.visibility = 'hidden'
-				locks--
-				if (after != null) { after() }
-			})})}
-	gif.src = GIF_PATH + name + '.gif'//'?a=' + Math.random() 
+				moviesDiv.innerHTML = ''
+				locks--; if (after != null) { after() }})})}
+	gif.src = GIF_PATH + name + '.gif?a=' + Math.random() 
 	// todo - use new object? so it 	
 }
 
