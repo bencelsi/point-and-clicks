@@ -172,7 +172,8 @@ function makeCustomBox(boxData) {
 		fn = () => { transitionTo(simpleEval(boxData.to), transition) }
 	}
 	let pic = simpleEval(boxData.pic)
-	if (pic != null) { makePicBox(pic, boxData.id, boxData.offset, boxData.style, boxData.class, boxData.scale) }
+	let offset = simpleEval(boxData.offset)
+	if (pic != null) { makePicBox(pic, boxData.id, offset, boxData.style, boxData.class, boxData.scale) }
 	let xy = simpleEval(boxData.xy)
 	if (xy != null) {
 		let cursor = boxData.cursor === undefined ? 'forward' : simpleEval(boxData.cursor)
