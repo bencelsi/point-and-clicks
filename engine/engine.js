@@ -1,10 +1,9 @@
-// Idea: you move around, but scary creature keeps following you
-// TODO: Add 'menu' logic
-// Make rooms optional.
-// tool to rename image files & frames in js
-// no boxes while gif plays... 
+// TODO: Add 'menu' logic, saveable state
+// TODO: Make rooms optional.
+// TODO: no boxes while gif plays... 
 // TODO - how to cache when left/right returns fn? framesToCache, or... left: {to: 'A1', fn: ()=> {...}}
 // TODO - cache pics/gifs
+// Idea: you move around, but scary creature keeps following you
  
 get("favicon").href = GAME_FOLDER + "/favicon.ico"
 const FRAME_PATH = GAME_FOLDER + '/assets/frames/'
@@ -310,7 +309,7 @@ function playGif(name, newFrame, delay, after = null) {
 			wait(delay / 2, () => {
 				moviesDiv.innerHTML = ''
 				locks--; if (after != null) { after() }})})}
-	gif.src = GIF_PATH + name + '.gif?a=' + Math.random() 
+	gif.src = GIF_PATH + name + '.gif?a=' + Math.random() // todo: better
 	// todo - use new object? so it 	
 }
 

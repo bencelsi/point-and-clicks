@@ -2,8 +2,10 @@
 // TODO: Steam puzzle
 // TODO: Salad puzzle
 // TODO: Clock puzzle
+// TODO: Jesus
 // TODO: Clockhand rotation
-// TODO: Fix gifs
+// TODO: Mr Bobb
+// TODO: Credits
 // TODO: fix cursor alignment
 // TODO: you can break halldirections by clicking repeatedly - should block on locks
 // TODO: fix elevator num framing
@@ -64,7 +66,7 @@ const keypadButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'opening', startFrame: 'A1',
+    startRoom: 'clockroom', startFrame: 'A1',
     extension: 'png',
     frameWidth: 1000, frameHeight: 750,
     // customCursors: true,
@@ -365,17 +367,19 @@ const gameData = {
         'clockroom' : {
             'A1': { left: 'A4', right: 'A2',
                 forward: () => { playGif('ladderDown', 'pool/B4', 10 * 150) }},
-            'A2': { alt: { name: 'A2.gif', if: () => { return s.clockRunning }},left: 'A1', right: 'A3', boxes: [
+            'A2': { alt: { name: 'A2.gif', if: () => { return s.clockRunning }}, left: 'A1', right: 'A3', boxes: [
                 { xy: [.29, .34, .42, .48], fn: () => { playSound('gearsRunning'); playSound('clock'); 
                     s.clockRunning = true; s.cafeUnlocked = true; makeEphemeralBox('lever', 1000)}},
-                { to: 'A5', xy: [.48,.6,.22,.3] }]},    
+                { xy: [.48, .6, .22, .3], to: 'A5' },
+                { xy: [.65, .75, .21, .29], to: 'A6', pic: 'jesusNote', if: () => { return s.jesusCount == 3 }}]},
+            'A2a': { forward: 'A2' },
             'A3': { alt: { name: 'A3.gif', if: () => { return s.clockRunning }},left: 'A2', right: 'A4', boxes: [
                 { pic: 'gear0' }, { pic: 'gear2' }, { pic: 'gear4' }, { pic: 'gear6'}, 
                 { pic: 'gear1' }, { pic: 'gear3' }, { pic: 'gear5' }]},
             'A4': { alt: { name: 'A4.gif', if: () => { return s.clockRunning }}, left: 'A3', right: 'A1', forward: 'A7' },
-            'A5': { back: 'A2' },
+            'A5': { back: () => { s.jesusCount++; if (s.jesusCount == 3) { playSound('jesus'); return 'A2a' }; return 'A2'}},
             'A6': { back: 'A2' },
-            'A7': { alt: { name: 'A7.gif', if: () => { return s.clockRunning }},back: 'A4'}
+            'A7': { alt: { name: 'A7.gif', if: () => { return s.clockRunning }}, back: 'A4'}
         },
         'stairs': { //zstairs
             'A1': { left: 'A4', right: 'A2', 
