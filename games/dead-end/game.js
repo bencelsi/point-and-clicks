@@ -10,7 +10,7 @@ const gameData = {
 			'0b': { forward: '0c' },
 			'0c': { forward: '0d' },
 			'0d': { forward: '0e' },
-			'0e': { forward: () => { playSound('churchbell', 1); wait(3000, () => { transitionTo('0g', 'fade')}); return '0f'} },
+			'0e': { forward: () => { playSound('churchbell', 1); wait(3000, () => { goTo('0g', 'fade')}); return '0f'} },
 			'0f': { },
 			'0g': { forward: '1a' },
 			'1a': { forward: '3a', left: '1f', right: '1b' },
@@ -28,7 +28,7 @@ const gameData = {
 			'2b': { left: '2a', right: '2c' },
 			'2c': { left: '2b', right: '2d', forward: '1d' },
 			'2d': { left: '2c', right: '2a', boxes: [
-				{ xy: [.05, .2, .25, .75], cursor: 'zoom', fn: () => transitionTo('2e', 'fade')}]},
+				{ xy: [.05, .2, .25, .75], cursor: 'zoom', fn: () => goTo('2e', 'fade')}]},
 			'2e': { left: '2c', right: '2a', back: '2d', boxes: [
 					{	xy: () => { return (s.power ? [.45, .57, .23, .3] : [.45, .57, .4, .47]) },
 						cursor: 'open',
@@ -56,7 +56,7 @@ const gameData = {
 								inventory['key'].state = 3
 								refreshCustomBoxes() 
 							} else if (inventory['key'].state == 3) {
-								extension = 'jpeg'; transitionTo('B/1a', 'fade') 
+								extension = 'jpeg'; goTo('B/1a', 'fade') 
 							}
 						}
 					}]
@@ -65,7 +65,7 @@ const gameData = {
 			'3g': { left: '3c', right: '3e', boxes: [
 					{	xy: [.48, .57, .87, .93],
 						cursor: 'zoom',
-						fn: () => transitionTo('3h', 'fade') }],
+						fn: () => goTo('3h', 'fade') }],
 					},
 			'3h': { back: '3g', boxes: [
 					{	if: () => { return inventory['key'].state == 0 },
