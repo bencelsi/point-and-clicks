@@ -1,12 +1,16 @@
 const gameData = {
     title: "Bush St",
     startRoom: 'A',
-    startFrame: 1,
+    startFrame: 101,
     extension: 'jpg',
     frameWidth: 840,
     frameHeight: 750,
     rooms: {
         A: {
+            //100: { left: 103, right: 102, forward: 101 },
+            101: { left: 103, right: 102, forward: 1 },
+            102: { left: 101 },
+            103: { right: 101 },
             1: { left: 4, right: 2, forward: 9 },
             2: { left: 1, right: 3, forward: 6 },
             3: { left: 2, right: 4 },
