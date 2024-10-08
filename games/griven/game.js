@@ -6,14 +6,15 @@
 // TODO: Clockhand rotation
 // TODO: Mr Bobb
 // TODO: Credits
-// TODO: fix cursor alignment
-// TODO: you can break halldirections by clicking repeatedly - should block on locks
-// TODO: fix elevator num framing
-// TODO: compress all images
-// TODO: fix inventory sizing
+// TODO: Fix cursor alignment
+// TODO: Better locking - breaks hallways
+// TODO: Fix elevator num framing
+// TODO: Compress all images
+// TODO: Fix inventory sizing
+
+
 // TODO: options - classic cursor / screech transitions / new music / volume
 // TODO: don't use gifs - .mov? cycle frames?
-// TODO: photoshop for valve states
 // TODO: wait for toilet to refill before flushing
 // TODO: live update for heater level
 
@@ -66,15 +67,22 @@ const keypadButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'clockroom', startFrame: 'A1',
+    startRoom: 'lobby', startFrame: 'A1',
     extension: 'png',
     frameWidth: 1000, frameHeight: 750,
+    music: 2,
     // customCursors: true,
+                //1         2       3           4           5      6
+    musicNames: ['lobby', 'pool', 'restroom', 'clockroom', 'cafe', 'plumbingroom',
+        //7         8       9         10    11  12
+        'stairs', 'hall','elevator','room','top','office'],
+    musicExtension: 'mp3',
+
     rooms: {
         'opening': {
             'A1': { forward: () => { playSound('opening');
                 wait(800, () => { playGif('opening', 'A2', 41 * 100) })}},
-            'A2': { forward: () => { wait(2000, () => { playSound('moonlight (full)', 1, true ) }); return 'lobby/A1' }}
+            'A2': { forward: () => { return 'lobby/A1' }}
         },
         'cafe': { //zcafe
             'A1': { left: () => { playSound('doorClose'); return 'A4'}, right: () => { playSound('doorClose'); return 'A2'}, boxes: [
@@ -229,7 +237,7 @@ const gameData = {
             'B5': { back: 'B1a' }
         },
         'lobby' : { //zlobby
-            'A1': { left: 'A4', right: 'A2', forward: 'B1' },
+            'A1': { left: 'A4', right: 'A2', forward: () => { return 'B1' } },
             'A2': { left: 'A1', right: 'A3', boxes: [
                 { to: 'A5', xy: [.37, .76, .25, .7] }]},
             'A3': { left: 'A2', right: 'A4' },

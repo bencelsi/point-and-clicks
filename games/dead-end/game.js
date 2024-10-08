@@ -2,9 +2,9 @@ const gameData = {
 	title: 'Dead End',
 	gameName: 'dead-end',
 	startRoom: 'A',
-	startFrame: '3a',
+	startFrame: '0a',
 	extension: 'png',
-	frames: {
+	rooms: {
 		A: {
 			'0a': { forward: '0b' },
 			'0b': { forward: '0c' },

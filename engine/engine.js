@@ -9,12 +9,14 @@ get("favicon").href = GAME_FOLDER + "/favicon.ico"
 const FRAME_PATH = GAME_FOLDER + '/assets/frames/'
 const GIF_PATH = GAME_FOLDER + '/assets/gifs/'
 const SOUND_PATH = GAME_FOLDER + '/assets/sound/'
+const MUSIC_PATH = SOUND_PATH + 'music/'
 const PIC_PATH = GAME_FOLDER + '/assets/pics/'
 const INVENTORY_PATH = GAME_FOLDER + '/assets/inventory/'
 
 let locks = 0 // whether or not to listen to user input
+let music = new Audio()
+window.onload = waitForGameData() // window onload?
 
-window.onload = waitForGameData
 // hacky way to wait for gameData & s (state) to load
 function waitForGameData() {
 	try { gameData; s; init() } 
@@ -23,6 +25,7 @@ function waitForGameData() {
 
 // DOM globals:
 let standardBoxesDiv, customBoxesDiv, picsDiv, cacheDiv, transitionsDiv, imgDiv, inventoryDiv, gif 
+
 // Constants:
 let CURSOR_PATH, WIDTH, HEIGHT, SIDE_SPEED, FADE_SPEED
 
@@ -40,10 +43,13 @@ function init() {
 	moviesDiv = get('movies')
 	
 	// global vars:
-	extension = gameData.extension
+	
 	room = gameData.startRoom
 	frame = gameData.startFrame
-	
+	extension = gameData.extension
+	music 
+	musicExtension = gameData.musicExtension
+
 	// constants
 	CURSOR_PATH = gameData.customCursors === true ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
 	WIDTH = gameData.frameWidth === undefined ? 750 : gameData.frameWidth
@@ -69,6 +75,7 @@ function init() {
 	setupStandardBoxes()
 	goTo(frame, 'fade')
 	refreshInventory()
+
 	locks = 0
 	//window.onclick = launchFullScreen(get('window'))
 }
@@ -98,7 +105,7 @@ function goTo(newFrame, type, override = false) {
 	
 	if (type != 'none') { createTransition(type + 'Out') }
 	[frame, newRoom, newExtension] = parseFrame(newFrame)
-	if (newRoom != null) { room = newRoom }
+	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
 	
 	let frameData = gameData.rooms[room][frame]
 	let frameImg
@@ -136,9 +143,7 @@ function createTransition(type) {
 }
 
 // BOXES ******************************************
-function refresh() {
-	refreshCustomBoxes(); refreshStandardBoxes(); refreshInventory()
-}
+function refresh() { refreshCustomBoxes(); refreshStandardBoxes(); refreshInventory() }
 
 function refreshCustomBoxes() {
 	picsDiv.innerHTML = ''; customBoxesDiv.innerHTML = ''
@@ -346,8 +351,33 @@ function cacheFrame(frame) {
 
 // SOUND ******************************************
 
-function playSound(name, volume=1, loop=false) {
-	let sound = new Audio(SOUND_PATH + name + (name.includes('.') ? '' : '.mp3'))
+// MUSIC ENGINE: 
+// var that tracks
+
+// when you enter / leave a location, fade song from one to another
+// add var music var: 0 (no music),
+// when that var changes
+// possible future options: music start
+// todo: add variable length gaps
+
+//music.setAttribute('loop', true)
+function setMusic(newMusic) {
+	console.log(newMusic)
+	if (newMusic == null) { music.stop() }
+	else { 
+		console.log(newMusic)
+		music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
+		music.play() ; console.log(music)
+	}
+}
+
+function fadeOutMusic() {
+
+}
+
+let sound = new Audio()
+function playSound(name, volume = 1, loop = false) {
+	sound.setAttribute('src', SOUND_PATH + name + (name.includes('.') ? '' : '.mp3'))
 	sound.volume = volume
 	sound.play()
 	return sound
