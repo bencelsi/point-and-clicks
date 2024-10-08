@@ -3,7 +3,7 @@ const gameData = {
 	startRoom: "A",
 	startFrame: 1,
 	extension: "jpg",
-	frames: {
+	rooms: {
 		"A": {
 			0: { left: 4, right: 2, forward: 1 },
 			1: { left: 4, right: 2, forward: 5 },

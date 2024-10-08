@@ -5,7 +5,7 @@ const gameData = {
     extension: 'jpg',
     frameWidth: 840,
     frameHeight: 750,
-    frames: {
+    rooms: {
         A: {
             1: { left: 4, right: 2, forward: 9 },
             2: { left: 1, right: 3, forward: 6 },

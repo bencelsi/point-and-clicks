@@ -20,7 +20,7 @@ window.onload = waitForGameData() // window onload?
 // hacky way to wait for gameData & s (state) to load
 function waitForGameData() {
 	try { gameData; s; init() } 
-	catch (e) { wait(100, waitForGameData) }
+	catch (e) { console.log(e); wait(100, waitForGameData) }
 }
 
 // DOM globals:
@@ -43,7 +43,6 @@ function init() {
 	moviesDiv = get('movies')
 	
 	// global vars:
-	
 	room = gameData.startRoom
 	frame = gameData.startFrame
 	extension = gameData.extension
@@ -102,11 +101,13 @@ function goTo(newFrame, type, override = false) {
 	console.log(newFrame)
 	if (newFrame == null || (locks > 0 && !override)) { return }
 	locks++
-	
+	console.log(newFrame)
+	console.log('A')
 	if (type != 'none') { createTransition(type + 'Out') }
 	[frame, newRoom, newExtension] = parseFrame(newFrame)
+	console.log('B')
 	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
-	
+	console.log('C')
 	let frameData = gameData.rooms[room][frame]
 	let frameImg
 	if (frameData.alt != null && frameData.alt.if()) {
@@ -114,8 +115,9 @@ function goTo(newFrame, type, override = false) {
 	} else {
 		frameImg = frame + '.' + (newExtension == null ? extension : newExtension)
 	}
-
 	imgDiv.src = FRAME_PATH + room + '/' + frameImg
+	console.log('D')
+	
 	console.log(frameImg)
 	refreshStandardBoxes(frameData)
 	refreshCustomBoxes()
@@ -402,16 +404,17 @@ function setVolume(n, volume, speed) {
 // HELPERS ******************************************	
 
 function parseFrame(frame) {
-	let room = null
-	let extension = null
+	if (typeof frame != 'string') { return [frame, null, null] }
+	let room = extension = null
 	if (frame.includes('/')) {
 		let roomFrame = frame.split('/')
 		room = roomFrame[0]; frame = roomFrame[1]
-	} 
+	}
 	if (frame.includes('.')) {
 		let frameExtension = frame.split('/')
 		frame = frameExtension[0]; extension = frameExtension[1]
 	} 
+	console.log(frame + '' + room + '' + extension)
 	return [frame, room, extension]
 }
 
