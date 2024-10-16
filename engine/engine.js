@@ -14,8 +14,8 @@ const PIC_PATH = GAME_FOLDER + '/assets/pics/'
 const INVENTORY_PATH = GAME_FOLDER + '/assets/inventory/'
 
 let locks = 0 // whether or not to listen to user input
-let music = new Audio()
-window.onload = waitForGameData() // window onload?
+let music = new Audio(); music.loop = true
+window.onload = waitForGameData()
 
 // hacky way to wait for gameData & s (state) to load
 function waitForGameData() {
@@ -33,20 +33,14 @@ function init() {
 	document.title = location.hostname === "" ? "." + gameData.title : gameData.title
 
 	//DOM elements:
-	standardBoxesDiv = get('standardBoxes')
-	customBoxesDiv = get('customBoxes')
-	picsDiv = get('pics')
-	cacheDiv = get('cache')
-    transitionsDiv = get('transitions')
-    imgDiv = get('img')
-    inventoryDiv = get('inventory')
-	moviesDiv = get('movies')
+	standardBoxesDiv = get('standardBoxes'); customBoxesDiv = get('customBoxes'); picsDiv = get('pics')
+	cacheDiv = get('cache'); transitionsDiv = get('transitions'); imgDiv = get('img'); 
+	inventoryDiv = get('inventory'); moviesDiv = get('movies')
 	
 	// global vars:
 	room = gameData.startRoom
 	frame = gameData.startFrame
 	extension = gameData.extension
-	music 
 	musicExtension = gameData.musicExtension
 
 	// constants
@@ -76,6 +70,7 @@ function init() {
 	refreshInventory()
 
 	locks = 0
+	setMusic(room)
 	//window.onclick = launchFullScreen(get('window'))
 }
 
@@ -101,24 +96,15 @@ function goTo(newFrame, type, override = false) {
 	console.log(newFrame)
 	if (newFrame == null || (locks > 0 && !override)) { return }
 	locks++
-	console.log(newFrame)
-	console.log('A')
 	if (type != 'none') { createTransition(type + 'Out') }
 	[frame, newRoom, newExtension] = parseFrame(newFrame)
-	console.log('B')
 	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
-	console.log('C')
 	let frameData = gameData.rooms[room][frame]
 	let frameImg
-	if (frameData.alt != null && frameData.alt.if()) {
-		frameImg = frameData.alt.name //
-	} else {
-		frameImg = frame + '.' + (newExtension == null ? extension : newExtension)
-	}
+	if (frameData.alt != null && frameData.alt.if()) { frameImg = frameData.alt.name } 
+	else { frameImg = frame + '.' + (newExtension == null ? extension : newExtension) }
 	imgDiv.src = FRAME_PATH + room + '/' + frameImg
-	console.log('D')
 	
-	console.log(frameImg)
 	refreshStandardBoxes(frameData)
 	refreshCustomBoxes()
 	if (type != 'none') { createTransition(type + 'In') }
@@ -161,7 +147,7 @@ function refreshCustomBoxes() {
 
 function makeEphemeralBox(img, life) { // TODO: ephemeral hitbox too
 	if (get(img) != null) { return }
-	let ephemeralBox = makePicBox(img, img)
+	makePicBox(img, img)
 	wait(life, () => {
 		let toRemove = get(img)
 		if (toRemove != null) { picsDiv.removeChild(toRemove) }})
@@ -169,14 +155,12 @@ function makeEphemeralBox(img, life) { // TODO: ephemeral hitbox too
 
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
-	console.log(boxData)
 	let transition = boxData.transition == undefined ? 'fade' : boxData.transition
 	let fn = boxData.fn
 	if (boxData.to !== undefined && boxData.fn !== undefined) {
 		fn = () => { boxData.fn(); goTo(simpleEval(boxData.to), transition) }
 	} else if (boxData.to !== undefined) {
-		fn = () => { goTo(simpleEval(boxData.to), transition) }
-	}
+		fn = () => { goTo(simpleEval(boxData.to), transition) }}
 	let pic = simpleEval(boxData.pic)
 	let offset = simpleEval(boxData.offset)
 	if (pic != null) { makePicBox(pic, boxData.id, offset, boxData.style, boxData.class, boxData.scale) }
@@ -254,7 +238,6 @@ function refreshInventory() {
 }
 
 function makeInventoryItem(id) {
-	console.log(id)
 	let item = document.createElement('div')
 	item.classList.add('inventory')
 	item.classList.add('box')
@@ -365,24 +348,39 @@ function cacheFrame(frame) {
 //music.setAttribute('loop', true)
 function setMusic(newMusic) {
 	console.log(newMusic)
-	if (newMusic == null) { music.stop() }
-	else { 
-		console.log(newMusic)
+	if (newMusic == null) { fadeOutMusic(music) }
+	else { fadeOutMusic(music, () => {
 		music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
-		music.play() ; console.log(music)
+		music.play(); fadeInMusic(music)})
 	}
 }
-
-function fadeOutMusic() {
-
+var fadeAudio
+function fadeOutMusic(sound, then = null) {
+	clearInterval(fadeAudio)
+	fadeAudio = setInterval(() => {
+        if (sound.volume > 0.1) { sound.volume -= 0.1 }
+		else { sound.volume = 0; clearInterval(fadeAudio); if (then != null) { then() }}
+    }, 150);
 }
 
-let sound = new Audio()
-function playSound(name, volume = 1, loop = false) {
-	sound.setAttribute('src', SOUND_PATH + name + (name.includes('.') ? '' : '.mp3'))
-	sound.volume = volume
-	sound.play()
-	return sound
+function fadeInMusic(sound, then = null) {
+	clearInterval(fadeAudio)
+	fadeAudio = setInterval(() => {
+        if (sound.volume < 0.9) {  sound.volume += 0.1; }
+		else { sound.volume = 1; clearInterval(fadeAudio); if (then != null) { then() }}
+    }, 150);
+}
+
+let sounds = [new Audio(), new Audio(), new Audio] // TODO: make concurrent sounds variable
+function playSound(name, volume = 1) {
+	for (i in sounds) {
+		let sound = sounds[i]
+		if (sound.paused) {
+			sound.setAttribute('src', SOUND_PATH + name + (name.includes('.') ? '' : '.mp3'))
+			sound.volume = volume; sound.play(); return
+		}
+	}
+	alert('no sound!')
 }
 
 /*
@@ -405,7 +403,7 @@ function setVolume(n, volume, speed) {
 
 function parseFrame(frame) {
 	if (typeof frame != 'string') { return [frame, null, null] }
-	let room = extension = null
+	let room = newExtension = null
 	if (frame.includes('/')) {
 		let roomFrame = frame.split('/')
 		room = roomFrame[0]; frame = roomFrame[1]
@@ -413,8 +411,7 @@ function parseFrame(frame) {
 	if (frame.includes('.')) {
 		let frameExtension = frame.split('/')
 		frame = frameExtension[0]; extension = frameExtension[1]
-	} 
-	console.log(frame + '' + room + '' + extension)
+	}
 	return [frame, room, extension]
 }
 
