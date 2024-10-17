@@ -24,7 +24,7 @@ function waitForGameData() {
 }
 
 // DOM globals:
-let standardBoxesDiv, customBoxesDiv, picsDiv, cacheDiv, transitionsDiv, imgDiv, inventoryDiv, gif 
+let standardBoxesDiv, customBoxesDiv, picsDiv, cacheDiv, transitionsDiv, frameImg, inventoryDiv, cursorBlockDiv
 
 // Constants:
 let CURSOR_PATH, WIDTH, HEIGHT, SIDE_SPEED, FADE_SPEED
@@ -34,8 +34,8 @@ function init() {
 
 	//DOM elements:
 	standardBoxesDiv = get('standardBoxes'); customBoxesDiv = get('customBoxes'); picsDiv = get('pics')
-	cacheDiv = get('cache'); transitionsDiv = get('transitions'); imgDiv = get('img'); 
-	inventoryDiv = get('inventory'); moviesDiv = get('movies')
+	cacheDiv = get('cache'); transitionsDiv = get('transitions'); frameImg = get('frame'); 
+	inventoryDiv = get('inventory'); moviesDiv = get('movies'); cursorBlockDiv = get('cursorBlock')
 	
 	// global vars:
 	room = gameData.startRoom; frame = gameData.startFrame; extension = gameData.extension
@@ -87,11 +87,11 @@ function setupStandardBoxes() {
 }
 
 function freeze() {
-	// override cursor - add box overlay?
+	cursorBlockDiv.style.visibility = 'visible'
 }
 
-function unFreeze() {
-	// 
+function unfreeze() {
+	cursorBlockDiv.style.visibility = 'hidden'
 }
 
 // TRANSITIONS ******************************************
@@ -103,10 +103,10 @@ function goTo(newFrame, transitionType, override = false) {
 	[frame, newRoom, newExtension] = parseFrame(newFrame)
 	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
 	let frameData = gameData.rooms[room][frame]
-	let frameImg
-	if (frameData.alt != null && frameData.alt.if()) { frameImg = frameData.alt.name } 
-	else { frameImg = frame + '.' + (newExtension == null ? extension : newExtension) }
-	imgDiv.src = FRAME_PATH + room + '/' + frameImg
+	let img
+	if (frameData.alt != null && frameData.alt.if()) { img = frameData.alt.name } 
+	else { img = frame + '.' + (newExtension == null ? extension : newExtension) }
+	frameImg.src = FRAME_PATH + room + '/' + img
 	
 	refreshStandardBoxes(frameData)
 	refreshCustomBoxes()
@@ -122,7 +122,7 @@ function goTo(newFrame, transitionType, override = false) {
 
 function createTransition(type) {
 	let transition = document.createElement('div')
-	transition.appendChild(imgDiv.cloneNode(true)) //creates duplicate img
+	transition.appendChild(frameImg.cloneNode(true)) //creates duplicate img
 	let picBoxes = picsDiv.cloneNode(true)
 	picBoxes.id = null
 	transition.appendChild(picBoxes)
@@ -295,12 +295,13 @@ function playGif(name, newFrame, delay, after = null) {
 	//cacheFrame(gameData.rooms[room][newFrame]) //todo - parse here
 	locks++; let gif = document.createElement('img')
 	gif.classList.add('fullGif')
+	freeze()
 	gif.onload = () => {
 		moviesDiv.appendChild(gif)
 		wait(delay / 2, () => {
 			goTo(newFrame, 'none', true)
 			wait(delay / 2, () => {
-				moviesDiv.innerHTML = ''
+				moviesDiv.innerHTML = ''; unfreeze()
 				locks--; if (after != null) { after() }})})}
 	gif.src = GIF_PATH + name + '.gif?a=' + Math.random() // todo: better
 	// todo - use new object? so it 	
