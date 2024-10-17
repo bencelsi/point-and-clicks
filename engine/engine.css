@@ -4,11 +4,6 @@ body {
 	user-select: none;
 }
 
-#window {
-	height: 100%;
-	width: 100%;
-}
-
 #game {
 	display: flex;
 	user-select: none;
@@ -17,14 +12,7 @@ body {
   	left: 50%;
 	margin-top: -425px;
 	margin-left: -475px;
-}
-
-#cursor {
-	width: 100%;
-	height: 100%;
-	position: absolute;
-	z-index: 99999;
-	display: none;
+	border: 1px orange solid;
 }
 
 #screen {
@@ -32,7 +20,7 @@ body {
 	position: relative;
 	top: 0;
 	overflow: hidden;
-	/*border: 1px green solid;*/
+	border: 1px red solid;
 }
 
 #menu {
@@ -41,7 +29,7 @@ body {
 	position: relative;
 	width: 100px;
 	height: 750px;
-	/*border: 1px yellow solid;*/
+	border: 1px purple solid;
 }
 
 #inventory {

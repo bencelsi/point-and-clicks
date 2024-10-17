@@ -38,10 +38,7 @@ function init() {
 	inventoryDiv = get('inventory'); moviesDiv = get('movies')
 	
 	// global vars:
-	room = gameData.startRoom
-	frame = gameData.startFrame
-	extension = gameData.extension
-	musicExtension = gameData.musicExtension
+	room = gameData.startRoom; frame = gameData.startFrame; extension = gameData.extension
 
 	// constants
 	CURSOR_PATH = gameData.customCursors === true ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
@@ -68,8 +65,6 @@ function init() {
 	setupStandardBoxes()
 	goTo(frame, 'fade')
 	refreshInventory()
-
-	locks = 0
 	setMusic(room)
 	//window.onclick = launchFullScreen(get('window'))
 }
@@ -91,12 +86,20 @@ function setupStandardBoxes() {
 	}
 }
 
+function freeze() {
+	// override cursor - add box overlay?
+}
+
+function unFreeze() {
+	// 
+}
+
 // TRANSITIONS ******************************************
-function goTo(newFrame, type, override = false) {
+function goTo(newFrame, transitionType, override = false) {
 	console.log(newFrame)
 	if (newFrame == null || (locks > 0 && !override)) { return }
 	locks++
-	if (type != 'none') { createTransition(type + 'Out') }
+	if (transitionType != 'none') { createTransition(transitionType + 'Out') }
 	[frame, newRoom, newExtension] = parseFrame(newFrame)
 	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
 	let frameData = gameData.rooms[room][frame]
@@ -107,8 +110,8 @@ function goTo(newFrame, type, override = false) {
 	
 	refreshStandardBoxes(frameData)
 	refreshCustomBoxes()
-	if (type != 'none') { createTransition(type + 'In') }
-	delay = 1000 * (type === 'none' ? 0 : SIDE_SPEED)
+	if (transitionType != 'none') { createTransition(transitionType + 'In') }
+	delay = 1000 * (transitionType === 'none' ? 0 : SIDE_SPEED)
 	 // if we wait full fade speed, it makes moving forward annoying.
 	wait(delay, () => {
 		transitionsDiv.innerHTML = ''
@@ -338,7 +341,6 @@ function cacheFrame(frame) {
 
 // MUSIC ENGINE: 
 // var that tracks
-
 // when you enter / leave a location, fade song from one to another
 // add var music var: 0 (no music),
 // when that var changes

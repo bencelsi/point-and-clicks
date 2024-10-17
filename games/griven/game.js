@@ -1,15 +1,19 @@
+// TODO: non-gif movies
+// TODO: Fix inventory sizing
+// TODO: Freeze (no boxes)
+// TODO: Compress all images
+
 // TODO: Clock puzzle
 // TODO: Salad puzzle
 // TODO: Steam puzzle
-// TODO: Fix inventory sizing
-// TODO: Jesus
+
 // TODO: Clockhand rotation
-// TODO: Mr Bobb
+// TODO: Mr Bobb animations
 // TODO: Credits
 // TODO: Fix cursor alignment
 // TODO: Better locking - breaks hallways
 // TODO: Fix elevator num framing
-// TODO: Compress all images
+
 
 // TODO: options - classic cursor / screech transitions / new music / volume
 // TODO: don't use gifs - .mov? cycle frames?
@@ -53,17 +57,11 @@ const keypadButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'top', startFrame: 'B2',
+    startRoom: 'lobby', startFrame: 'B1',
     extension: 'png',
     frameWidth: 1000, frameHeight: 750,
     music: 2,
     // customCursors: true,
-                //1         2       3           4           5      6
-    musicNames: ['lobby', 'pool', 'restroom', 'clockroom', 'cafe', 'plumbingroom',
-       //7         8       9           10      11     12
-        'stairs', 'hall', 'elevator', 'room', 'top', 'office'],
-    musicExtension: 'mp3',
-
     rooms: {
         'opening': {
             'A1': { forward: () => { playSound('music/opening');
@@ -539,12 +537,14 @@ const gameData = {
             'D3': { left: 'D2', right: () => { if (!s.otherLeft && !s.bobbSpeech) { playSound('bobb/otherLeft'); s.otherLeft = true; } return 'D4' },
                 boxes: [{ xy: [.57, .61, .44, .49], fn: () => {
                     if (s.bobbSpeech) { playSound('bobb/jump'); playSound('music/ending')
-                        playGif('exit', 'C1', 13 * 150 + 200, () => {
-                            playGif('fall', 'opening/A1', 22 * 100)})
+                        playGif('exit', 'D6', 13 * 150 + 1000, () => {
+                            playSound('scream')
+                            playGif('fall', 'D6', 22 * 100)})
                     } else { playSound ('doorLocked') }
                 }}]},
             'D4': { left: 'D3', right: 'D1' },
-            'D5': { back: 'D2' }
+            'D5': { back: 'D2' },
+            'D6': {}
         }
     }
 }
