@@ -103,6 +103,7 @@ function goTo(newFrame, transitionType, override = false) {
 	[frame, newRoom, newExtension] = parseFrame(newFrame)
 	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
 	let frameData = gameData.rooms[room][frame]
+	if (frameData == null) { frameData = {} }
 	let img
 	if (frameData.alt != null && frameData.alt.if()) { img = frameData.alt.name } 
 	else { img = frame + '.' + (newExtension == null ? extension : newExtension) }
@@ -112,10 +113,11 @@ function goTo(newFrame, transitionType, override = false) {
 	refreshCustomBoxes()
 	if (transitionType != 'none') { createTransition(transitionType + 'In') }
 	delay = 1000 * (transitionType === 'none' ? 0 : SIDE_SPEED)
-	 // if we wait full fade speed, it makes moving forward annoying.
+	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
 	wait(delay, () => {
 		transitionsDiv.innerHTML = ''
 		cacheResources(frameData)
+		if (frameData.onEntrance != null) { frameData.onEntrance() }
 		locks--
 	})
 }
@@ -138,7 +140,9 @@ function refresh() { refreshCustomBoxes(); refreshStandardBoxes(); refreshInvent
 
 function refreshCustomBoxes() {
 	picsDiv.innerHTML = ''; customBoxesDiv.innerHTML = ''
-	let boxes = gameData.rooms[room][frame].boxes
+	let frameData = gameData.rooms[room][frame]
+	if (frameData == null) { return }
+	let boxes = frameData.boxes
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
 			let boxData = boxes[i]

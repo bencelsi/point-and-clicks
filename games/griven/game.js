@@ -1,6 +1,5 @@
 // TODO: non-gif movies
 // TODO: Fix inventory sizing
-// TODO: Freeze (no boxes)
 // TODO: Compress all images
 
 // TODO: Clock puzzle
@@ -14,16 +13,14 @@
 // TODO: Better locking - breaks hallways
 // TODO: Fix elevator num framing
 
-
 // TODO: options - classic cursor / screech transitions / new music / volume
 // TODO: don't use gifs - .mov? cycle frames?
 // TODO: wait for toilet to refill before flushing
 // TODO: live update for heater level
 
-
 // fn/to are redundant? eval should not have side effects.
 // idea: instead of lobby/A1, try assigning numbers... so, lB1,cA2, etc... for ease of use
-// idea for ease of use: store functions at ends of rooms?
+// idea for ease of use: store helper functions at ends of rooms?
 
 const elevatorBoxes = [
     { xy: [.81, .84, .06, .1], fn: () => { setElevatorFloor(1)} },
@@ -57,10 +54,9 @@ const keypadButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'lobby', startFrame: 'B1',
+    startRoom: 'clockroom', startFrame: 'A1',
     extension: 'png',
     frameWidth: 1000, frameHeight: 750,
-    music: 2,
     // customCursors: true,
     rooms: {
         'opening': {
@@ -363,7 +359,8 @@ const gameData = {
                     s.clockRunning = true; s.cafeUnlocked = true; makeEphemeralBox('lever', 1000)}},
                 { xy: [.48, .6, .22, .3], to: 'A5' },
                 { xy: [.65, .75, .21, .29], to: 'A6', pic: 'jesusNote', if: () => { return s.jesusCount == 3 }}]},
-            'A2a': { forward: 'A2' },
+            'A2a': { onEntrance: () => { freeze(); playSound('jesus'); wait(2000, () => {
+                goTo('A2', 'fade'); unfreeze() })}},
             'A3': { alt: { name: 'A3.gif', if: () => { return s.clockRunning }},left: 'A2', right: 'A4', boxes: [
                 { pic: 'gear2.gif', offset: [0,.6], scale: 10 },
                 { pic: 'gear3.gif', offset: [.77,.82], scale: 23 },
@@ -371,7 +368,7 @@ const gameData = {
                 { pic: 'gear0' }, { pic: 'gear2' }, { pic: 'gear4' }, { pic: 'gear6'}, 
                 { pic: 'gear1' }, { pic: 'gear3' }, { pic: 'gear5' }]},
             'A4': { alt: { name: 'A4.gif', if: () => { return s.clockRunning }}, left: 'A3', right: 'A1', forward: 'A7' },
-            'A5': { back: () => { s.jesusCount++; if (s.jesusCount == 3) { playSound('jesus'); return 'A2a' }; return 'A2'}},
+            'A5': { back: () => { s.jesusCount++; if (s.jesusCount == 3) { return 'A2a' }; return 'A2'}},
             'A6': { back: 'A2' },
             'A7': { alt: { name: 'A7.gif', if: () => { return s.clockRunning }}, back: 'A4'}
         },
@@ -512,7 +509,7 @@ const gameData = {
                 { xy: [.45, .48, .44, .48], fn: () => { s.shower = 2; refreshCustomBoxes() }},
                 { if: () => { return s.shower !== 0 }, pic: () => { return s.shower === 1 ? 'cold' : 'hot' }},
                 { if: () => { return s.shower !== 0 }, pic: 'shower.gif', offset: [.5, 1], class: 'fullHeight' }]},
-            'D5': { back: 'D1' }
+            'D5': { back: 'D1' },
         },
         'top': {
             'A1': { left: 'A4', right: 'A2', boxes: [ outerElevatorBox,
@@ -533,7 +530,13 @@ const gameData = {
                 { to: 'D3', fn: () => { playSound('doorClose'); playSound('bobb/left') }, xy: [.35, .65, .22, .82] }]},
             'C3': { boxes: keypadButtons, back: 'C2' },    
             'D1': { left: 'D4', right: 'D2', boxes: [{xy: [.4, .6, .3, .75], fn: () => { playSound('doorLocked') }}] },
-            'D2': { left: 'D1', right: 'D3', forward: () => { s.bobbSpeech = true; return 'D5' }},
+            'D2': { left: 'D1', right: 'D3', onEntrance: () => {
+                if (s.bobbSpeech) { return }
+                freeze()
+                wait(1000, () => {
+                    goTo('D5', 'fade'); setMusic(null); playSound('bobb/speech')
+                    wait(305000, () => { s.bobbSpeech = true; unfreeze() })
+                })}},
             'D3': { left: 'D2', right: () => { if (!s.otherLeft && !s.bobbSpeech) { playSound('bobb/otherLeft'); s.otherLeft = true; } return 'D4' },
                 boxes: [{ xy: [.57, .61, .44, .49], fn: () => {
                     if (s.bobbSpeech) { playSound('bobb/jump'); playSound('music/ending')
@@ -542,12 +545,11 @@ const gameData = {
                             playGif('fall', 'D6', 22 * 100)})
                     } else { playSound ('doorLocked') }
                 }}]},
-            'D4': { left: 'D3', right: 'D1' },
-            'D5': { back: 'D2' },
-            'D6': {}
+            'D4': { left: 'D3', right: 'D1' }
         }
     }
 }
+
 // non-saveable state
 let topFloorWaitId = 0
 let combo = []
@@ -678,7 +680,11 @@ function openElevator() {
         if (frame == 'A2d') { goTo('A2' + (s.elevatorFloor == 1 ? 'a' : (s.elevatorFloor == 10 ? 'c' : 'b')), 'fade') }
     } else if (s.elevatorFloor == s.floor) {
         if (room == 'lobby' && (frame == 'C1' || frame == 'C1a')) { playSound('elevatorOpen'); goTo('C1b', 'fade') }
-        else if (room == 'hall' && (frame == 'B1' || frame == 'B1a')) {  playSound('elevatorOpen'); goTo('B1b', 'fade') }
+        else if (room == 'hall' && (frame == 'B1' || frame == 'B1a')) { playSound('elevatorOpen'); goTo('B1b', 'fade') }
     }
     s.elevatorMoving = false
+}
+
+function bobbSpeech() {
+   
 }
