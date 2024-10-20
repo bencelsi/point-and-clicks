@@ -78,15 +78,17 @@ const gameData = {
             'B4': { left: 'B3', right: 'B1', forward: 'D3', boxes: [
                 { pic: 'B4-down', if: () => { return s.cabinetDown } }]},
             'C1': { left: 'C4', right: 'C2', boxes: [ outerElevatorBox,
-                { xy: [.28, .31, .48, .52], to: () => { 
-                    if (s.elevatorFloor == 1) { playSound('elevatorOpen'); return 'C1b' }
-                    else if (!s.elevatorFixed) { playSound('elevatorOpen'); return 'C1a' }
-                    else { callElevator() }}}]},
+                { xy: [.28, .31, .48, .52], 
+                    to: () => { return s.elevatorFloor == 1 ? 'C1b' : (!s.elevatorFixed ? 'C1a' : null) },
+                    fn: () => {
+                        if (s.elevatorFloor == 1) { playSound('elevatorOpen') }
+                        else if (!s.elevatorFixed) { playSound('elevatorOpen') }
+                        else { callElevator() }}}]},
             'C1a':{ left: () => { playSound('elevatorClose'); return 'C4' }, right: () => { playSound('elevatorClose'); return 'C2' },
                 boxes: [ outerElevatorBox, { to: 'C5', xy: [.35, .66, .17, .88] },
-                { to: () => { playSound('elevatorClose'); return 'C1' }, xy: [.28, .31, .48, .52] }]},
+                { to: 'C1', fn: () => { playSound('elevatorClose') }, xy: [.28, .31, .48, .52] }]},
             'C1b':{ left: () => { playSound('elevatorClose'); return 'C4' }, right: () => { playSound('elevatorClose'); return 'C2' },
-                boxes: [ outerElevatorBox, { to: () => { playSound('elevatorClose'); return 'C1' }, xy: [.28, .31, .48, .52] },
+                boxes: [ outerElevatorBox, { to: 'C1', fn: () => { playSound('elevatorClose') }, xy: [.28, .31, .48, .52] },
                 { to: 'elevator/A1', xy: [.35, .66, .17, .88] }]},
             'C2': { left: 'C1', right: 'C3' },
             'C3': { left: 'C2', right: 'C4',
@@ -155,7 +157,8 @@ const gameData = {
             'H3': { left: 'H2', right: 'H4', boxes: [
                 { to: 'G2', xy: [.25, .5, .2, .6] }]},
             'H4': { left: 'H3', right: 'H1', boxes: [ { xy: [.57, .7, .4, .63],
-                to: () => { if (s.cafeUnlocked) { playSound('doorOpen'); return 'H4a' } else { playSound('doorLocked') }}}]},
+                to: () => { if (s.cafeUnlocked) { return 'H4a' }},
+                fn: () => { if (s.cafeUnlocked) { playSound('doorOpen') } else { playSound('doorLocked') }}}]},
             'H4a': { left: () => { playSound('doorClose'); return 'H3'}, 
                     right: () => { playSound('doorClose'); return 'H1'}, boxes: [
                 { to: 'cafe/A4', xy: [.4, .85, .2, .8]}]},
@@ -164,7 +167,7 @@ const gameData = {
             'I2': { left: 'I1', right: 'I3', boxes: [
                 { xy: [.39, .43, .53, .64], fn: () => { 
                     playSound('toilet' + (s.valves[0] ? 'Flush' : 'Empty'))
-                    makeEphemeralBox('toiletHandle', 700); 
+                    makeEphemeralBox('toiletHandle', .7); 
                     if (s.valves[0] && s.valves[1] && s.pipe == 2) {
                         s.heaterLevel = Math.min(100, s.heaterLevel + 10) }
                  }}]},
@@ -200,7 +203,7 @@ const gameData = {
                 forward: () => { playGif('ladderDown', 'pool/B1', 10 * .15) }},
             'A2': { alt: { name: 'A2.gif', if: () => { return s.clockRunning }}, left: 'A1', right: 'A3', boxes: [
                 { xy: [.29, .34, .42, .48], fn: () => { playSound('gearsRunning'); 
-                    s.clockRunning = true; clockOn(); makeEphemeralBox('lever', 1000)}},
+                    s.clockRunning = true; clockOn(); makeEphemeralBox('lever', 1)}},
                 { xy: [.48, .6, .22, .3], to: 'A5' },
                 { xy: [.65, .75, .21, .29], to: 'A6', pic: 'jesusNote', if: () => { return s.jesusCount >= 3 }}]},
             'A2a': { onEntrance: () => { freeze(); setMusic(null); playSound('jesus'); wait(9, () => {
@@ -228,7 +231,8 @@ const gameData = {
         },       
         'cafe': { //zcafe
             'A1': { left: 'A4', right: 'A2', boxes: [
-                { to: () => { if (s.plumbingUnlocked) { playSound('doorOpen'); return 'A1a' } return 'A6' },
+                { to: () => { return s.plumbingUnlocked ? 'A1a' : 'A6' },
+                  fn: () => { if (s.plumbingUnlocked) { playSound('doorOpen') }},
                   xy: [.3, .35, .5, .6] },
                 { to: 'A7', xy: [.62, .78, .42, .6] }]},
             'A1a':{ left: () => { playSound('doorClose'); return 'A4' }, right: () => { playSound('doorClose'); return 'A2'}, boxes: [
@@ -244,17 +248,22 @@ const gameData = {
                     if: () => { return s.coffee == 1 || s.coffee == 2 }},
                 { xy: [.34, .4, .46, .52], fn: () => { playSound('button')
                     if (s.heaterLevel >= 0 && !s.valves[2] && s.valves[4] && s.pipe == 3) { playSound('slurp'); s.coffee = 2 }
-                    else { makeEphemeralBox('noWater', 1000) }}}]},
+                    else { makeEphemeralBox('noWater', 1) }}}]},
             'A5': { forward: 'plumbingroom/A1', back: 'A1a' },
             'B1': { left: 'B4', right: 'B2', boxes: [{ xy: [.2,.8,.4,1], to: 'B5' }]},
             'B2': { left: 'B1', right: 'B3', forward: 'A2' },
             'B3': { left: 'B2', right: 'B4', forward: 'H4' },
             'B4': { left: 'B3', right: 'B1', boxes: [
-                { xy: [.05, .2, .46, .5], to: () => { s.currentSalad = 0; return 'B6' + ['c', 'b', 'a', ''][s.salads[0]]}},
-                { xy: [.22, .35, .46, .5], to: () => { s.currentSalad = 1; return 'B6' + ['c', 'b', 'a', ''][s.salads[1]]}},
-                { xy: [.38, .51, .46, .5], to: () => { s.currentSalad = 2; return 'B6' + ['c', 'b', 'a', ''][s.salads[2]]}},
-                { xy: [.54, .67, .46, .5], to: () => { s.currentSalad = 3; return 'B6' + ['c', 'b', 'a', ''][s.salads[3]]}},
-                { xy: [.7, .84, .46, .5], to: () => { s.currentSalad = 4; return 'B6' + ['c', 'b', 'a', ''][s.salads[4]]}},
+                { xy: [.05, .2, .46, .5], fn: () => { s.currentSalad = 0 }, 
+                    to: () => { return 'B6' + ['c', 'b', 'a', ''][s.salads[0]]}},
+                { xy: [.22, .35, .46, .5], fn: () => { s.currentSalad = 1 }, 
+                    to: () => { return 'B6' + ['c', 'b', 'a', ''][s.salads[1]]}},
+                { xy: [.38, .51, .46, .5], fn: () => { s.currentSalad = 2 },
+                    to: () => { return 'B6' + ['c', 'b', 'a', ''][s.salads[2]]}},
+                { xy: [.54, .67, .46, .5], to: () => { s.currentSalad = 3 },
+                    to: () => { return 'B6' + ['c', 'b', 'a', ''][s.salads[3]]}},
+                { xy: [.7, .84, .46, .5], to: () => { s.currentSalad = 4 },
+                    to: () => { return 'B6' + ['c', 'b', 'a', ''][s.salads[4]]}},
                 { xy: [.09, .12, .42, .46], fn: () => { saladButton(0) }},
                 { xy: [.26, .29, .42, .46], fn: () => { saladButton(1) }},
                 { xy: [.43, .46, .42, .46], fn: () => { saladButton(2) }},
@@ -348,7 +357,7 @@ const gameData = {
                         playGif('stairsMiddleDown1', 'A3', 10 * .15) })}},
             'B4': { left: 'B3', right: 'B1' },
             'B5': { back: 'B1', boxes: [
-                { to: () => { playSound('drawer'); return 'B5a' }, xy: [.37, .52, .63, .78]}]},
+                { to: 'B5a', fn: () => { playSound('drawer') }, xy: [.37, .52, .63, .78]}]},
             'B5a':{ back: () => { playSound('drawer'); return'B1' }, boxes: [
                 { pic: 'card2', xy: [.03,.1,.5,.68], fn: () => { s.card = 0; refresh() },
                     if: () => { return s.card == 2 }},
@@ -409,20 +418,20 @@ const gameData = {
                 right: () => { hallTurnRight(); return 'A2' }},
             'A10': {
                 boxes: [
-                    { xy: [.5, .72, .2, .35], fn: () => {  makeEphemeralBox('doorHandle2', 500); 
+                    { xy: [.5, .72, .2, .35], fn: () => {  makeEphemeralBox('doorHandle2', .5); 
                         if (s.floor == 2 && s.hallPosition == 7 && s.hallDirection == 1) {
                             playSound('doorOpen'); goTo('A5a' , 'fade') } else { playSound('doorHandle');}}}],
                 back: 'A5' },
             'B1': { left: 'B4', right: 'B2', boxes: [ outerElevatorBox,
-                { xy: [.28, .31, .48, .52], to: () => { 
-                    if (s.floor == s.elevatorFloor) { playSound('elevatorOpen'); return 'B1b' }
-                    else if (!s.elevatorFixed) { playSound('elevatorOpen'); return 'B1a' }
-                    else { callElevator() }}}]},
+                { xy: [.28, .31, .48, .52], to: () => { if (s.floor == s.elevatorFloor) { return 'B1b' }
+                    else if (!s.elevatorFixed) { return 'B1a' }}, 
+                    fn: () => { if (s.floor == s.elevatorFloor || !s.elevatorFixed) { playSound('elevatorOpen') }
+                        else { callElevator() }}}]},
             'B1a': { left: () => { playSound('elevatorClose'); return 'B4' }, right: () => { playSound('elevatorClose'); return 'B2'},
-                boxes: [ outerElevatorBox, { to: () => { playSound('elevatorOpen'); return'B1' }, xy: [.28, .31, .48, .52] },
+                boxes: [ outerElevatorBox, { to: 'B1', fn: () => { playSound('elevatorOpen') }, xy: [.28, .31, .48, .52] },
                 { to: 'B5', xy: [.35, .66, .17, .88] }]},
             'B1b': { left: 'B4', right: 'B2', boxes: [ outerElevatorBox,
-                { to: () => { playSound('elevatorOpen'); return 'B1'}, xy: [.28, .31, .48, .52] },
+                { to: 'B1', fn: () => { playSound('elevatorOpen') }, xy: [.28, .31, .48, .52] },
                 { to: 'elevator/A1', xy: [.35, .66, .17, .88]}]},
             'B2': { left: 'B1', right: 'B3', 
                 forward: () => { s.hallDirection = 1; s.hallPosition = 6; return 'A9'}},
@@ -471,7 +480,8 @@ const gameData = {
         'room': { //zroom
             'A1': { left: 'A4', right: 'A2', boxes: [
                 { xy: [.62, .73, .1, .25], id: 'goldKeyhole', pic: () => { s.goldKey == 4 ? 'A1-key' : null },
-                    to: () => { if (s.goldKey == 4) { playSound('doorOpen'); return 'A1a' } else { playSound('doorLocked') }}}]},
+                    to: () => { if (s.goldKey == 4) { return 'A1a' }},
+                    fn: () => { if (s.goldKey == 4) { playSound('doorOpen') } else { playSound('doorLocked') }}}]},
             'A1a':{ left: () => { playSound('doorClose'); return 'A4' }, right: () => { playSound('doorClose'); return 'A2'},
                  forward: () => { playSound('doorClose'); return 'D1' }},
             'A2': { left: 'A1', right: 'A3', forward: 'B2', boxes: [
@@ -519,10 +529,10 @@ const gameData = {
         },
         'top': {
             'A1': { left: 'A4', right: 'A2', boxes: [ outerElevatorBox,
-                { to: () => { playSound('elevatorOpen'); return 'A1a'}, xy: [.28, .31, .48, .52]}]},
+                { to: 'A1a', fn: () => { playSound('elevatorOpen') }, xy: [.28, .31, .48, .52]}]},
             'A1a': { left: () => { playSound('elevatorClose'); return 'A4'}, 
-                right:  () => { playSound('elevatorClose'); return 'A2'}, boxes: [ outerElevatorBox,
-                { to: () => { playSound('elevatorClose'); return 'A1'}, xy: [.28, .31, .48, .52]},
+                right: () => { playSound('elevatorClose'); return 'A2'}, boxes: [ outerElevatorBox,
+                { to: 'A1', fn: () => { playSound('elevatorClose') }, xy: [.28, .31, .48, .52]},
                 { to: 'elevator/A1', xy: [.35, .66, .17, .88]}]},
             'A2': { left: 'A1', right: 'A3' },
             'A3': { left: 'A2', right: 'A4', forward: 'B2' },

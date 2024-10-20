@@ -163,11 +163,11 @@ function makeBox(boxData, div) {
 	let cursor = orDefault(boxData.cursor, 'forward')
 	setCursor(box, cursor)
 
-	let fn = boxData.fn
+	let fn = orDefault(boxData.fn, null, false)
 	let to = orDefault(boxData.to, null)
 	let transition = orDefault(boxData.transition, 'fade')
 	if (to != null && fn != null) {
-		fn = () => { fn(); goTo(to, transition) }}
+		fn = () => { boxData.fn(); goTo(to, transition) }}
 	else if (to != null) {
 		fn = () => { goTo(to, transition) }}
 	
@@ -449,7 +449,8 @@ function launchFullScreen(element) {
 // If x is a function, returns the result of evaluating x, otherwise returns x
 function simpleEval(x) { return (x instanceof Function) ? x() : x }
 
-function orDefault(value, def) { return (value == undefined) ? def : simpleEval(value) }
+function orDefault(value, def, eval = true) { return (value == undefined) ? def : 
+	(eval ? simpleEval(value) : value) }
 
 function isCollide(a, b) {
 	return !(a.y + a.height < b.y || a.y > b.y + b.height ||
