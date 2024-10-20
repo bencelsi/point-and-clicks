@@ -5,6 +5,7 @@ const GAME_FOLDER = "../games/" + window.location.search.substring(1).split('&')
 
 // first, load the game data
 addScript(GAME_FOLDER + "/game.js")
+
 // then, load the engine which wil run the game
 addScript("engine.js")
 
@@ -16,6 +17,4 @@ function addScript(src) {
 }
 
 // shared functions
-function wait(duration, then) {
-	return setTimeout(() => { then() }, duration)
-}
+function wait(duration, then) { return setTimeout(() => { then() }, duration * 1000) }

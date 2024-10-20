@@ -1,33 +1,32 @@
+// TODO: 'enqueue' a click for fast clickthru
 // TODO: Add 'menu' logic, saveable state
-// TODO: Make rooms optional.
-// TODO: no boxes while gif plays... 
-// TODO - how to cache when left/right returns fn? framesToCache, or... left: {to: 'A1', fn: ()=> {...}}
-// TODO - cache pics/gifs
-// Idea: you move around, but scary creature keeps following you
- 
+// TODO: Make rooms optional
+// TODO: how to cache when left/right returns fn? framesToCache, or... left: {to: 'A1', fn: ()=> {...}}
+// TODO: cache pics/gifs
+
 get("favicon").href = GAME_FOLDER + "/favicon.ico"
 const FRAME_PATH = GAME_FOLDER + '/assets/frames/'
 const GIF_PATH = GAME_FOLDER + '/assets/gifs/'
 const SOUND_PATH = GAME_FOLDER + '/assets/sound/'
 const MUSIC_PATH = SOUND_PATH + 'music/'
 const PIC_PATH = GAME_FOLDER + '/assets/pics/'
-const INVENTORY_PATH = GAME_FOLDER + '/assets/inventory/'
+const INVENTORY_PATH = PIC_PATH + '/inventory/'
 
-let locks = 0 // whether or not to listen to user input
 let music = new Audio(); music.loop = true
-window.onload = waitForGameData()
-
-// hacky way to wait for gameData & s (state) to load
-function waitForGameData() {
-	try { gameData; s; init() } 
-	catch (e) { console.log(e); wait(100, waitForGameData) }
-}
 
 // DOM globals:
 let standardBoxesDiv, customBoxesDiv, picsDiv, cacheDiv, transitionsDiv, frameImg, inventoryDiv, cursorBlockDiv
 
 // Constants:
 let CURSOR_PATH, WIDTH, HEIGHT, SIDE_SPEED, FADE_SPEED
+
+window.onload = waitForGameData()
+
+// hacky way to wait for gameData & s (state) to load
+function waitForGameData() {
+	try { gameData; s; init() } 
+	catch (e) { console.log(e); wait(.2, waitForGameData) }
+}
 
 function init() {
 	document.title = location.hostname === "" ? "." + gameData.title : gameData.title
@@ -44,10 +43,26 @@ function init() {
 	CURSOR_PATH = gameData.customCursors === true ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
 	WIDTH = gameData.frameWidth === undefined ? 750 : gameData.frameWidth
 	HEIGHT = gameData.frameHeight === undefined ? 750 : gameData.frameHeight
-	SIDE_SPEED = .35 // could be customized
-	FADE_SPEED = 1
-	get("screen").style.width = WIDTH + "px"
-	get("screen").style.height = HEIGHT + "px"
+	SIDE_SPEED = .35; FADE_SPEED = 1
+	get("screen").style.width = WIDTH + "px"; get("screen").style.height = HEIGHT + "px"
+	updateStyle(); setupStandardBoxes(); goTo(frame); refreshInventory(); setMusic(room)
+	//window.onclick = launchFullScreen(get('window'))
+}
+
+const standardBoxes = {
+	left: { xy: [0, .2, .2, .8], transition: 'left', cursor: 'left', id: 'left' },
+	right: { xy: [.8, 1, .2, .8], transition: 'right', cursor: 'right', id: 'right' },
+	forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'forward', id: 'forward' },
+	back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'back', id: 'back' }
+}
+
+// DOM setup  ******************************************
+function setupStandardBoxes() {
+	for (let i in standardBoxes) { makeBox(standardBoxes[i], standardBoxesDiv) }
+}
+
+
+function updateStyle() { // TODO: better.
 	get("style").innerHTML =  `
 	@keyframes leftIn { from { transform: translateX(0) } to { transform: translateX(${WIDTH}px) }}
 	@keyframes leftOut { from { transform: translateX(0) }}
@@ -61,44 +76,14 @@ function init() {
 	.rightOut { animation:rightOut ${SIDE_SPEED}s; transform: translateX(-${WIDTH}px) } 
 	.fadeIn { animation:fadeIn ${FADE_SPEED}s; } 
 	.fadeOut { animation:fadeOut ${FADE_SPEED}s; opacity: 0 }`
-
-	setupStandardBoxes()
-	goTo(frame, 'fade')
-	refreshInventory()
-	setMusic(room)
-	//window.onclick = launchFullScreen(get('window'))
 }
 
-const standardBoxes = {
-	left: { xy: [0, .2, .2, .8], transition: 'left', cursor: 'left' },
-	right: { xy: [.8, 1, .2, .8], transition: 'right', cursor: 'right' },
-	forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'forward' },
-	back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'back' }
-}
-
-// DOM setup  ******************************************
-function setupStandardBoxes() {
-	for (let i in standardBoxes) { //todo: better
-		let boxData = standardBoxes[i]
-		let box = makeBox(boxData.xy, boxData.cursor)
-		boxData.element = box
-		standardBoxesDiv.appendChild(box)
-	}
-}
-
-function freeze() {
-	cursorBlockDiv.style.visibility = 'visible'
-}
-
-function unfreeze() {
-	cursorBlockDiv.style.visibility = 'hidden'
-}
+function setFade(fade) { FADE_SPEED = fade; updateStyle() }
 
 // TRANSITIONS ******************************************
-function goTo(newFrame, transitionType, override = false) {
+function goTo(newFrame, transitionType) {
 	console.log(newFrame)
-	if (newFrame == null || (locks > 0 && !override)) { return }
-	locks++
+	if (newFrame == null) { return }
 	if (transitionType != 'none') { createTransition(transitionType + 'Out') }
 	[frame, newRoom, newExtension] = parseFrame(newFrame)
 	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
@@ -112,26 +97,32 @@ function goTo(newFrame, transitionType, override = false) {
 	refreshStandardBoxes(frameData)
 	refreshCustomBoxes()
 	if (transitionType != 'none') { createTransition(transitionType + 'In') }
-	delay = 1000 * (transitionType === 'none' ? 0 : SIDE_SPEED)
+	delay = transitionType === 'none' ? 0 : (transitionType === 'fade') ? FADE_SPEED : SIDE_SPEED
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
+	freeze()
 	wait(delay, () => {
+		console.log('fade done')
 		transitionsDiv.innerHTML = ''
 		cacheResources(frameData)
 		if (frameData.onEntrance != null) { frameData.onEntrance() }
-		locks--
+		unfreeze()
 	})
 }
 
-function createTransition(type) {
+function freeze() { cursorBlockDiv.style.visibility = 'visible' }
+
+function unfreeze() { cursorBlockDiv.style.visibility = 'hidden' }
+
+function createTransition(transitionType) {
 	let transition = document.createElement('div')
 	transition.appendChild(frameImg.cloneNode(true)) //creates duplicate img
 	let picBoxes = picsDiv.cloneNode(true)
 	picBoxes.id = null
 	transition.appendChild(picBoxes)
 	transition.classList.add('transition')
-	transition.classList.add(type)
-	if (type == 'leftIn') { transition.style.left = -WIDTH + 'px' } 
-	else if (type == 'rightIn') { transition.style.left = WIDTH + 'px' }
+	transition.classList.add(transitionType)
+	if (transitionType == 'leftIn') { transition.style.left = -WIDTH + 'px' } 
+	else if (transitionType == 'rightIn') { transition.style.left = WIDTH + 'px' }
 	transitionsDiv.appendChild(transition)
 }
 
@@ -146,75 +137,100 @@ function refreshCustomBoxes() {
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
 			let boxData = boxes[i]
-			if (boxData.if !== undefined && !boxData.if()) { continue }
 			makeCustomBox(boxData)
 		}
 	}
 }
 
-function makeEphemeralBox(img, life) { // TODO: ephemeral hitbox too
-	if (get(img) != null) { return }
-	makePicBox(img, img)
-	wait(life, () => {
-		let toRemove = get(img)
-		if (toRemove != null) { picsDiv.removeChild(toRemove) }})
-}
 
 // returns a box element from a JSON object containing box info, or null if the box shouldn't exist
 function makeCustomBox(boxData) {
-	let transition = boxData.transition == undefined ? 'fade' : boxData.transition
-	let fn = boxData.fn
-	if (boxData.to !== undefined && boxData.fn !== undefined) {
-		fn = () => { boxData.fn(); goTo(simpleEval(boxData.to), transition) }
-	} else if (boxData.to !== undefined) {
-		fn = () => { goTo(simpleEval(boxData.to), transition) }}
-	let pic = simpleEval(boxData.pic)
-	let offset = simpleEval(boxData.offset)
-	if (pic != null) { makePicBox(pic, boxData.id, offset, boxData.style, boxData.class, boxData.scale) }
+	if (boxData.if !== undefined && !boxData.if()) { return }
+	makeBox(boxData, customBoxesDiv)
+	makePicBox(boxData)
+}
+
+function makeBox(boxData, div) {
 	let xy = simpleEval(boxData.xy)
-	if (xy != null) {
-		let cursor = boxData.cursor === undefined ? 'forward' : simpleEval(boxData.cursor)
-		let id = simpleEval(boxData.id)
-		let box = makeBox(xy, cursor, fn, id)
-		customBoxesDiv.appendChild(box)
-	}
-}
+	if (boxData.xy == null) { return }
 
-// todo - consolidate into single 'makeBox' method.
-
-function makePicBox(pic, id, offset = null, style = null, className = null, scale = null) {
-	let img = document.createElement('img')
-	img.classList.add('picBox')
-	if (id != null) { img.id = id }
-	if (style != null) { img.style = style }
-	if (className != null) { img.classList.add(className) }
-	if (scale != null) {
-		img.style.width = scale + '%'
-		img.style.height = 'auto'
-	}
-	if (offset != null) { 
-		img.style.left = WIDTH * offset[0] + 'px'
-		img.style.top = HEIGHT * (1 - offset[1]) + 'px'
-	} else {
-		img.classList.add('full') 
-	}
-	img.src = PIC_PATH + pic + (pic.includes('.') ? '' : '.png')
-	picsDiv.appendChild(img)
-}
-
-function makeBox(xy, cursor, fn = null, id = null) {
 	let box = document.createElement('div')
 	box.className = 'box'
 	box.style.left = xy[0] * WIDTH + 'px'
 	box.style.width = (xy[1] - xy[0]) * WIDTH + 'px'
 	box.style.bottom = xy[2] * HEIGHT + 'px'
 	box.style.height = (xy[3] - xy[2]) * HEIGHT + 'px'
+	let cursor = orDefault(boxData.cursor, 'forward')
 	setCursor(box, cursor)
-	if (id != null) { box.id = id }
+
+	let fn = boxData.fn
+	let to = orDefault(boxData.to, null)
+	let transition = orDefault(boxData.transition, 'fade')
+	if (to != null && fn != null) {
+		fn = () => { fn(); goTo(to, transition) }}
+	else if (to != null) {
+		fn = () => { goTo(to, transition) }}
+	
 	if (fn != null) { box.onclick = fn }
-	return box
+	
+	let id = orDefault(boxData.id, null)
+	if (id != null) { box.id = id }
+	div.appendChild(box)
 }
 
+// todo - consolidate into single 'makeBox' method?
+function makePicBox(boxData) {
+	let pic = simpleEval(boxData.pic) 
+	if (pic == null) { return }
+
+	let img = document.createElement('img')
+	img.classList.add('picBox')
+	img.src = PIC_PATH + pic + (pic.includes('.') ? '' : '.png')
+	let style = orDefault(boxData.style, null)
+	if (style != null) { img.style = style }
+	let id = orDefault(boxData.id, null)
+	if (id != null) { img.id = id }
+	
+	let offset = orDefault(boxData.offset, null)
+	let centerOffset = orDefault(boxData.centerOffset, false)
+	if (offset != null) {
+		img.style.left = WIDTH * offset[0] - (centerOffset ? (img.width / 2) : 0) + 'px'
+		img.style.top = HEIGHT * (1 - offset[1]) - (centerOffset ? (img.height / 2) : 0) + 'px'
+	} else { img.classList.add('full') }
+	
+	let scale = orDefault(boxData.scale, null)
+	if (scale != null) { // todo: better
+		img.style.width = scale + '%'
+		img.style.height = 'auto'
+	}
+	picsDiv.appendChild(img)
+}
+
+
+
+function makeEphemeralBox(img, life) { // TODO: ephemeral hitbox too
+	if (get(img) != null) { return }
+	makePicBox({ 'pic': img, 'id': img })
+	wait(life, () => {
+		let toRemove = get(img)
+		if (toRemove != null) { picsDiv.removeChild(toRemove) }})
+}
+
+// TODO: make 'real' js objects? but then - cant encode both in 1 box
+
+// boxData can have:
+//                  box? (div)         	pic? (img)		type
+// xy (required)	X									val
+// to				X									val
+// fn				X									fn
+// cursor			X									val
+// transition		X									val
+// pic (required)						X
+// offset								X
+// centerOffset							X
+// if				?					?
+// style			X					X
+// id				?					?
 
 // STANDARD BOXES ******************************************
 
@@ -227,7 +243,7 @@ function refreshStandardBoxes(frameData) {
 }
 
 function refreshStandardBox(boxData, destinationFrame) {
-	let element = boxData.element
+	let element = get(boxData.id)
 	if (destinationFrame == null) {
 		element.style.visibility = 'hidden'
 	} else {
@@ -297,16 +313,15 @@ function makeDraggable(item, targets) {
 function playGif(name, newFrame, delay, after = null) {
 	console.log('name: ' + name)
 	//cacheFrame(gameData.rooms[room][newFrame]) //todo - parse here
-	locks++; let gif = document.createElement('img')
+	let gif = document.createElement('img')
 	gif.classList.add('fullGif')
 	freeze()
 	gif.onload = () => {
 		moviesDiv.appendChild(gif)
-		wait(delay / 2, () => {
-			goTo(newFrame, 'none', true)
-			wait(delay / 2, () => {
-				moviesDiv.innerHTML = ''; unfreeze()
-				locks--; if (after != null) { after() }})})}
+		if (newFrame != null) { goTo(newFrame, 'fade', true) }
+		wait(delay, () => {
+			moviesDiv.innerHTML = ''; unfreeze()
+			if (after != null) { after() }})}
 	gif.src = GIF_PATH + name + '.gif?a=' + Math.random() // todo: better
 	// todo - use new object? so it 	
 }
@@ -324,11 +339,8 @@ function cacheResources(frameData) {
 function cacheFrame(frame) {
 	if (frame == null || frame instanceof Function) { return }
 	let src
-	if (gameData.rooms[room][frame] === undefined) {
-		src = FRAME_PATH + frame + '.' + extension
-	} else {
-		src = FRAME_PATH + room  + '/' + frame + '.' + extension
-	}
+	if (gameData.rooms[room][frame] === undefined) { src = FRAME_PATH + frame + '.' + extension }
+	else { src = FRAME_PATH + room  + '/' + frame + '.' + extension }
 	if (cacheSet.has(src)) { return }
 	if (cacheDiv.childNodes.length >= 20) {
 		let cachedImageToRemove = cacheDiv.childNodes[0]
@@ -437,7 +449,8 @@ function launchFullScreen(element) {
 // If x is a function, returns the result of evaluating x, otherwise returns x
 function simpleEval(x) { return (x instanceof Function) ? x() : x }
 
-// Returns true if a and b are overlapping
+function orDefault(value, def) { return (value == undefined) ? def : simpleEval(value) }
+
 function isCollide(a, b) {
 	return !(a.y + a.height < b.y || a.y > b.y + b.height ||
 		a.x + a.width < b.x || a.x > b.x + b.width)
