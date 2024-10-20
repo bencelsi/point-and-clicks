@@ -10,6 +10,7 @@ const GIF_PATH = GAME_FOLDER + '/assets/gifs/'
 const SOUND_PATH = GAME_FOLDER + '/assets/sound/'
 const MUSIC_PATH = SOUND_PATH + 'music/'
 const PIC_PATH = GAME_FOLDER + '/assets/pics/'
+const MOVIE_PATH = GAME_FOLDER + '/assets/pics/movies/'
 const INVENTORY_PATH = PIC_PATH + '/inventory/'
 
 let music = new Audio(); music.loop = true
@@ -101,7 +102,6 @@ function goTo(newFrame, transitionType) {
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
 	freeze()
 	wait(delay, () => {
-		console.log('fade done')
 		transitionsDiv.innerHTML = ''
 		cacheResources(frameData)
 		if (frameData.onEntrance != null) { frameData.onEntrance() }
@@ -136,23 +136,17 @@ function refreshCustomBoxes() {
 	let boxes = frameData.boxes
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
-			let boxData = boxes[i]
-			makeCustomBox(boxData)
+			let X = boxes[i]
+			if (X.if != undefined && !X.if()) { continue }
+			makeBox(X, customBoxesDiv)
+			makePic(X)
 		}
 	}
 }
 
-
-// returns a box element from a JSON object containing box info, or null if the box shouldn't exist
-function makeCustomBox(boxData) {
-	if (boxData.if !== undefined && !boxData.if()) { return }
-	makeBox(boxData, customBoxesDiv)
-	makePicBox(boxData)
-}
-
-function makeBox(boxData, div) {
-	let xy = simpleEval(boxData.xy)
-	if (boxData.xy == null) { return }
+function makeBox(X, div) {
+	let xy = simpleEval(X.xy)
+	if (X.xy == null) { return }
 
 	let box = document.createElement('div')
 	box.className = 'box'
@@ -160,57 +154,79 @@ function makeBox(boxData, div) {
 	box.style.width = (xy[1] - xy[0]) * WIDTH + 'px'
 	box.style.bottom = xy[2] * HEIGHT + 'px'
 	box.style.height = (xy[3] - xy[2]) * HEIGHT + 'px'
-	let cursor = orDefault(boxData.cursor, 'forward')
+	let cursor = orDefault(X.cursor, 'forward')
 	setCursor(box, cursor)
 
-	let fn = orDefault(boxData.fn, null, false)
-	let to = orDefault(boxData.to, null)
-	let transition = orDefault(boxData.transition, 'fade')
-	if (to != null && fn != null) {
-		fn = () => { boxData.fn(); goTo(to, transition) }}
-	else if (to != null) {
-		fn = () => { goTo(to, transition) }}
-	
+	let fn = orDefault(X.fn, null, false)
+	let to = orDefault(X.to, null)
+	let transition = orDefault(X.transition, 'fade')
+	if (to != null && fn != null) { fn = () => { X.fn(); goTo(to, transition) }}
+	else if (to != null) { fn = () => { goTo(to, transition) }}
 	if (fn != null) { box.onclick = fn }
 	
-	let id = orDefault(boxData.id, null)
-	if (id != null) { box.id = id }
+	let id = orDefault(X.id, null); if (id != null) { box.id = id }
 	div.appendChild(box)
 }
 
 // todo - consolidate into single 'makeBox' method?
-function makePicBox(boxData) {
-	let pic = simpleEval(boxData.pic) 
-	if (pic == null) { return }
-
-	let img = document.createElement('img')
-	img.classList.add('picBox')
-	img.src = PIC_PATH + pic + (pic.includes('.') ? '' : '.png')
-	let style = orDefault(boxData.style, null)
-	if (style != null) { img.style = style }
-	let id = orDefault(boxData.id, null)
-	if (id != null) { img.id = id }
+function makePic(X) {
+	console.log('ppp')
+	let isMovie = X.steps != null
+	let pic = simpleEval(X.pic); if (pic == null) { return }
+	let img = document.createElement('img'); img.classList.add('picBox')
+	img.src = PIC_PATH + pic + (isMovie ? '/1' : '') + (pic.includes('.') ? '' : '.png')
 	
-	let offset = orDefault(boxData.offset, null)
-	let centerOffset = orDefault(boxData.centerOffset, false)
+	let style = orDefault(X.style, null); if (style != null) { img.style = style }
+	let id = orDefault(X.id, isMovie ? Math.random() : null); if (id != null) { img.id = id }
+	let offset = orDefault(X.offset, null)
+	let centerOffset = orDefault(X.centerOffset, false)
 	if (offset != null) {
 		img.style.left = WIDTH * offset[0] - (centerOffset ? (img.width / 2) : 0) + 'px'
-		img.style.top = HEIGHT * (1 - offset[1]) - (centerOffset ? (img.height / 2) : 0) + 'px'
-	} else { img.classList.add('full') }
+		img.style.top = HEIGHT * (1 - offset[1]) - (centerOffset ? (img.height / 2) : 0) + 'px' }
+	else { img.classList.add('full') }
 	
-	let scale = orDefault(boxData.scale, null)
+	let scale = orDefault(X.scale, null)
 	if (scale != null) { // todo: better
 		img.style.width = scale + '%'
 		img.style.height = 'auto'
 	}
 	picsDiv.appendChild(img)
+	if (isMovie) {
+		console.log('ppp')
+		movieStep({ obj: img, path: PIC_PATH + pic + '/', step: 0, steps: X.steps, totalSteps: orDefault(X.totalSteps, X.steps),
+			delay: orDefault(X.delay, .1), then: X.then, fate: orDefault(X.fate, 'end'), id: id })
+	}
+	return img
 }
 
+// function playMovie(X) {
+// 	let id = orDefault(X.id, Math.random())
+// 	let pic = makePic({ pic: 'movies/' + X.movie + '/1.png', offset: X.offset, id: id }, picsDiv)
+// 	movieStep({ obj: pic, path: MOVIE_PATH + X.movie + '/', step: 1, steps: X.steps, delay: X.delay, 
+// 		then: X.then, fate: X.fate, id: id })
+// }
+
+function movieStep(X) {
+	console.log(X.totalSteps)
+	if (get(X.id) == null) { return }
+	X.step++;
+	if (X.step == X.totalSteps) {
+		if (X.then != null) { X.then() }
+		if (X.fate == 'end') { picsDiv.removeChild(X.obj); return }
+		if (X.fate == 'stay') { return }
+		if (X.fate == 'loop') { X.step = 0 }
+	}
+	wait (X.delay, () => {
+		X.obj.src = X.path + (X.step % X.steps) + '.png'
+		movieStep(X)
+	})
+}
 
 
 function makeEphemeralBox(img, life) { // TODO: ephemeral hitbox too
 	if (get(img) != null) { return }
-	makePicBox({ 'pic': img, 'id': img })
+	let pic = makePic({ 'pic': img, 'id': img })
+	picsDiv.appendChild(pic)
 	wait(life, () => {
 		let toRemove = get(img)
 		if (toRemove != null) { picsDiv.removeChild(toRemove) }})
@@ -311,7 +327,6 @@ function makeDraggable(item, targets) {
 
 // GIFS ••••••••••••••••••••••••••••••••••••••••••••••••••
 function playGif(name, newFrame, delay, after = null) {
-	console.log('name: ' + name)
 	//cacheFrame(gameData.rooms[room][newFrame]) //todo - parse here
 	let gif = document.createElement('img')
 	gif.classList.add('fullGif')

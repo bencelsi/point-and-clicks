@@ -49,7 +49,7 @@ const keypadButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'opening', startFrame: 'A0',
+    startRoom: 'clockroom', startFrame: 'A1',
     extension: 'png',
     frameWidth: 1000, frameHeight: 750,
     // customCursors: true,
@@ -201,14 +201,16 @@ const gameData = {
         'clockroom' : {
             'A1': { left: 'A4', right: 'A2',
                 forward: () => { playGif('ladderDown', 'pool/B1', 10 * .15) }},
-            'A2': { alt: { name: 'A2.gif', if: () => { return s.clockRunning }}, left: 'A1', right: 'A3', boxes: [
+            'A2': { left: 'A1', right: 'A3', boxes: [
                 { xy: [.29, .34, .42, .48], fn: () => { playSound('gearsRunning'); 
-                    s.clockRunning = true; clockOn(); makeEphemeralBox('lever', 1)}},
+                    makePic({ pic: 'movies/gear1', steps: 3, totalSteps: 45 })
+                    s.clockOn = true; clockOn(); makeEphemeralBox('lever', 1)}},
+                //{ pic: 'movies/gear1', steps: 3, fate: 'loop', if: () => { return s.clockOn }},
                 { xy: [.48, .6, .22, .3], to: 'A5' },
                 { xy: [.65, .75, .21, .29], to: 'A6', pic: 'jesusNote', if: () => { return s.jesusCount >= 3 }}]},
             'A2a': { onEntrance: () => { freeze(); setMusic(null); playSound('jesus'); wait(9, () => {
                 goTo('A2', 'fade'); setMusic('clockroom'); unfreeze() })}},
-            'A3': { alt: { name: 'A3.gif', if: () => { return s.clockRunning }},left: 'A2', right: 'A4', boxes: [
+            'A3': { alt: { name: 'A3.gif', if: () => { return s.clockOn }}, left: 'A2', right: 'A4', boxes: [
                 // { pic: 'gear2.gif', offset: [0,.6], scale: 10 },
                 // { pic: 'gear3.gif', offset: [.77,.82], scale: 23 },
                 { pic: () => { return 'gear' + s.gears[0] }, offset: [.08, .38], centerOffset: true, rotation: 45 },
@@ -224,10 +226,10 @@ const gameData = {
                 { pic: () => { return 'gear' + s.gears[10] }, offset: [.79, .51], centerOffset: true },
                 { pic: 'gearTray0' }, { pic: 'gearTray2' }, { pic: 'gearTray4' }, { pic: 'gearTray6' }, 
                 { pic: 'gearTray1' }, { pic: 'gearTray3' }, { pic: 'gearTray5' }]},
-            'A4': { alt: { name: 'A4.gif', if: () => { return s.clockRunning }}, left: 'A3', right: 'A1', forward: 'A7' },
+            'A4': { alt: { name: 'A4.gif', if: () => { return s.clockOn }}, left: 'A3', right: 'A1', forward: 'A7' },
             'A5': { back: () => { s.jesusCount++; if (s.jesusCount == 3) { return 'A2a' }; return 'A2'}},
             'A6': { back: 'A2' },
-            'A7': { alt: { name: 'A7.gif', if: () => { return s.clockRunning }}, back: 'A4'}
+            'A7': { alt: { name: 'A7.gif', if: () => { return s.clockOn }}, back: 'A4' }
         },       
         'cafe': { //zcafe
             'A1': { left: 'A4', right: 'A2', boxes: [
@@ -264,7 +266,9 @@ const gameData = {
                     to: () => { return 'B6' + ['c', 'b', 'a', ''][s.salads[3]]}},
                 { xy: [.7, .84, .46, .5], to: () => { s.currentSalad = 4 },
                     to: () => { return 'B6' + ['c', 'b', 'a', ''][s.salads[4]]}},
-                { xy: [.09, .12, .42, .46], fn: () => { saladButton(0) }},
+                { xy: [.09, .12, .42, .46], fn: () => { saladButton(0);
+                    makePic({ pic: 'movies/salad', steps: 11, offset: [.127, .548], then: () => {
+                        makePic({ pic: 'movies/salad', steps: 11, offset: [.1, .39] })}})}},
                 { xy: [.26, .29, .42, .46], fn: () => { saladButton(1) }},
                 { xy: [.43, .46, .42, .46], fn: () => { saladButton(2) }},
                 { xy: [.6, .63, .42, .46], fn: () => { saladButton(3) }},
@@ -274,7 +278,7 @@ const gameData = {
             'B6a': { back: 'B4'},
             'B6b': { back: 'B4'},
             'B6c': { back: 'B4', boxes: [
-                { pic: () => { return 'salad' + [8, 7, 0, 1, 2][s.currentSalad]}, offset: [.45, .65], style: 'opacity: 50%;'},
+                { pic: () => { return 'salad' + [8, 7, 0, 1, 2][s.currentSalad]}, offset: [.45, .65], style: 'opacity: 50%;'}
             ]},
         },
         'plumbingroom': { //zplumbing
@@ -511,7 +515,7 @@ const gameData = {
                 { to: 'C6', xy: [.41, .57, .71, .93] },
                 { if: () => { return s.pig == 1 }, xy: [.25, .35, .4, .53], fn: () => { s.pig = 0; refresh() }, },
                 { if: () => { return s.pig == 1 }, pic: 'pig' }]},
-            'C5': { back: 'C2'},
+            'C5': { back: 'C2' },
             'C6': { back: 'C4' },
             'D1': { left: 'D4', right: 'D2', forward: 'D5' },
             'D2': { left: 'D1', right: 'D3', boxes: [
@@ -593,7 +597,7 @@ const s = {
     // front desk:
     lightsOn: false, cabinetDown: false, drawers: [false, false, false, false], clock1: 350, clock2: 359,
     //clockroom:
-    clockUnlocked: false, clockRunning: false, jesusCount: 0, gears: [0, 3, 2, 1, 3, 2, 1, 2, 3, 3, 3],
+    clockUnlocked: false, gearsOk: false, clockOn: false, jesusCount: 0, gears: [0, 3, 2, 1, 3, 2, 1, 2, 3, 3, 3],
     //cafe
     cafeUnlocked: true, currentSalad: 0, salads: [3, 3, 3, 3, 3],
     //plumbingroom:
