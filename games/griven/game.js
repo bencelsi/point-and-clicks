@@ -1,10 +1,10 @@
-// TODO: non-gif movies
 // TODO: Fix inventory sizing
 // TODO: Compress all images
 // TODO: Add Brochure
-// TODO: Clock puzzle
 // TODO: Salad puzzle
+// TODO: Clock puzzle
 // TODO: Steam puzzle
+// TODO: Room
 // TODO: Mr Bobb animations
 // TODO: Credits
 // TODO: Better locking - breaks hallways
@@ -12,8 +12,8 @@
 // TODO: Fix elevator num framing
 // TODO: wait for toilet to refill before flushing
 // TODO: live update for heater level
+// TODO: fade time bug
 
-// fn/to are redundant? eval should not have side effects.
 // idea: instead of lobby/A1, try assigning numbers... so, lB1,cA2, etc... for ease of use
 // idea for ease of use: store helper functions at ends of rooms?
 
@@ -57,7 +57,8 @@ const gameData = {
         'opening': {
             'menu': { boxes: [{ xy: [0, 1, 0, 1], to: 'A0' }]},
             'A0': { onEntrance: () => {
-                freeze(); playSound('music/opening'); setFade(4); goTo('A1', 'fade'); wait(4, () => {
+                freeze(); setMusic(null); playSound('opening');
+                setFade(4); goTo('A1', 'fade'); wait(4, () => {
                 playGif('opening', 'A2', 4, () => {
                 playSound('music/title'); wait(2, () => { goTo('A3', 'fade'); wait(4, () => {
                 goTo('lobby/A1', 'fade'); wait(4, () => {

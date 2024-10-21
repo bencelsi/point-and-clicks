@@ -44,7 +44,7 @@ function init() {
 	SIDE_SPEED = .35; FADE_SPEED = 1
 	get("screen").style.width = WIDTH + "px"; get("screen").style.height = HEIGHT + "px"
 	updateStyle(); setupStandardBoxes(); goTo(frame); refreshInventory(); setMusic(room)
-	//window.onclick = launchFullScreen(get('window'))
+	window.onclick = launchFullScreen(get('window'))
 }
 
 const standardBoxes = {
