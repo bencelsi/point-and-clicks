@@ -49,13 +49,14 @@ const keypadButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'clockroom', startFrame: 'A1',
+    startRoom: 'opening', startFrame: 'menu',
     extension: 'png',
     frameWidth: 1000, frameHeight: 750,
     // customCursors: true,
     rooms: {
         'opening': {
-            'A0': { forward: () => { 
+            'menu': { boxes: [{ xy: [0, 1, 0, 1], to: 'A0' }]},
+            'A0': { onEntrance: () => {
                 freeze(); playSound('music/opening'); setFade(4); goTo('A1', 'fade'); wait(4, () => {
                 playGif('opening', 'A2', 4, () => {
                 playSound('music/title'); wait(2, () => { goTo('A3', 'fade'); wait(4, () => {
@@ -167,7 +168,7 @@ const gameData = {
             'I2': { left: 'I1', right: 'I3', boxes: [
                 { xy: [.39, .43, .53, .64], fn: () => { 
                     playSound('toilet' + (s.valves[0] ? 'Flush' : 'Empty'))
-                    makeEphemeralBox('toiletHandle', .7); 
+                    makePic({ pic: 'toiletHandle', life: .7}); 
                     if (s.valves[0] && s.valves[1] && s.pipe == 2) {
                         s.heaterLevel = Math.min(100, s.heaterLevel + 10) }
                  }}]},
@@ -202,17 +203,25 @@ const gameData = {
             'A1': { left: 'A4', right: 'A2',
                 forward: () => { playGif('ladderDown', 'pool/B1', 10 * .15) }},
             'A2': { left: 'A1', right: 'A3', boxes: [
-                { xy: [.29, .34, .42, .48], fn: () => { playSound('gearsRunning'); 
-                    makePic({ pic: 'movies/gear1', steps: 3, totalSteps: 45 })
-                    s.clockOn = true; clockOn(); makeEphemeralBox('lever', 1)}},
-                //{ pic: 'movies/gear1', steps: 3, fate: 'loop', if: () => { return s.clockOn }},
+                { xy: [.29, .34, .42, .48], if: () => { return !s.clockOn }, fn: () => { 
+                    playSound('gearsRunning'); s.clockOn = true; refreshCustomBoxes()
+                    if (s.gearsOk) { clockOn() }
+                    else { freeze();
+                        wait(4.5, () => {
+                            s.clockOn = false;
+                            refreshCustomBoxes()
+                            unfreeze() })}}},
+                { mov: 'gear1', steps: 3, fate: 'loop', if: () => { return s.clockOn }, while: () => { return s.clockOn }},
+                { pic: 'lever', if: () => { return s.clockOn } },
                 { xy: [.48, .6, .22, .3], to: 'A5' },
                 { xy: [.65, .75, .21, .29], to: 'A6', pic: 'jesusNote', if: () => { return s.jesusCount >= 3 }}]},
             'A2a': { onEntrance: () => { freeze(); setMusic(null); playSound('jesus'); wait(9, () => {
                 goTo('A2', 'fade'); setMusic('clockroom'); unfreeze() })}},
-            'A3': { alt: { name: 'A3.gif', if: () => { return s.clockOn }}, left: 'A2', right: 'A4', boxes: [
+            'A3': { left: 'A2', right: 'A4', boxes: [
                 // { pic: 'gear2.gif', offset: [0,.6], scale: 10 },
                 // { pic: 'gear3.gif', offset: [.77,.82], scale: 23 },
+                { mov: 'gear2', steps: 3, fate: 'loop', if: () => { return s.clockOn }},
+                { mov: 'gear3', steps: 3, fate: 'loop', if: () => { return s.clockOn }},
                 { pic: () => { return 'gear' + s.gears[0] }, offset: [.08, .38], centerOffset: true, rotation: 45 },
                 { pic: () => { return 'gear' + s.gears[1] }, offset: [.14, .43], centerOffset: true, rotation: 45 },
                 { pic: () => { return 'gear' + s.gears[2] }, offset: [.13, .6], centerOffset: true },
@@ -250,7 +259,7 @@ const gameData = {
                     if: () => { return s.coffee == 1 || s.coffee == 2 }},
                 { xy: [.34, .4, .46, .52], fn: () => { playSound('button')
                     if (s.heaterLevel >= 0 && !s.valves[2] && s.valves[4] && s.pipe == 3) { playSound('slurp'); s.coffee = 2 }
-                    else { makeEphemeralBox('noWater', 1) }}}]},
+                    else { makePic({ pic: 'noWater', life: 1 }) }}}]},
             'A5': { forward: 'plumbingroom/A1', back: 'A1a' },
             'B1': { left: 'B4', right: 'B2', boxes: [{ xy: [.2,.8,.4,1], to: 'B5' }]},
             'B2': { left: 'B1', right: 'B3', forward: 'A2' },
@@ -267,8 +276,8 @@ const gameData = {
                 { xy: [.7, .84, .46, .5], to: () => { s.currentSalad = 4 },
                     to: () => { return 'B6' + ['c', 'b', 'a', ''][s.salads[4]]}},
                 { xy: [.09, .12, .42, .46], fn: () => { saladButton(0);
-                    makePic({ pic: 'movies/salad', steps: 11, offset: [.127, .548], then: () => {
-                        makePic({ pic: 'movies/salad', steps: 11, offset: [.1, .39] })}})}},
+                    makePic({ mov: 'salad', steps: 11, offset: [.127, .548], then: () => {
+                        makePic({ mov: 'salad', steps: 11, offset: [.1, .39] })}})}},
                 { xy: [.26, .29, .42, .46], fn: () => { saladButton(1) }},
                 { xy: [.43, .46, .42, .46], fn: () => { saladButton(2) }},
                 { xy: [.6, .63, .42, .46], fn: () => { saladButton(3) }},
@@ -422,7 +431,7 @@ const gameData = {
                 right: () => { hallTurnRight(); return 'A2' }},
             'A10': {
                 boxes: [
-                    { xy: [.5, .72, .2, .35], fn: () => {  makeEphemeralBox('doorHandle2', .5); 
+                    { xy: [.5, .72, .2, .35], fn: () => { makePic({ pic: 'doorHandle2', life: .5}); 
                         if (s.floor == 2 && s.hallPosition == 7 && s.hallDirection == 1) {
                             playSound('doorOpen'); goTo('A5a' , 'fade') } else { playSound('doorHandle');}}}],
                 back: 'A5' },
@@ -527,8 +536,9 @@ const gameData = {
                 { xy: [.39, .42, .44, .48], fn: () => { s.shower = 1; refreshCustomBoxes() }},
                 { xy: [.42, .45, .44, .48], fn: () => { s.shower = 0; refreshCustomBoxes() }},
                 { xy: [.45, .48, .44, .48], fn: () => { s.shower = 2; refreshCustomBoxes() }},
-                { if: () => { return s.shower !== 0 }, pic: () => { return s.shower === 1 ? 'cold' : 'hot' }},
-                { if: () => { return s.shower !== 0 }, pic: 'shower.gif', offset: [.5, 1], class: 'fullHeight' }]},
+                { if: () => { return s.shower != 0 }, pic: () => { return s.shower === 1 ? 'cold' : 'hot' }},
+                { if: () => { return s.shower != 0 }, mov: 'shower', steps: 8, delay: .075, fate: 'loop' }
+                ]},
             'D5': { back: 'D1' },
         },
         'top': {
@@ -597,7 +607,7 @@ const s = {
     // front desk:
     lightsOn: false, cabinetDown: false, drawers: [false, false, false, false], clock1: 350, clock2: 359,
     //clockroom:
-    clockUnlocked: false, gearsOk: false, clockOn: false, jesusCount: 0, gears: [0, 3, 2, 1, 3, 2, 1, 2, 3, 3, 3],
+    clockUnlocked: false, gearsOk: true, clockOn: false, jesusCount: 0, gears: [0, 3, 2, 1, 3, 2, 1, 2, 3, 3, 3],
     //cafe
     cafeUnlocked: true, currentSalad: 0, salads: [3, 3, 3, 3, 3],
     //plumbingroom:

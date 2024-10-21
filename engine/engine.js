@@ -10,7 +10,7 @@ const GIF_PATH = GAME_FOLDER + '/assets/gifs/'
 const SOUND_PATH = GAME_FOLDER + '/assets/sound/'
 const MUSIC_PATH = SOUND_PATH + 'music/'
 const PIC_PATH = GAME_FOLDER + '/assets/pics/'
-const MOVIE_PATH = GAME_FOLDER + '/assets/pics/movies/'
+const MOV_PATH = GAME_FOLDER + '/assets/movies/'
 const INVENTORY_PATH = PIC_PATH + '/inventory/'
 
 let music = new Audio(); music.loop = true
@@ -25,21 +25,18 @@ window.onload = waitForGameData()
 
 // hacky way to wait for gameData & s (state) to load
 function waitForGameData() {
-	try { gameData; s; init() } 
+	try { gameData; s; init() }
 	catch (e) { console.log(e); wait(.2, waitForGameData) }
 }
 
 function init() {
 	document.title = location.hostname === "" ? "." + gameData.title : gameData.title
-
 	//DOM elements:
 	standardBoxesDiv = get('standardBoxes'); customBoxesDiv = get('customBoxes'); picsDiv = get('pics')
 	cacheDiv = get('cache'); transitionsDiv = get('transitions'); frameImg = get('frame'); 
 	inventoryDiv = get('inventory'); moviesDiv = get('movies'); cursorBlockDiv = get('cursorBlock')
-	
 	// global vars:
 	room = gameData.startRoom; frame = gameData.startFrame; extension = gameData.extension
-
 	// constants
 	CURSOR_PATH = gameData.customCursors === true ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
 	WIDTH = gameData.frameWidth === undefined ? 750 : gameData.frameWidth
@@ -58,10 +55,7 @@ const standardBoxes = {
 }
 
 // DOM setup  ******************************************
-function setupStandardBoxes() {
-	for (let i in standardBoxes) { makeBox(standardBoxes[i], standardBoxesDiv) }
-}
-
+function setupStandardBoxes() { for (let i in standardBoxes) { makeBox(standardBoxes[i], standardBoxesDiv) }}
 
 function updateStyle() { // TODO: better.
 	get("style").innerHTML =  `
@@ -82,10 +76,10 @@ function updateStyle() { // TODO: better.
 function setFade(fade) { FADE_SPEED = fade; updateStyle() }
 
 // TRANSITIONS ******************************************
-function goTo(newFrame, transitionType) {
-	console.log(newFrame)
+function goTo(newFrame, transitionType) { console.log(newFrame)
 	if (newFrame == null) { return }
 	if (transitionType != 'none') { createTransition(transitionType + 'Out') }
+	
 	[frame, newRoom, newExtension] = parseFrame(newFrame)
 	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
 	let frameData = gameData.rooms[room][frame]
@@ -170,45 +164,48 @@ function makeBox(X, div) {
 
 // todo - consolidate into single 'makeBox' method?
 function makePic(X) {
-	console.log('ppp')
-	let isMovie = X.steps != null
-	let pic = simpleEval(X.pic); if (pic == null) { return }
-	let img = document.createElement('img'); img.classList.add('picBox')
-	img.src = PIC_PATH + pic + (isMovie ? '/1' : '') + (pic.includes('.') ? '' : '.png')
-	
-	let style = orDefault(X.style, null); if (style != null) { img.style = style }
-	let id = orDefault(X.id, isMovie ? Math.random() : null); if (id != null) { img.id = id }
+	let pic = document.createElement('img'); pic.classList.add('picBox')
+
+	let isMovie = X.mov != null
+	let name = isMovie ? simpleEval(X.mov) : simpleEval(X.pic)
+	if (name == null) { return }
+	let src = (isMovie ? MOV_PATH + name + '/1' : PIC_PATH + name) + (name.includes('.') ? '' : '.png')
+	pic.src = src
+
+	let style = orDefault(X.style, null); if (style != null) { pic.style = style }
+	let id = orDefault(X.id, isMovie ? Math.random() : null); if (id != null) { pic.id = id }
 	let offset = orDefault(X.offset, null)
 	let centerOffset = orDefault(X.centerOffset, false)
 	if (offset != null) {
-		img.style.left = WIDTH * offset[0] - (centerOffset ? (img.width / 2) : 0) + 'px'
-		img.style.top = HEIGHT * (1 - offset[1]) - (centerOffset ? (img.height / 2) : 0) + 'px' }
-	else { img.classList.add('full') }
+		pic.style.left = WIDTH * offset[0] - (centerOffset ? (pic.width / 2) : 0) + 'px'
+		pic.style.top = HEIGHT * (1 - offset[1]) - (centerOffset ? (pic.height / 2) : 0) + 'px' }
+	else { pic.classList.add('full') }
 	
 	let scale = orDefault(X.scale, null)
 	if (scale != null) { // todo: better
-		img.style.width = scale + '%'
-		img.style.height = 'auto'
+		pic.style.width = scale + '%'
+		pic.style.height = 'auto'
 	}
-	picsDiv.appendChild(img)
+	picsDiv.appendChild(pic)
 	if (isMovie) {
-		console.log('ppp')
-		movieStep({ obj: img, path: PIC_PATH + pic + '/', step: 0, steps: X.steps, totalSteps: orDefault(X.totalSteps, X.steps),
+		movieStep({ obj: pic, path: MOV_PATH + name + '/', while: X.while,
+			step: 0, steps: X.steps, totalSteps: orDefault(X.totalSteps, X.steps),
 			delay: orDefault(X.delay, .1), then: X.then, fate: orDefault(X.fate, 'end'), id: id })
-	}
-	return img
+	} 
+	let life = simpleEval(X.life, null)
+	if (life != null) { wait(life, () => { picsDiv.removeChild(pic) })}
+	return pic
 }
 
 // function playMovie(X) {
-// 	let id = orDefault(X.id, Math.random())
-// 	let pic = makePic({ pic: 'movies/' + X.movie + '/1.png', offset: X.offset, id: id }, picsDiv)
-// 	movieStep({ obj: pic, path: MOVIE_PATH + X.movie + '/', step: 1, steps: X.steps, delay: X.delay, 
+// let id = orDefault(X.id, Math.random())
+// let pic = makePic({ pic: 'movies/' + X.movie + '/1.png', offset: X.offset, id: id }, picsDiv)
+// movieStep({ obj: pic, path: MOV_PATH + X.movie + '/', step: 1, steps: X.steps, delay: X.delay, 
 // 		then: X.then, fate: X.fate, id: id })
 // }
 
 function movieStep(X) {
-	console.log(X.totalSteps)
-	if (get(X.id) == null) { return }
+	if (get(X.id) == null || (X.while != null && !X.while())) { return }
 	X.step++;
 	if (X.step == X.totalSteps) {
 		if (X.then != null) { X.then() }
@@ -222,31 +219,21 @@ function movieStep(X) {
 	})
 }
 
-
-function makeEphemeralBox(img, life) { // TODO: ephemeral hitbox too
-	if (get(img) != null) { return }
-	let pic = makePic({ 'pic': img, 'id': img })
-	picsDiv.appendChild(pic)
-	wait(life, () => {
-		let toRemove = get(img)
-		if (toRemove != null) { picsDiv.removeChild(toRemove) }})
-}
-
 // TODO: make 'real' js objects? but then - cant encode both in 1 box
 
 // boxData can have:
-//                  box? (div)         	pic? (img)		type
-// xy (required)	X									val
-// to				X									val
-// fn				X									fn
-// cursor			X									val
-// transition		X									val
-// pic (required)						X
-// offset								X
-// centerOffset							X
-// if				?					?
-// style			X					X
-// id				?					?
+//                  box? (div)         	pic? (img)		mov
+// xy (required)	X									
+// to				X									
+// fn				X									
+// cursor			X									
+// transition		X									
+// pic (required)						X				X
+// offset								X				X
+// centerOffset							X				X
+// if				?					?				X
+// style			X					X				X
+// id				?					?				X
 
 // STANDARD BOXES ******************************************
 
@@ -260,9 +247,8 @@ function refreshStandardBoxes(frameData) {
 
 function refreshStandardBox(boxData, destinationFrame) {
 	let element = get(boxData.id)
-	if (destinationFrame == null) {
-		element.style.visibility = 'hidden'
-	} else {
+	if (destinationFrame == null) { element.style.visibility = 'hidden' } 
+	else {
 		element.style.visibility = 'visible'
 		element.onclick = () => { goTo(simpleEval(destinationFrame), boxData.transition) }
 	}
@@ -381,7 +367,6 @@ function cacheFrame(frame) {
 
 //music.setAttribute('loop', true)
 function setMusic(newMusic) {
-	console.log(newMusic)
 	if (newMusic == null) { fadeOutMusic(music) }
 	else { fadeOutMusic(music, () => {
 		music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
