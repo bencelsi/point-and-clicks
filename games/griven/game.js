@@ -49,7 +49,7 @@ const keypadButtons = [
 
 const gameData = {
     title: 'Griven',
-    startRoom: 'opening', startFrame: 'menu',
+    startRoom: 'cafe', startFrame: 'B4',
     extension: 'png',
     frameWidth: 1000, frameHeight: 750,
     // customCursors: true,
@@ -57,7 +57,7 @@ const gameData = {
         'opening': {
             'menu': { boxes: [{ xy: [0, 1, 0, 1], to: 'A0' }]},
             'A0': { onEntrance: () => {
-                freeze(); setMusic(null); playSound('opening');
+                freeze(); setMusic(null); playSound('music/opening');
                 setFade(4); goTo('A1', 'fade'); wait(4, () => {
                 playGif('opening', 'A2', 4, () => {
                 playSound('music/title'); wait(2, () => { goTo('A3', 'fade'); wait(4, () => {
@@ -240,7 +240,7 @@ const gameData = {
             'A5': { back: () => { s.jesusCount++; if (s.jesusCount == 3) { return 'A2a' }; return 'A2'}},
             'A6': { back: 'A2' },
             'A7': { alt: { name: 'A7.gif', if: () => { return s.clockOn }}, back: 'A4' }
-        },       
+        },
         'cafe': { //zcafe
             'A1': { left: 'A4', right: 'A2', boxes: [
                 { to: () => { return s.plumbingUnlocked ? 'A1a' : 'A6' },
@@ -251,7 +251,7 @@ const gameData = {
                 { to: 'A5', xy: [.28, .46, .28, .75] },
                 { to: 'A7', xy: [.62, .78, .42, .6] }]},
             'A2': { left: 'A1', right: 'A3', forward: () => { playSound('doorClose'); return 'lobby/H2' }},
-            'A3': { left: 'A2', right: 'A4', forward: 'H4' },
+            'A3': { left: 'A2', right: 'A4' },
             'A4': { left: 'A3', right: 'A1', forward: 'B4' },
             'A6': { back: 'A1', boxes: keypadButtons }, 
             'A7': { back: () => { return s.plumbingDoorOpen ? 'A1a' : 'A1' }, boxes: [
@@ -266,6 +266,10 @@ const gameData = {
             'B2': { left: 'B1', right: 'B3', forward: 'A2' },
             'B3': { left: 'B2', right: 'B4', forward: 'H4' },
             'B4': { left: 'B3', right: 'B1', boxes: [
+                { xy: [.4, .53, .3, .39], drag: { y: [.1,.9] }, subBoxes: [
+                    { pic: 'bowl', scale: 100 }
+                ]},
+                { pic: 'bowlPour'},
                 { xy: [.05, .2, .46, .5], fn: () => { s.currentSalad = 0 }, 
                     to: () => { return 'B6' + ['c', 'b', 'a', ''][s.salads[0]]}},
                 { xy: [.22, .35, .46, .5], fn: () => { s.currentSalad = 1 }, 
@@ -277,19 +281,27 @@ const gameData = {
                 { xy: [.7, .84, .46, .5], to: () => { s.currentSalad = 4 },
                     to: () => { return 'B6' + ['c', 'b', 'a', ''][s.salads[4]]}},
                 { xy: [.09, .12, .42, .46], fn: () => { saladButton(0);
-                    makePic({ mov: 'salad', steps: 11, offset: [.127, .548], then: () => {
-                        makePic({ mov: 'salad', steps: 11, offset: [.1, .39] })}})}},
-                { xy: [.26, .29, .42, .46], fn: () => { saladButton(1) }},
-                { xy: [.43, .46, .42, .46], fn: () => { saladButton(2) }},
-                { xy: [.6, .63, .42, .46], fn: () => { saladButton(3) }},
-                { xy: [.77, .8, .42, .46], fn: () => { saladButton(4) }}]},
+                    makePic({ mov: 'salad', steps: 13, delay: .06, offset: [.1, .39], scale: 3.5, then: () => {
+                        makePic({ mov: 'salad', steps: 13, delay: .06, offset: [.127, .548], scale: 3.5 })}})}},
+                { xy: [.26, .29, .42, .46], fn: () => { saladButton(1)
+                    makePic({ mov: 'salad', steps: 13, delay: .06, offset: [.28, .39], scale: 3.5, then: () => {
+                        makePic({ mov: 'salad', steps: 13, delay: .06, offset: [.28, .548], scale: 3.5 })}})}},
+                { xy: [.43, .46, .42, .46], fn: () => { saladButton(2);
+                    makePic({ mov: 'salad', steps: 13, delay: .06, offset: [.46, .39], scale: 3.5, then: () => {
+                        makePic({ mov: 'salad', steps: 13, delay: .05, offset: [.436, .548], scale: 3.5 })}})}},
+                { xy: [.6, .63, .42, .46], fn: () => { saladButton(3) 
+                    makePic({ mov: 'salad', steps: 13, delay: .06, offset: [.637, .39], scale: 3.5, then: () => {
+                        makePic({ mov: 'salad', steps: 13, delay: .05, offset: [.59, .548], scale: 3.5 })}})}},
+                { xy: [.77, .8, .42, .46], fn: () => { saladButton(4) 
+                    makePic({ mov: 'salad', steps: 13, delay: .05, offset: [.82, .39], scale: 3.5, then: () => {
+                        makePic({ mov: 'salad', steps: 13, delay: .05, offset: [.747, .548], scale: 3.5 })}})}}            
+                ]},
             'B5': { back: 'B1'},
             'B6': { back: 'B4'},
             'B6a': { back: 'B4'},
             'B6b': { back: 'B4'},
             'B6c': { back: 'B4', boxes: [
-                { pic: () => { return 'salad' + [8, 7, 0, 1, 2][s.currentSalad]}, offset: [.45, .65], style: 'opacity: 50%;'}
-            ]},
+                { pic: () => { return 'salad' + [8, 7, 0, 1, 2][s.currentSalad]}, offset: [.45, .65], style: 'opacity: 50%;' }]},
         },
         'plumbingroom': { //zplumbing
             'A1': { left: 'A4', right: 'A2', boxes: [
@@ -318,10 +330,10 @@ const gameData = {
                     fn: () => {  flipValve(5) }}, 
                 { xy: [.25, .5, .86, 1], pic: () => { return s.pipe == 3 ? 'pipe3' : null }, id: 'pipe3',
                     fn: () => { if (s.pipe == 3) { s.pipe = 0; refreshCustomBoxes(); refresh() }}}]},
-            'A4': { left: 'A3', right: 'A1', boxes: 
-                [{ to: 'A5', xy: [.15, .3, .08, .9]},
+            'A4': { left: 'A3', right: 'A1', boxes: [
+                { to: 'A5', xy: [.15, .3, .08, .9]},
                 { xy: [.6,.7,.25,.32], fn: () => { s.pipe = 0; refreshCustomBoxes(); refresh()},
-                pic: 'pipe1', if: () => { return s.pipe == 1 }}]},
+                    pic: 'pipe1', if: () => { return s.pipe == 1 }}]},
             'A5': { forward: () => { playSound('doorClose'); return 'cafe/A3' }, back: 'A4' },
             'B1': { left: 'B4', right: 'B2', boxes: [
                 { to: 'B5', xy: [.3, .5, .48, .65] }]},
@@ -331,8 +343,7 @@ const gameData = {
                 { xy: [.38, .57, .6, .71], pic: () => { return s.pipe == 2 ? 'pipe2' : null }, id: 'pipe2',
                     fn: () => { if (s.pipe == 2) { s.pipe = 0 }; refreshCustomBoxes(); refresh() }},
                 { pic: 'heaterMeter', scale: 3, 
-                    offset: () => { return [.242 - (.019 * (s.heaterLevel / 100)), .016 + (.383 * (s.heaterLevel / 100))] }}
-            ]},
+                    offset: () => { return [.242 - (.019 * (s.heaterLevel / 100)), .016 + (.383 * (s.heaterLevel / 100))]}}]},
             'B3': { left: 'B2', right: 'B4', boxes: [
                 { xy: [.53, .6, .49, .58], pic: () => { return s.valves[2] ? 'valve2' : null }, 
                     fn: () => {  flipValve(2) }},
@@ -343,19 +354,16 @@ const gameData = {
         },
         'stairs': { //zstairs
             'A1': { left: 'A4', right: 'A2', 
-                forward: () => { 
-                    s.floor++; playSound('stairsUp')
+                forward: () => { s.floor++; playSound('stairsUp')
                     playGif('stairsMiddleUp2', 'C1', 9 * .15, () => { 
                         if (s.floor === 10) { clearTimeout(topFloorWaitId); playGif('stairsTopUp', 'B1', 10 * .15) }
                         else { playGif('stairsMiddleUp1', 'A1', 9 * .15) }})}},
             'A2': { left: 'A1', right: 'A3', forward: () => { 
                 s.hallDirection = 1; s.hallPosition = 2; return 'hall/A7' }, boxes: [
-                    { pic: () => { return 'floor' + s.floor}, offset: [.865, .91] }
-                ]},
+                    { pic: () => { return 'floor' + s.floor}, offset: [.865, .91] }]},
             'A3': { left: 'A2', right: 'A4', 
-                forward: () => { s.floor--
-                    playSound('stairsDown')
-                    playGif('stairsMiddleDown2', 'C1', 9 * .15, () => { 
+                forward: () => { s.floor--; playSound('stairsDown')
+                    playGif('stairsMiddleDown2', 'C1', 9 * .15, () => {
                         playSound('stairsDown');
                         if (s.floor === 1) { playGif('stairsBottomDown', 'lobby/F2', 9 * .15) } 
                         else { playGif('stairsMiddleDown1', 'A3', 10 * .15) }})}},
@@ -375,9 +383,8 @@ const gameData = {
             'B5a':{ back: () => { playSound('drawer'); return'B1' }, boxes: [
                 { pic: 'card2', xy: [.03,.1,.5,.68], fn: () => { s.card = 0; refresh() },
                     if: () => { return s.card == 2 }},
-                { },
-                { pic: 'B5a-coffee', if: () => { return s.coffee == 3 }},
-                { pic: 'B5a-note', if: () => { return s.coffee == 4 }}
+                { pic: 'drawerCoffee', if: () => { return s.coffee == 3 }},
+                { pic: 'drawerNote', if: () => { return s.coffee == 4 }}
             ]},
             'C1': {}
         },
@@ -538,8 +545,9 @@ const gameData = {
                 { xy: [.42, .45, .44, .48], fn: () => { s.shower = 0; refreshCustomBoxes() }},
                 { xy: [.45, .48, .44, .48], fn: () => { s.shower = 2; refreshCustomBoxes() }},
                 { if: () => { return s.shower != 0 }, pic: () => { return s.shower === 1 ? 'cold' : 'hot' }},
-                { if: () => { return s.shower != 0 }, mov: 'shower', steps: 8, delay: .075, fate: 'loop' }
-                ]},
+                { mov: 'shower', steps: 8, delay: .075, fate: 'loop', if: () => { 
+                    return s.floorValve == 2 && (s.shower == 1 || 
+                        (s.shower == 2 && s.pipe == 3 && !s.valves[2] && s.valves[3] && s.heaterLevel > 0)) }}]},
             'D5': { back: 'D1' },
         },
         'top': {
@@ -670,6 +678,7 @@ function comboIs(goal) {
 
 function saladButton(n) {
     playSound('button')
+    console.log('sb')
     if (s.salads[n] > 0) { playSound('slurp'); s.salads[n]-- }
 }
 

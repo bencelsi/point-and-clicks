@@ -39,12 +39,12 @@ function init() {
 	room = gameData.startRoom; frame = gameData.startFrame; extension = gameData.extension
 	// constants
 	CURSOR_PATH = gameData.customCursors === true ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
-	WIDTH = gameData.frameWidth === undefined ? 750 : gameData.frameWidth
-	HEIGHT = gameData.frameHeight === undefined ? 750 : gameData.frameHeight
+	WIDTH = gameData.frameWidth == null ? 750 : gameData.frameWidth
+	HEIGHT = gameData.frameHeight == null ? 750 : gameData.frameHeight
 	SIDE_SPEED = .35; FADE_SPEED = 1
 	get("screen").style.width = WIDTH + "px"; get("screen").style.height = HEIGHT + "px"
 	updateStyle(); setupStandardBoxes(); goTo(frame); refreshInventory(); setMusic(room)
-	window.onclick = launchFullScreen(get('window'))
+	//window.onclick = launchFullScreen(get('window'))
 }
 
 const standardBoxes = {
@@ -131,14 +131,14 @@ function refreshCustomBoxes() {
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
 			let X = boxes[i]
-			if (X.if != undefined && !X.if()) { continue }
+			if (X.if != null && !X.if()) { continue }
 			makeBox(X, customBoxesDiv)
 			makePic(X)
 		}
 	}
 }
 
-function makeBox(X, div) {
+function makeBox(X, parent) {
 	let xy = simpleEval(X.xy)
 	if (X.xy == null) { return }
 
@@ -159,11 +159,18 @@ function makeBox(X, div) {
 	if (fn != null) { box.onclick = fn }
 	
 	let id = orDefault(X.id, null); if (id != null) { box.id = id }
-	div.appendChild(box)
+	if (X.subBoxes != null) {
+		for (i in X.subBoxes) {
+			makePic(X.subBoxes[i], box)
+			makeBox(X.subBoxes[i], box)
+		}
+	}
+	if (X.drag != null) { makeDraggable(box, []) }
+	parent.appendChild(box)
 }
 
 // todo - consolidate into single 'makeBox' method?
-function makePic(X) {
+function makePic(X, parent = picsDiv) {
 	let pic = document.createElement('img'); pic.classList.add('picBox')
 
 	let isMovie = X.mov != null
@@ -186,12 +193,13 @@ function makePic(X) {
 		pic.style.width = scale + '%'
 		pic.style.height = 'auto'
 	}
-	picsDiv.appendChild(pic)
+	parent.appendChild(pic)
 	if (isMovie) {
 		movieStep({ obj: pic, path: MOV_PATH + name + '/', while: X.while,
 			step: 0, steps: X.steps, totalSteps: orDefault(X.totalSteps, X.steps),
 			delay: orDefault(X.delay, .1), then: X.then, fate: orDefault(X.fate, 'end'), id: id })
 	} 
+	
 	let life = simpleEval(X.life, null)
 	if (life != null) { wait(life, () => { picsDiv.removeChild(pic) })}
 	return pic
@@ -214,14 +222,10 @@ function movieStep(X) {
 		if (X.fate == 'loop') { X.step = 0 }
 	}
 	wait (X.delay, () => {
-		X.obj.src = X.path + (X.step % X.steps) + '.png'
-		movieStep(X)
+		X.obj.src = X.path + (X.step % X.steps) + '.png'; movieStep(X)
 	})
 }
 
-// TODO: make 'real' js objects? but then - cant encode both in 1 box
-
-// boxData can have:
 //                  box? (div)         	pic? (img)		mov
 // xy (required)	X									
 // to				X									
@@ -234,8 +238,6 @@ function movieStep(X) {
 // if				?					?				X
 // style			X					X				X
 // id				?					?				X
-
-// STANDARD BOXES ******************************************
 
 function refreshStandardBoxes(frameData) {
 	if (frameData == null) { return }
@@ -257,7 +259,7 @@ function refreshStandardBox(boxData, destinationFrame) {
 // INVENTORY ••••••••••••••••••••••••••••••••••••••••••••••••••
 
 function refreshInventory() {
-	if (inventory === undefined) { return }
+	if (inventory == null) { return }
 	inventoryDiv.innerHTML = ''
 	Object.keys(inventory).forEach(key => { if (s[key] == 0) { makeInventoryItem(key) }})
 }
@@ -277,10 +279,12 @@ function makeInventoryItem(id) {
 
 // Make given inventory box draggable, execute action if dropped on targetId
 function makeDraggable(item, targets) {
+	console.log('drag')
 	setCursor(item, 'open')
 	item.onmousedown = function(event) {
+		console.log(event)
 		event.preventDefault()
-		//setCursor(item, 'closed')	
+		setCursor(item, 'closed')	
 		let itemX = parseInt(item.style.left)
 		let itemY = parseInt(item.style.top)
 		let mouseX = event.clientX
@@ -340,7 +344,7 @@ function cacheResources(frameData) {
 function cacheFrame(frame) {
 	if (frame == null || frame instanceof Function) { return }
 	let src
-	if (gameData.rooms[room][frame] === undefined) { src = FRAME_PATH + frame + '.' + extension }
+	if (gameData.rooms[room][frame] == undefined) { src = FRAME_PATH + frame + '.' + extension }
 	else { src = FRAME_PATH + room  + '/' + frame + '.' + extension }
 	if (cacheSet.has(src)) { return }
 	if (cacheDiv.childNodes.length >= 20) {
@@ -449,10 +453,8 @@ function launchFullScreen(element) {
 // If x is a function, returns the result of evaluating x, otherwise returns x
 function simpleEval(x) { return (x instanceof Function) ? x() : x }
 
-function orDefault(value, def, eval = true) { return (value == undefined) ? def : 
+function orDefault(value, def, eval = true) { return (value == null) ? def : 
 	(eval ? simpleEval(value) : value) }
 
 function isCollide(a, b) {
-	return !(a.y + a.height < b.y || a.y > b.y + b.height ||
-		a.x + a.width < b.x || a.x > b.x + b.width)
-}
+	return !(a.y + a.height < b.y || a.y > b.y + b.height || a.x + a.width < b.x || a.x > b.x + b.width) }
