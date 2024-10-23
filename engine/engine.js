@@ -42,7 +42,12 @@ function init() {
 	WIDTH = gameData.frameWidth == null ? 750 : gameData.frameWidth
 	HEIGHT = gameData.frameHeight == null ? 750 : gameData.frameHeight
 	SIDE_SPEED = .35; FADE_SPEED = 1
-	get("screen").style.width = WIDTH + "px"; get("screen").style.height = HEIGHT + "px"
+
+	get("all").style.width = WIDTH + "px";
+	get("all").style.height = HEIGHT + 100 + "px";
+	get("screen").style.width = WIDTH + "px";
+	get("screen").style.height = HEIGHT + "px"
+	get("inventory").style.width = WIDTH + "px";
 	updateStyle(); setupStandardBoxes(); goTo(frame); refreshInventory(); setMusic(room)
 	//window.onclick = launchFullScreen(get('window'))
 }
@@ -75,6 +80,10 @@ function updateStyle() { // TODO: better.
 
 function setFade(fade) { FADE_SPEED = fade; updateStyle() }
 
+function freeze() { cursorBlockDiv.style.visibility = 'visible' }
+
+function unfreeze() { cursorBlockDiv.style.visibility = 'hidden' }
+
 // TRANSITIONS ******************************************
 function goTo(newFrame, transitionType) { console.log(newFrame)
 	if (newFrame == null) { return }
@@ -103,16 +112,12 @@ function goTo(newFrame, transitionType) { console.log(newFrame)
 	})
 }
 
-function freeze() { cursorBlockDiv.style.visibility = 'visible' }
-
-function unfreeze() { cursorBlockDiv.style.visibility = 'hidden' }
-
 function createTransition(transitionType) {
 	let transition = document.createElement('div')
 	transition.appendChild(frameImg.cloneNode(true)) //creates duplicate img
-	let picBoxes = picsDiv.cloneNode(true)
-	picBoxes.id = null
-	transition.appendChild(picBoxes)
+	let pics = picsDiv.cloneNode(true)
+	pics.id = null
+	transition.appendChild(pics)
 	transition.classList.add('transition')
 	transition.classList.add(transitionType)
 	if (transitionType == 'leftIn') { transition.style.left = -WIDTH + 'px' } 
@@ -171,7 +176,7 @@ function makeBox(X, parent) {
 
 // todo - consolidate into single 'makeBox' method?
 function makePic(X, parent = picsDiv) {
-	let pic = document.createElement('img'); pic.classList.add('picBox')
+	let pic = document.createElement('img'); pic.classList.add('pic')
 
 	let isMovie = X.mov != null
 	let name = isMovie ? simpleEval(X.mov) : simpleEval(X.pic)
@@ -267,7 +272,7 @@ function refreshInventory() {
 function makeInventoryItem(id) {
 	let item = document.createElement('div')
 	item.classList.add('inventory')
-	item.classList.add('box')
+	//item.classList.add('box')
 	item.style.left = '0px'
 	item.style.top = '0px'
 	let img = document.createElement('img')
@@ -279,10 +284,8 @@ function makeInventoryItem(id) {
 
 // Make given inventory box draggable, execute action if dropped on targetId
 function makeDraggable(item, targets) {
-	console.log('drag')
 	setCursor(item, 'open')
 	item.onmousedown = function(event) {
-		console.log(event)
 		event.preventDefault()
 		setCursor(item, 'closed')	
 		let itemX = parseInt(item.style.left)
@@ -292,8 +295,7 @@ function makeDraggable(item, targets) {
 		document.onmousemove = function(event) {
 			event.preventDefault()
 			item.style.left = itemX + event.clientX - mouseX + 'px'
-			item.style.top = itemY + event.clientY - mouseY + 'px'
-		};
+			item.style.top = itemY + event.clientY - mouseY + 'px' };
 		document.onmouseup = function(event) {
 			document.onmousemove = null
 			document.onmouseup = null
@@ -301,8 +303,7 @@ function makeDraggable(item, targets) {
 			for (let i in targets) {
 				if (targets[i].frame != null) {
 					let parsed = parseFrame(targets[i].frame)
-					if (room == parsed[1] && frame == parsed[0]) { targets[i].fn(); return }
-				}
+					if (room == parsed[1] && frame == parsed[0]) { targets[i].fn(); return }}
 				let targetObj = get(targets[i].id)
 				if (targetObj != null && isCollide(item, targetObj)) { targets[i].fn(); return }
 			}
@@ -357,7 +358,6 @@ function cacheFrame(frame) {
 	cacheDiv.appendChild(cachedImage)
 	cacheSet.add(src)
 }
-
 
 // SOUND ******************************************
 
@@ -426,16 +426,10 @@ function setVolume(n, volume, speed) {
 
 function parseFrame(frame) {
 	if (typeof frame != 'string') { return [frame, null, null] }
-	let room = newExtension = null
-	if (frame.includes('/')) {
-		let roomFrame = frame.split('/')
-		room = roomFrame[0]; frame = roomFrame[1]
-	}
-	if (frame.includes('.')) {
-		let frameExtension = frame.split('/')
-		frame = frameExtension[0]; extension = frameExtension[1]
-	}
-	return [frame, room, extension]
+	let room = newExt = null
+	if (frame.includes('/')) { let roomFrame = frame.split('/'); room = roomFrame[0]; frame = roomFrame[1] }
+	if (frame.includes('.')) { let frameExt = frame.split('/'); frame = frameExt[0]; newExt = frameExt[1] }
+	return [frame, room, newExt]
 }
 
 function get(id) { return document.getElementById(id) }
