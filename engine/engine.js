@@ -21,27 +21,25 @@ let CURSOR_PATH, WIDTH, HEIGHT, SIDE_SPEED, FADE_SPEED
 
 // Global vars:
 let music = new Audio(); music.loop = true; let cacheSet = new Set()
-let sounds = [new Audio(), new Audio(), new Audio] // TODO: make concurrent sounds variable
+let sounds = [new Audio(), new Audio(), new Audio, new Audio, new Audio] // TODO: make concurrent sounds variable
 let persistentIds = []
-window.onload = waitForGameData()
+window.onload = waitForData()
 
 // hacky way to wait for gameData & s (state) to load
-function waitForGameData() {
-	try { gameData; s; init() }
-	catch (e) { console.log(e); wait(.2, waitForGameData) }}
+function waitForData() { try { startData; roomData; s; init() } catch (e) { console.log(e); wait(.2, waitForData) }}
 
 function init() {
-	document.title = location.hostname == "" ? "." + gameData.title : gameData.title
+	document.title = (location.hostname == "" ? "." : "") + startData.title
 	//DOM elements:
 	standardBoxesDiv = get('standardBoxes'); customBoxesDiv = get('customBoxes'); picsDiv = get('pics')
 	cacheDiv = get('cache'); transitionsDiv = get('transitions'); frameImg = get('frame'); persistentDiv = get('persistents')
 	inventoryDiv = get('inventory'); moviesDiv = get('movies'); cursorBlockDiv = get('cursorBlock')
 	// global vars:
-	room = gameData.startRoom; frame = gameData.startFrame; extension = gameData.extension
+	room = startData.room; frame = startData.frame; extension = startData.extension
 	// constants
-	CURSOR_PATH = gameData.customCursors ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
-	WIDTH = gameData.frameWidth == null ? 750 : gameData.frameWidth
-	HEIGHT = gameData.frameHeight == null ? 750 : gameData.frameHeight
+	CURSOR_PATH = startData.customCursors ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
+	WIDTH = startData.frameWidth == null ? 750 : startData.frameWidth
+	HEIGHT = startData.frameHeight == null ? 750 : startData.frameHeight
 	SIDE_SPEED = .35; FADE_SPEED = 1
 
 	get("all").style.width = WIDTH + "px"; get("all").style.height = HEIGHT + 100 + "px"
@@ -55,8 +53,7 @@ const standardBoxes = {
 	left: { xy: [0, .2, .2, .8], transition: 'left', cursor: 'left', id: 'left' },
 	right: { xy: [.8, 1, .2, .8], transition: 'right', cursor: 'right', id: 'right' },
 	forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'forward', id: 'forward' },
-	back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'back', id: 'back' }
-}
+	back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'back', id: 'back' }}
 
 // DOM setup  ******************************************
 function setupStandardBoxes() { for (let i in standardBoxes) { makeBox(standardBoxes[i], standardBoxesDiv) }}
@@ -90,7 +87,7 @@ function goTo(newFrame, transitionType = 'fade') { console.log(newFrame)
 	
 	[frame, newRoom, newExtension] = parseFrame(newFrame)
 	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
-	let frameData = gameData.rooms[room][frame]
+	let frameData = roomData[room][frame]
 	if (frameData == null) frameData = {}
 	let img
 	if (frameData.alt != null && frameData.alt.if()) img = frameData.alt.name
@@ -121,7 +118,7 @@ function refresh() { refreshCustomBoxes(); refreshStandardBoxes(); refreshInvent
 
 function refreshCustomBoxes() {
 	picsDiv.innerHTML = ''; customBoxesDiv.innerHTML = ''
-	let frameData = gameData.rooms[room][frame]
+	let frameData = roomData[room][frame]
 	if (frameData == null) return
 	let boxes = frameData.boxes
 	if (boxes != null) {
@@ -132,7 +129,7 @@ function refreshCustomBoxes() {
 
 	// Persistents
 	let newIds = []
-	let persistents = gameData.rooms[room]['persistents']
+	let persistents = roomData[room]['persistents']
 	if (persistents != null) {
 		for (i in persistents) {
 			let persistent = persistents[i]
@@ -313,7 +310,7 @@ function cacheResources(frameData) {
 function cacheFrame(frame) {
 	if (frame == null || frame instanceof Function) return
 	let src
-	if (gameData.rooms[room][frame] == undefined) src = FRAME_PATH + frame + '.' + extension
+	if (roomData[room][frame] == undefined) src = FRAME_PATH + frame + '.' + extension
 	else src = FRAME_PATH + room  + '/' + frame + '.' + extension
 	if (cacheSet.has(src)) return
 	if (cacheDiv.childNodes.length >= 20) {
