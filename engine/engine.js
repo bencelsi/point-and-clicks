@@ -84,7 +84,7 @@ function freeze() { cursorBlockDiv.style.visibility = 'visible' }
 function unfreeze() { cursorBlockDiv.style.visibility = 'hidden' }
 
 // TRANSITIONS ******************************************
-function goTo(newFrame, transitionType) { console.log(newFrame)
+function goTo(newFrame, transitionType = 'fade') { console.log(newFrame)
 	if (newFrame == null) return
 	if (transitionType != 'none') { createTransition(transitionType + 'Out') }
 	
@@ -263,8 +263,7 @@ function refreshInventory() {
 
 function makeInventoryItem(id) {
 	let item = document.createElement('div')
-	item.classList.add('inventory')
-	//item.classList.add('box')
+	item.classList.add('inventory') //item.classList.add('box')
 	item.style.left = '0px'; item.style.top = '0px'
 	let img = document.createElement('img')
 	img.src = INVENTORY_PATH + inventory[id].img + '.png'
@@ -287,9 +286,7 @@ function makeDraggable(item, targets) {
 			document.onmousemove = null; document.onmouseup = null
 			event.preventDefault()
 			for (let i in targets) {
-				if (targets[i].frame != null) {
-					let parsed = parseFrame(targets[i].frame)
-					if (room == parsed[1] && frame == parsed[0]) { targets[i].fn(); return }}
+				if (targets[i].if != null && targets[i].if()) { targets[i].fn(); return }
 				let targetObj = get(targets[i].id)
 				if (targetObj != null && isCollide(item, targetObj)) { targets[i].fn(); return }}
 			item.style.left = itemX; item.style.top = itemY
