@@ -80,15 +80,17 @@ function freeze() { cursorBlockDiv.style.visibility = 'visible' }
 
 function unfreeze() { cursorBlockDiv.style.visibility = 'hidden' }
 
+function hideInventory() { inventoryDiv.style.visibility = 'hidden' }
+
 // TRANSITIONS ******************************************
 function goTo(newFrame, transitionType = 'fade') { console.log(newFrame)
 	if (newFrame == null) return
+
 	if (transitionType != 'none') { createTransition(transitionType + 'Out') }
 	
 	[frame, newRoom, newExtension] = parseFrame(newFrame)
 	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
-	let frameData = roomData[room][frame]
-	if (frameData == null) frameData = {}
+	let frameData = roomData[room][frame]; if (frameData == null) frameData = {}
 	let img
 	if (frameData.alt != null && frameData.alt.if()) img = frameData.alt.name
 	else img = frame + '.' + (newExtension == null ? extension : newExtension)
@@ -96,10 +98,9 @@ function goTo(newFrame, transitionType = 'fade') { console.log(newFrame)
 	
 	refreshStandardBoxes(frameData); refreshCustomBoxes()
 	if (transitionType != 'none') createTransition(transitionType + 'In')
-	delay = transitionType == 'none' ? 0 : (transitionType == 'fade') ? FADE_SPEED : SIDE_SPEED
+	delay = transitionType == 'none' ? 0 : (transitionType == 'fade') ? FADE_SPEED - .5 : SIDE_SPEED
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
-	freeze()
-	wait(delay, () => {
+	freeze(); wait(delay, () => {
 		transitionsDiv.innerHTML = ''; cacheResources(frameData)
 		if (frameData.onEntrance != null) frameData.onEntrance()
 		unfreeze() })}
@@ -283,7 +284,7 @@ function makeDraggable(item, targets) {
 			document.onmousemove = null; document.onmouseup = null
 			event.preventDefault()
 			for (let i in targets) {
-				if (targets[i].if != null && targets[i].if()) { targets[i].fn(); return }
+				if (targets[i].if == null || targets[i].if()) { targets[i].fn(); return }
 				let targetObj = get(targets[i].id)
 				if (targetObj != null && isCollide(item, targetObj)) { targets[i].fn(); return }}
 			item.style.left = itemX; item.style.top = itemY
@@ -355,9 +356,16 @@ function playSound(name, volume = 1) {
 	for (i in sounds) {
 		let sound = sounds[i]
 		if (sound.paused) {
+			sound.setAttribute('id', name)
 			sound.setAttribute('src', SOUND_PATH + name + (name.includes('.') ? '' : '.mp3'))
-			sound.volume = volume; sound.play(); return }}
+			sound.volume = volume; sound.play(); return sound }}
 	alert('no sound!') }
+
+function stopSound(name) { 
+	let sound = get(name)
+	console.log(sound)
+	//.stop()
+}
 
 // HELPERS ******************************************	
 function parseFrame(frame) {
