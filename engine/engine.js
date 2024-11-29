@@ -284,7 +284,7 @@ function makeDraggable(item, targets) {
 			document.onmousemove = null; document.onmouseup = null
 			event.preventDefault()
 			for (let i in targets) {
-				if (targets[i].if == null || targets[i].if()) { targets[i].fn(); return }
+				if (targets[i].if != null && targets[i].if()) { return }
 				let targetObj = get(targets[i].id)
 				if (targetObj != null && isCollide(item, targetObj)) { targets[i].fn(); return }}
 			item.style.left = itemX; item.style.top = itemY

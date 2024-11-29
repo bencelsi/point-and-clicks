@@ -8,14 +8,8 @@
 // Make it possible to drag small key without zooming in, just show zoom shot for a moment
 // ‘No Water’ text
 // Clockroom Puzzle
-// Fix pipe inventory puzzle
-
-// Lil Photoshops:
-// 	Plumbingroom valve(s)
-// 	Plumbingroom pipe
-
-// TODO: live update for heater level
-// TODO: card in door target
+// live update for heater level
+// card in door target
 
 //nice to have:
 // TODO: wait for toilet to refill before flushing
@@ -55,7 +49,7 @@ const keypadButtons = [
     { xy: [.3, .42, .46, .66], fn: () => { pushKeypad(6) }}, { xy: [.44, .56, .46, .66], fn: () => { pushKeypad(7) }},
     { xy: [.58, .7, .46, .66], fn: () => { pushKeypad(8) }}, { xy: [.72, .84, .46, .66], fn: () => { pushKeypad(9) }}]
 
-const startData = { title: 'Griven', room: 'plumbingroom', frame: 'A1', extension: 'png', frameWidth: 1000, frameHeight: 750 } 
+const startData = { title: 'Griven', room: 'brochure', frame: 0, extension: 'png', frameWidth: 1000, frameHeight: 750 } 
 
 const roomData = {
 'opening': {
@@ -445,7 +439,7 @@ const roomData = {
         freeze(); setMusic(null); playSound('music/end'); playSound('bobb/jump'); hideInventory(); playGif('exit6', 'D6', 13 * .25);
         wait(3.5, () => { setFade(7); goTo('E1'); 
         wait(5, () => { let scream = playSound('scream'); playGif('fall', 'E2', 22 * .1); 
-        wait(2, () => { scream.pause(); playSound('splat'); goTo('credits/1')})})})}}]},
+        wait(2, () => { scream.pause(); playSound('splat'); goTo('credits/1') })})})}}]},
     'D4': { left: 'D3', right: 'D1' }},
 'credits': {
     1: { onEntrance: () => { setFade(4); wait(4, () => { goTo(2) })}},
@@ -499,7 +493,7 @@ let waitId = 0; let combo = []
 
 // STATE or, use history.pushState() 
 const s = {
-/*inventory*/ smallKey: 1, pipe: 1, coffee: 1, card: 1, pig: 1, goldKey: 1,
+/*inventory*/ brochure: 0, smallKey: 1, pipe: 1, coffee: 1, card: 1, pig: 1, goldKey: 1,
 /*lobby*/     lightsOn: false, cabinetDown: false, drawers: [false, false, false, false], clock1: 350, clock2: 359,
 /*clock*/     clockUnlocked: false, gearsOk: true, clockOn: false, jesusCount: 0, gears: [0, 3, 2, 1, 3, 2, 1, 2, 3, 3, 3],
 /*cafe*/      cafeUnlocked: true, saladZoom: 0, salads: [3, 3, 3, 3, 3],
@@ -518,9 +512,9 @@ const s_final = {
 /*elevator*/  elevatorFloor: 5, elevatorGoal: 5, elevatorMoving: false, elevatorFixed: false, circuits: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 /*hall/room*/ hallPosition: 0, hallDirection: 0, floor: 1, fire: false, speakerVolume: 0, shower: 0, steamLevel: 0, 
 /*office*/    officeUnlocked: false, otherLeft: true, bobbSpeech: false }
-
+saved_location
 const inventory = {
-    brochure: { img: 'brochureFree' },
+    brochure: { img: 'brochure', fn: () => {let saved_location = room + '/' + frame; goTo('brochure/0');} },
     smallKey: { img: 'smallkeyFree', targets: [{ id: 'keyhole', fn: () => { s.smallKey = 2; refresh(); 
         if (frame == 'D4') { freeze(); makePic({ pic: 'smallKey1'}); wait(1, () => { goTo('D3'); unfreeze() })}}}]},
     pipe: { img: 'pipeFree', targets: [{ id: 'pipe2', fn: () => { s.pipe = 2; refresh() }},
