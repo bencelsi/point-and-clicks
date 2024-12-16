@@ -48,8 +48,8 @@ const keypadButtons = [
     { xy: [.72, .84, .68, .86], fn: () => { pushKeypad(4) }}, { xy: [.16, .29, .46, .66], fn: () => { pushKeypad(5) }},
     { xy: [.3, .42, .46, .66], fn: () => { pushKeypad(6) }}, { xy: [.44, .56, .46, .66], fn: () => { pushKeypad(7) }},
     { xy: [.58, .7, .46, .66], fn: () => { pushKeypad(8) }}, { xy: [.72, .84, .46, .66], fn: () => { pushKeypad(9) }}]
-
-const startData = { title: 'Griven', room: 'brochure', frame: 0, extension: 'png', frameWidth: 1000, frameHeight: 750 } 
+// START
+const startData = { title: 'Griven', room: 'lobby', frame: 'A1', extension: 'png', frameWidth: 1000, frameHeight: 750 } 
 
 const roomData = {
 'opening': {
@@ -64,7 +64,9 @@ const roomData = {
     'A3': { left: 'A2', right: 'A4' },
     'A4': { left: 'A3', right: 'A1' },
     'A5': { back: 'A2' },
-    'B1': { left: 'B4', right: 'B2', forward: () => { playSound('grandUp'); playGif('grandUp', 'C1', 10 * .15)},
+    'B1': { left: 'B4', right: 'B2', forward: () => { playSound('grandUp'); 
+        makePic({mov: 'grandUp', totalSteps: 10, delay: .2, destination: 'C1'})},
+        //playGif('grandUp', 'C1', 10 * .15)},
         boxes: [{ to: 'D1', xy: [.15, .23, .4, .56] }, { to: 'E1', xy: [.84, .95, .4, .58] }]},
     'B2': { left: 'B1', right: 'B3', forward: 'E2', boxes: [{ xy: [.4, .63, .7, 1], to: 'E4' }]},
     'B3': { left: 'B2', right: 'B4', forward: 'A3' },
@@ -512,9 +514,10 @@ const s_final = {
 /*elevator*/  elevatorFloor: 5, elevatorGoal: 5, elevatorMoving: false, elevatorFixed: false, circuits: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 /*hall/room*/ hallPosition: 0, hallDirection: 0, floor: 1, fire: false, speakerVolume: 0, shower: 0, steamLevel: 0, 
 /*office*/    officeUnlocked: false, otherLeft: true, bobbSpeech: false }
-saved_location
+
+var saved_location
 const inventory = {
-    brochure: { img: 'brochure', fn: () => {let saved_location = room + '/' + frame; goTo('brochure/0');} },
+    brochure: { img: 'brochure', fn: () => { let saved_location = room + '/' + frame; goTo('brochure/0')} },
     smallKey: { img: 'smallkeyFree', targets: [{ id: 'keyhole', fn: () => { s.smallKey = 2; refresh(); 
         if (frame == 'D4') { freeze(); makePic({ pic: 'smallKey1'}); wait(1, () => { goTo('D3'); unfreeze() })}}}]},
     pipe: { img: 'pipeFree', targets: [{ id: 'pipe2', fn: () => { s.pipe = 2; refresh() }},

@@ -83,7 +83,8 @@ function unfreeze() { cursorBlockDiv.style.visibility = 'hidden' }
 function hideInventory() { inventoryDiv.style.visibility = 'hidden' }
 
 // TRANSITIONS ******************************************
-function goTo(newFrame, transitionType = 'fade') { console.log(newFrame)
+function goTo(newFrame, transitionType = 'fade') { 
+	console.log(newFrame)
 	if (newFrame == null) return
 
 	if (transitionType != 'none') { createTransition(transitionType + 'Out') }
@@ -179,50 +180,99 @@ function makeBox(X, parent) {
 	parent.appendChild(box) }
 
 // todo - consolidate into single 'makeBox' method?
+
+
 function makePic(X, parent = picsDiv) {
-	let pic = document.createElement('img'); pic.classList.add('pic')
+	let element = document.createElement('img'); element.classList.add('pic')
 
 	let isMovie = X.mov != null
-	let name = isMovie ? simpleEval(X.mov) : simpleEval(X.pic)
+	if (isMovie) parent = moviesDiv
+	let name = simpleEval(isMovie ? X.mov : X.pic)
 	if (name == null) return
-	let src = (isMovie ? MOV_PATH + name + '/1' : PIC_PATH + name) + (name.includes('.') ? '' : '.png')
-	pic.src = src
+	element.src = (isMovie ? MOV_PATH + name + '/1' : PIC_PATH + name) + (name.includes('.') ? '' : '.png')
 
-	let style = orDefault(X.style, null); if (style != null) { pic.style = style }
-	let id = orDefault(X.id, isMovie ? Math.random() : null); if (id != null) { pic.id = id }
+	let style = orDefault(X.style, null); if (style != null) { element['style'] = style }
+	let id = orDefault(X.id, isMovie ? Math.random() : null); if (id != null) { element.id = id }
 	let offset = orDefault(X.offset, null)
 	let centerOffset = orDefault(X.centerOffset, false)
 	if (offset != null) {
-		pic.style.left = WIDTH * offset[0] - (centerOffset ? (pic.width / 2) : 0) + 'px'
-		pic.style.top = HEIGHT * (1 - offset[1]) - (centerOffset ? (pic.height / 2) : 0) + 'px' }
-	else { pic.classList.add('full') }
+		element.style.left = WIDTH * offset[0] - (centerOffset ? (element.width / 2) : 0) + 'px'
+		element.style.top = HEIGHT * (1 - offset[1]) - (centerOffset ? (element.height / 2) : 0) + 'px' }
+	else { element.classList.add('full') }
 	
 	let scale = orDefault(X.scale, null)
 	if (scale != null) { // todo: better
-		pic.style.width = scale + '%'
-		pic.style.height = 'auto' }
-	parent.appendChild(pic)
-	if (isMovie) { movieStep({ obj: pic, path: MOV_PATH + name + '/', while: X.while,
-			step: 0, steps: X.steps, totalSteps: orDefault(X.totalSteps, X.steps),
-			delay: orDefault(X.delay, .1), then: X.then, fate: orDefault(X.fate, 'end'), id: id })} 
+		element.style.width = scale + '%'
+		element.style.height = 'auto' }
+	
+	parent.appendChild(element)
+
+	if (isMovie) {
+		movieStep({ 
+			obj: element, 
+			path: MOV_PATH + name + '/', 
+			while: X.while,
+			step: 0, 
+			steps: X.steps, 
+			totalSteps: orDefault(X.totalSteps, X.steps),
+			destination: X.destination,
+			delay: orDefault(X.delay, .1), 
+			then: X.then, 
+			fate: orDefault(X.fate, 'end'), 
+			id: id })}
+	
 	let life = simpleEval(X.life, null)
-	if (life != null) wait(life, () => { picsDiv.removeChild(pic) })
-	return pic }
+	if (life != null) wait(life, () => { parent.removeChild(element) })
+	
+	return element }
+
+function setIfNotNull(toSet) {
+
+}
 
 // function playMovie(X) {
 // let id = orDefault(X.id, Math.random())
 // let pic = makePic({ pic: 'movies/' + X.movie + '/1.png', offset: X.offset, id: id }, picsDiv)
 // movieStep({ obj: pic, path: MOV_PATH + X.movie + '/', step: 1, steps: X.steps, delay: X.delay, 
 // 		then: X.then, fate: X.fate, id: id })}
+
+function playMovie(name, totalSteps, destination) {
+	let obj = makePic({ mov: name, id: name, totalSteps: totalSteps }, moviesDiv)
+	console.log(obj)
+	//movieStep2(obj, 1, .2, MOV_PATH + name + '/', totalSteps, destination)
+	//goTo(destination, 'none')
+}
+
+function movieStep2(obj, step, delay, path, totalSteps, destination) {
+	if (step == totalSteps) {
+		moviesDiv.removeChild(obj)
+		return
+	}
+	wait(delay, () => {
+		step++; obj.src = path + step + '.png'
+		movieStep2(obj, step, delay, path, totalSteps, destination)
+	})
+}
+
 function movieStep(X) {
+	console.log(X)
 	if (get(X.id) == null || (X.while != null && !X.while())) return
 	X.step++;
-	if (X.step == X.totalSteps) {
+
+	if (X.destination != null && X.step >= X.totalSteps) {
+		goTo(X.destination, 'none')
+	}
+	if (X.step > X.totalSteps) {
+		console.log('bye')
 		if (X.then != null) X.then()
-		if (X.fate == 'end') { picsDiv.removeChild(X.obj); return }
+		if (X.fate == 'end') { moviesDiv.removeChild(X.obj); return }
 		if (X.fate == 'stay') return
 		if (X.fate == 'loop') X.step = 0 }
-	wait (X.delay, () => { X.obj.src = X.path + (X.step % X.steps) + '.png'; movieStep(X) })}
+
+	wait(X.delay, () => { 
+		X.obj.src = X.path + X.step + '.png';
+		console.log(X)
+		movieStep(X) })}
 
 //                  box? (div)         	pic? (img)		mov
 // xy (required)	X									
@@ -283,8 +333,8 @@ function makeDraggable(item, targets) {
 		document.onmouseup = function(event) {
 			document.onmousemove = null; document.onmouseup = null
 			event.preventDefault()
-			for (let i in targets) {
-				if (targets[i].if != null && targets[i].if()) { return }
+			for (const target of targets) {
+				if (target.if != null && target.if()) { return }
 				let targetObj = get(targets[i].id)
 				if (targetObj != null && isCollide(item, targetObj)) { targets[i].fn(); return }}
 			item.style.left = itemX; item.style.top = itemY
