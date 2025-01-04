@@ -111,7 +111,7 @@ const roomData = {
         { if: () => { return s.lightsOn && s.smallKey == 1 }, xy: [.58, .64, .41 ,.45], fn: () => { s.smallKey = 0; refresh() }},
         { pic: () => { return 'cabinetDown' + (s.lightsOn ? '2' : '1') }, if: () => { return s.cabinetDown }}],
     toCache: ['lightRight', 'lightRightKey', 'cabinetDown1', 'cabinetDown2']},
-    'D4': { back: 'D3', boxes: [{ xy: [.41, .48, .6, .67], id: 'keyhole' }] },
+    'D4': { back: 'D3', boxes: [{ xy: [.41, .48, .6, .67], id: 'keyhole', cursor: 'none' }] },
     'E1': { left: 'E3', right: 'E2', boxes: [{ to: 'G1', xy: [.57, .73, .35, .62] }]},
     'E2': { left: 'E1', right: 'E3', boxes: [{ to: 'E4', xy: [.4, .85, .8, 1] }]},
     'E3': { left: 'E2', right: 'E1', boxes: [{ to: 'B3', xy: [.2, .5, .2, .8] }, { to: 'B4', xy: [.5, .8, .2, .8] },

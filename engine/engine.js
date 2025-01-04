@@ -50,8 +50,8 @@ function init() {
 }
 
 const standardBoxes = {
-	left: { xy: [0, .2, .2, .8], transition: 'left', cursor: 'left', id: 'left' },
-	right: { xy: [.8, 1, .2, .8], transition: 'right', cursor: 'right', id: 'right' },
+	left: { xy: [0, .2, .2, .8], transition: 'none', cursor: 'left', id: 'left' },
+	right: { xy: [.8, 1, .2, .8], transition: 'none', cursor: 'right', id: 'right' },
 	forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'forward', id: 'forward' },
 	back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'back', id: 'back' }}
 
@@ -335,8 +335,9 @@ function makeDraggable(item, targets) {
 			event.preventDefault()
 			for (const target of targets) {
 				if (target.if != null && target.if()) { return }
-				let targetObj = get(targets[i].id)
-				if (targetObj != null && isCollide(item, targetObj)) { targets[i].fn(); return }}
+				if (frame == target.frame) { target.fn(); return }
+				let targetObj = get(target.id)
+				if (targetObj != null && isCollide(item, targetObj)) { console.log(item); target.fn(); return }}
 			item.style.left = itemX; item.style.top = itemY
 			document.onmousemove = null; setCursor(item, 'open') }}}
 
@@ -439,4 +440,7 @@ function simpleEval(x) { return (x instanceof Function) ? x() : x }
 
 function orDefault(value, def, eval = true) { return (value == null) ? def : (eval ? simpleEval(value) : value) }
 
-function isCollide(a, b) { return !(a.y + a.height < b.y || a.y > b.y + b.height || a.x + a.width < b.x || a.x > b.x + b.width) }
+function isCollide(a, b) { 
+	console.log(a)
+	console.log(b)
+	return !(a.y + a.height < b.y || a.y > b.y + b.height || a.x + a.width < b.x || a.x > b.x + b.width) }
