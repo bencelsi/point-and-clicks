@@ -38,6 +38,7 @@ function init() {
 	room = startData.room; frame = startData.frame; extension = startData.extension
 	// constants
 	CURSOR_PATH = startData.customCursors ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
+	setCursor(get('all'), 'default')
 	WIDTH = startData.frameWidth == null ? 750 : startData.frameWidth
 	HEIGHT = startData.frameHeight == null ? 750 : startData.frameHeight
 	SIDE_SPEED = .35; FADE_SPEED = 1
@@ -52,7 +53,7 @@ function init() {
 const standardBoxes = {
 	left: { xy: [0, .2, .2, .8], transition: 'none', cursor: 'left', id: 'left' },
 	right: { xy: [.8, 1, .2, .8], transition: 'none', cursor: 'right', id: 'right' },
-	forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'forward', id: 'forward' },
+	forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'default', id: 'forward' },
 	back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'back', id: 'back' }}
 
 // DOM setup  ******************************************
@@ -428,7 +429,7 @@ function parseFrame(frame) {
 
 function get(id) { return document.getElementById(id) }
 
-function setCursor(element, cursor) { if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png), auto' }
+function setCursor(element, cursor) { if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png) 25 25, auto' }
 
 function launchFullScreen(element) {
 	if (element.requestFullScreen) element.requestFullScreen()
