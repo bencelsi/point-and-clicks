@@ -15,8 +15,8 @@ Fix number
 combo sound x4
 
 Customizable standard boxes
-
 make set of constant xy's, for left right etc, reference in game data
+Strong specs- config objects- etc
 
 DONE
 Photoshop lightswitch
@@ -24,7 +24,7 @@ Combo far away view
 
 */
 
-const config = { title: 'Grounded', room: 'room', frame: 'A1', extension: 'jpeg', 
+const config = { title: 'Grounded', room: 'room', frame: 'M', extension: 'jpeg', 
     customCursors: true, frameWidth: 640, frameHeight: 480,
     defaultCursor: 'o' } 
 
@@ -40,15 +40,15 @@ const config = { title: 'Grounded', room: 'room', frame: 'A1', extension: 'jpeg'
 
 const roomData = {
     'room': {
-        'M': { onEnter: '', },
+        'M': { forward: () => {playSound('music/ABC.mp3'); wait(1, () => { goTo('A1') }) }},
         'A1': { left: 'A11', right: 'A2', boxes: [{ xy: [.6, .67, .35, .51], cursor: 'z', to: 'A1a' },
             { xy: [0, .1, .4, .55], cursor: 'z', to: () => { return s.lightOn ? 'A11b' : 'A11a' }},
             { xy: [.85,1, .5,.85], cursor: 'z', to: 'A2a'}, { pic: 'lightswitch1', if: () => { return s.lightOn } }]},
         'A1a': { back: 'A1' },
         'A2': { left: 'A1', right: 'A3', boxes: [{ xy: [.57, .8, .5, .83], cursor: 'z', to: 'A2a' }, 
             { xy: [.34, .4, .36, .5], cursor: 'z', to: 'A1a'}]},
-        'A2a': { back: 'A2', boxes: [{ xy: [.28, .34, .89, .97], cursor: 'default', to: 'A2b', fn: () => { playSound('creak') }}] },
-        'A2b': { back: 'A2', boxes: [{ xy: [.28, .34, .89, .97], cursor: 'default', to: 'A2a', fn: () => { playSound('creak') }}, 
+        'A2a': { back: 'A2', boxes: [{ xy: [.28, .34, .89, .97], cursor: 'f', to: 'A2b', fn: () => { playSound('creak') }}] },
+        'A2b': { back: 'A2', boxes: [{ xy: [.28, .34, .89, .97], cursor: 'f', to: 'A2a', fn: () => { playSound('creak') }}, 
             { xy: [.57, .85, .4, .77], to: 'A2c', cursor: 'z' },
             { pic: () => { return 'numbers/' + s.combo[0] + '.png' }, offset: [.687, .64], style: 'width: 10px' },
             { pic: () => { return 'numbers/' + s.combo[1] + '.png' }, offset: [.707, .64], style: 'width: 10px' },
@@ -81,7 +81,7 @@ const roomData = {
 
         'A4': { left: 'A3', right: 'A5' },
         'A5': { left: 'A4', right: 'A6', boxes: [{ xy: [.41, .89, .3, .6], cursor: 'z', to: 'A5a' }]},
-        'A5a': { back: 'A5', boxes: [{ xy: [.45, .59, .37, .53], cursor: 'o', to: () => { playSound('open'); return 'A5b' }}]},
+        'A5a': { back: 'A5', boxes: [{ xy: [.45, .59, .37, .53], cursor: 'o', to: 'A5b', fn: () => { playSound('open') }}]},
         'A5b': { forward: 'A5a', back: () => { playSound('close'); return 'A5' }},
         'A6': { left: 'A5', right: 'A7', boxes: [{ xy: [.5, .8, .37, .74], cursor: 'z', to: 'A6a'}]},
         'A6a': { back: 'A6' },
@@ -103,11 +103,11 @@ const roomData = {
         'A11a': { back: 'A11', boxes: [{ xy: [.35, .54, .33, .7], cursor: 'o', fn: () => { s.lightOn = true; goTo('A11b') }}] },
         'A11b': { back: 'A11', boxes: [{ xy: [.35, .54, .33, .7], cursor: 'o', fn: () => { s.lightOn = false; goTo('A11a') } }] },
         'B1': { left: 'B2', right: 'B2', back: 'A10',
-            boxes: [{ xy: [.61, .68, .45, .62], id: 'doorknob', cursor: () => { return s.key == 2 ? 'o' : 'default' },
+            boxes: [{ xy: [.61, .68, .45, .62], id: 'doorknob', cursor: () => { return s.key == 2 ? 'o' : 'f' },
             fn: ()=> { if (s.key == 2) { goTo(s.lightOn ? 'B1c' : 'B1b') }}}, { pic: 'key', if: () => { return s.key == 2 }}] },
         'B1a': { left: 'B2', right: 'B2', forward: 'C1', boxes: [{ xy: [.38, .41, .48, .59], to: 'B1' }] },
         'B1b': { left: 'B2', right: 'B2', forward: 'D1', boxes: [{ xy: [.38, .41, .48, .59], to: 'B1' }] },
-        'B2': { forward: 'A5', left: 'B1', right: 'B1', boxes: [{ xy: [.68, .72, .89, .96], to: 'B2a' }] },
+        'B2': { forward: 'A5', left: 'B1', right: 'B1', boxes: [{ xy: [.68, .72, .89, .96], to: 'B2a', cursor: 'z' }] },
         'B2a': { back: 'B2'},
         'C1': { left: 'C4', right: 'C2' },
         'C2': { left: 'C1', right: 'C3' },
@@ -116,7 +116,7 @@ const roomData = {
         'D1': { left: 'D4', right: 'D2' },
         'D2': { left: 'D1', right: 'D3' },
         'D3': { left: 'D2', right: 'D4', forward: 'B2' },
-        'D4': { left: 'D3', right: 'D1', cursor: 'z', boxes: [{ xy: [.2, .63, 0, .5], to: 'D4a' }] },
+        'D4': { left: 'D3', right: 'D1', boxes: [{ xy: [.2, .63, 0, .5], to: 'D4a', cursor: 'z' }] },
         'D4a': { back: 'D4' },
         'E1': { forward: 'E2' }
     }
@@ -132,7 +132,7 @@ function runClock() {
 
 
 const s = { 
-    radio: 1, radioOn: true, clockOn: false, time: 4, lightOn: false, combo: [0, 0, 0, 0],
+    radio: 1, radioOn: true, clockOn: false, time: 3, lightOn: false, combo: [0, 0, 0, 0],
     pig: 0, key: 0
 }
 
@@ -155,5 +155,3 @@ function comboMatches(goal) {
     }
     return true
 }
-
-playSound('Circlesong Six')
