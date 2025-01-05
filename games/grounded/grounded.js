@@ -1,26 +1,22 @@
 /*
 TODOs:
 
-End credits
+Ending credits
 Radio working
-Cuckoo working
-Sound effects
 Put back piggy
-inventory sizing
+Put back key
+Crop Inventory
 Under bed
-Opening
 Sound system for variable volume
-More boxes - lightswitch, painting, cuckoo
 Fix number
 combo sound x4
+Overridable standard boxes
 
-Customizable standard boxes
+Nice to have:
+
 make set of constant xy's, for left right etc, reference in game data
 Strong specs- config objects- etc
 
-DONE
-Photoshop lightswitch
-Combo far away view
 
 */
 
@@ -40,7 +36,7 @@ const config = { title: 'Grounded', room: 'room', frame: 'M', extension: 'jpeg',
 
 const roomData = {
     'room': {
-        'M': { forward: () => {playSound('music/ABC.mp3'); wait(1, () => { goTo('A1') }) }},
+        'M': { forward: () => {playSound('music/heart.mp3'); wait(0, () => { goTo('A1') }) }},
         'A1': { left: 'A11', right: 'A2', boxes: [{ xy: [.6, .67, .35, .51], cursor: 'z', to: 'A1a' },
             { xy: [0, .1, .4, .55], cursor: 'z', to: () => { return s.lightOn ? 'A11b' : 'A11a' }},
             { xy: [.85,1, .5,.85], cursor: 'z', to: 'A2a'}, { pic: 'lightswitch1', if: () => { return s.lightOn } }]},
@@ -68,7 +64,8 @@ const roomData = {
         'A2d': { back: 'A2b', boxes: [{ xy: [.4, .55, .3, .7], cursor: 'z', to: 'A2f' }, { xy: [.23, .27, .5, .65], to: 'A2c' }] },
         'A2e': { back: 'A2b' },
         'A2f': { back: 'A2d', boxes: [{ xy: [.5, .83, .12, .8], cursor: 'o', fn: () => { goTo('A2e'); s.pig = 0; refreshInventory() } }] },
-        'A3': { left: 'A2', right: 'A4', boxes: [{ xy: [.3, .5, .5, .83], cursor: 'z', to: 'A3a' }]},
+        'A3': { left: 'A2', right: 'A4', boxes: [{ xy: [0, .25, .5, .85], to: 'A2a', cursor: 'z'},
+            { xy: [.3, .5, .5, .83], cursor: 'z', to: 'A3a' }]},
         'A3a': { back: 'A3', boxes: [{ pic: () => { return s.clockOn ? 'on' : 'off' }, offset: [.65,.2], style: 'width: 20px'},
             { xy: [.63,.7,.1,.25], cursor: 'o', fn: () => { s.clockOn = !s.clockOn; runClock(); refresh() }},
             { pic: 'clockHour', offset: [.49, .5], style: () => { 
@@ -76,9 +73,18 @@ const roomData = {
             { pic: 'clockMinute', offset: [.49, .54], style: () => { 
                 return 'transform: rotate(' + s.time / 10 + 'deg); transform-origin: center bottom; height: 70px' }},
             { pic: 'clockSecond', offset: [.5, .52], style: () => { 
-                return 'transform: rotate(' + s.time * 6 + 'deg); transform-origin: center bottom; height: 60px' }},
-        ]},
-
+                return 'transform: rotate(' + s.time * 6 + 'deg); transform-origin: center bottom; height: 60px' }}]},
+        'A3b': { back: 'A3', boxes: [{ pic: () => { return s.clockOn ? 'on' : 'off' }, offset: [.65,.2], style: 'width: 20px'},
+            { xy: [.63,.7,.1,.25], cursor: 'o', fn: () => { s.clockOn = !s.clockOn; if (s.clockOn) { goTo('A3a'); runClock() }; refresh() }},
+            { xy: [.4,.7,.6,.85], cursor: 'z', to: () => { return s.key == 1 ? 'A3c' : 'A3d' }},
+            { pic: 'clockHour', offset: [.49, .5], style: () => { 
+                return 'transform: rotate(' + s.time / 120 + 'deg); transform-origin: center bottom; height: 50px' }},
+            { pic: 'clockMinute', offset: [.49, .54], style: () => { 
+                return 'transform: rotate(' + s.time / 10 + 'deg); transform-origin: center bottom; height: 70px' }},
+            { pic: 'clockSecond', offset: [.5, .52], style: () => { 
+                return 'transform: rotate(' + s.time * 6 + 'deg); transform-origin: center bottom; height: 60px' }}]},
+        'A3c': { back: 'A3b', boxes: [{xy: [.3,.6, .4, .6], fn: () => { s.key = 0; goTo('A3d'); refreshInventory()}}]},
+        'A3d': { back: 'A3b' },
         'A4': { left: 'A3', right: 'A5' },
         'A5': { left: 'A4', right: 'A6', boxes: [{ xy: [.41, .89, .3, .6], cursor: 'z', to: 'A5a' }]},
         'A5a': { back: 'A5', boxes: [{ xy: [.45, .59, .37, .53], cursor: 'o', to: 'A5b', fn: () => { playSound('open') }}]},
@@ -95,7 +101,6 @@ const roomData = {
             { pic: () => { return s.radioOn ? 'on' : 'off' }, offset: [.64, .4], style: 'width: 30px' },
             { pic: () => { return 'numbers/' + s.radio  }, offset: [.5, .4], style: 'width: 30px' },
             { pic: 'dial', offset: [.5, .52], style: 'height: 30px' }]},
-            
         'A10': { left: 'A9', right: 'A11', forward: 'B1' },
         'A11': { left: 'A10', right: 'A1', boxes: [
             { xy: [.4, .55, .4, .6], cursor: 'z', to: () => { return s.lightOn ? 'A11b' : 'A11a' }},
@@ -107,7 +112,7 @@ const roomData = {
             fn: ()=> { if (s.key == 2) { goTo(s.lightOn ? 'B1c' : 'B1b') }}}, { pic: 'key', if: () => { return s.key == 2 }}] },
         'B1a': { left: 'B2', right: 'B2', forward: 'C1', boxes: [{ xy: [.38, .41, .48, .59], to: 'B1' }] },
         'B1b': { left: 'B2', right: 'B2', forward: 'D1', boxes: [{ xy: [.38, .41, .48, .59], to: 'B1' }] },
-        'B2': { forward: 'A5', left: 'B1', right: 'B1', boxes: [{ xy: [.68, .72, .89, .96], to: 'B2a', cursor: 'z' }] },
+        'B2': { forward: 'A5', left: 'B1', right: 'B1', boxes: [{ xy: [.65, .8, .8, 1], to: 'B2a', cursor: 'z' }] },
         'B2a': { back: 'B2'},
         'C1': { left: 'C4', right: 'C2' },
         'C2': { left: 'C1', right: 'C3' },
@@ -118,22 +123,36 @@ const roomData = {
         'D3': { left: 'D2', right: 'D4', forward: 'B2' },
         'D4': { left: 'D3', right: 'D1', boxes: [{ xy: [.2, .63, 0, .5], to: 'D4a', cursor: 'z' }] },
         'D4a': { back: 'D4' },
-        'E1': { forward: 'E2' }
+        'E1': { forward: 'E2' },
+        'E2': { onEnter: () => { wait(2, () => { goTo('E3') })}}
     }
 }
 
 /////// THREADS
 function runClock() {
     if (!s.clockOn) return
-    playSound('tick'); s.time +=1; refreshCustomBoxes(); wait(1, runClock)
+    playSound('tick'); s.time +=1;
+    if (frame == 'A3a' || frame == 'A3b') {
+        refreshCustomBoxes(); 
+    } 
+
+    if (s.time % 60 == 0) {
+        
+        if (frame == 'A3a') {
+            playSound('cuckoo')
+            goTo('A3b')
+            wait(3, () => { if (frame == 'A3b' && s.clockOn) { goTo('A3a')}})
+        } 
+    }
+    wait(1, runClock)
 }
 
 
 
 
 const s = { 
-    radio: 1, radioOn: true, clockOn: false, time: 3, lightOn: false, combo: [0, 0, 0, 0],
-    pig: 0, key: 0
+    radio: 1, radioOn: true, clockOn: false, time: 58, lightOn: false, combo: [0, 0, 0, 0],
+    pig: 1, key: 1
 }
 
 const inventory = {
