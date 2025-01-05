@@ -26,21 +26,23 @@ let persistentIds = []
 window.onload = waitForData()
 
 // hacky way to wait for gameData & s (state) to load
-function waitForData() { try { startData; roomData; s; init() } catch (e) { console.log(e); wait(.2, waitForData) }}
+function waitForData() { try { config; roomData; s; init() } catch (e) { console.log(e); wait(.2, waitForData) }}
 
 function init() {
-	document.title = (location.hostname == "" ? "." : "") + startData.title
+	document.title = (location.hostname == "" ? "." : "") + config.title
 	//DOM elements:
 	standardBoxesDiv = get('standardBoxes'); customBoxesDiv = get('customBoxes'); picsDiv = get('pics')
 	cacheDiv = get('cache'); transitionsDiv = get('transitions'); frameImg = get('frame'); persistentDiv = get('persistents')
 	inventoryDiv = get('inventory'); moviesDiv = get('movies'); cursorBlockDiv = get('cursorBlock')
 	// global vars:
-	room = startData.room; frame = startData.frame; extension = startData.extension
+	room = config.room; frame = config.frame; extension = config.extension
 	// constants
-	CURSOR_PATH = startData.customCursors ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
-	setCursor(get('all'), 'default')
-	WIDTH = startData.frameWidth == null ? 750 : startData.frameWidth
-	HEIGHT = startData.frameHeight == null ? 750 : startData.frameHeight
+	CURSOR_PATH = config.customCursors ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
+	setCursor(get('all'), 'n')
+	setCursor(cursorBlockDiv, 's')
+
+	WIDTH = config.frameWidth == null ? 750 : config.frameWidth
+	HEIGHT = config.frameHeight == null ? 750 : config.frameHeight
 	SIDE_SPEED = .35; FADE_SPEED = 1
 
 	get("all").style.width = WIDTH + "px"; get("all").style.height = HEIGHT + 100 + "px"
@@ -51,10 +53,10 @@ function init() {
 }
 
 const standardBoxes = {
-	left: { xy: [0, .2, .2, .8], transition: 'none', cursor: 'left', id: 'left' },
-	right: { xy: [.8, 1, .2, .8], transition: 'none', cursor: 'right', id: 'right' },
-	forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'default', id: 'forward' },
-	back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'back', id: 'back' }}
+	left: { xy: [0, .2, .2, .8], transition: 'none', cursor: 'l', id: 'l' },
+	right: { xy: [.8, 1, .2, .8], transition: 'none', cursor: 'r', id: 'r' },
+	forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'f', id: 'f' },
+	back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'b', id: 'b' }}
 
 // DOM setup  ******************************************
 function setupStandardBoxes() { for (let i in standardBoxes) { makeBox(standardBoxes[i], standardBoxesDiv) }}
@@ -104,7 +106,7 @@ function goTo(newFrame, transitionType = 'fade') {
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
 	freeze(); wait(delay, () => {
 		transitionsDiv.innerHTML = ''; cacheResources(frameData)
-		if (frameData.onEntrance != null) frameData.onEntrance()
+		if (frameData.onEnter != null) frameData.onEnter()
 		unfreeze() })}
 
 function createTransition(transitionType) {
@@ -160,7 +162,7 @@ function makeBox(X, parent) {
 	box.style.width = (xy[1] - xy[0]) * WIDTH + 'px'
 	box.style.bottom = xy[2] * HEIGHT + 'px'
 	box.style.height = (xy[3] - xy[2]) * HEIGHT + 'px'
-	let cursor = orDefault(X.cursor, 'forward')
+	let cursor = orDefault(X.cursor, config.defaultCursor)
 	setCursor(box, cursor)
 
 	let fn = orDefault(X.fn, null, false)
@@ -322,9 +324,9 @@ function makeInventoryItem(id) {
 
 // Make given inventory box draggable, execute action if dropped on targetId
 function makeDraggable(item, targets) {
-	setCursor(item, 'open')
+	setCursor(item, 'o')
 	item.onmousedown = function(event) {
-		event.preventDefault(); setCursor(item, 'closed')	
+		event.preventDefault(); setCursor(item, 'o')	
 		let itemX = parseInt(item.style.left); let itemY = parseInt(item.style.top)
 		let mouseX = event.clientX; let mouseY = event.clientY
 		document.onmousemove = function(event) {
@@ -340,7 +342,7 @@ function makeDraggable(item, targets) {
 				let targetObj = get(target.id)
 				if (targetObj != null && isCollide(item, targetObj)) { console.log(item); target.fn(); return }}
 			item.style.left = itemX; item.style.top = itemY
-			document.onmousemove = null; setCursor(item, 'open') }}}
+			document.onmousemove = null; setCursor(item, 'o') }}}
 
 // GIFS ••••••••••••••••••••••••••••••••••••••••••••••••••
 function playGif(name, newFrame, delay, after = null) {
