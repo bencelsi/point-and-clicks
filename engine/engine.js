@@ -4,80 +4,89 @@
 // TODO: how to cache when left/right returns fn? framesToCache, or... left: {to: 'A1', fn: ()=> {...}}
 // TODO: cache pics/gifs
 
-get("favicon").href = GAME_FOLDER + "/favicon.ico"
-const FRAME_PATH = GAME_FOLDER + '/assets/frames/'
-const GIF_PATH = GAME_FOLDER + '/assets/gifs/'
-const SOUND_PATH = GAME_FOLDER + '/assets/sound/'
-const MUSIC_PATH = SOUND_PATH + 'music/'
-const PIC_PATH = GAME_FOLDER + '/assets/pics/'
-const MOV_PATH = GAME_FOLDER + '/assets/movies/'
-const INVENTORY_PATH = PIC_PATH + '/inventory/'
-
 // DOM globals:
-let standardBoxesDiv, customBoxesDiv, picsDiv, cacheDiv, transitionsDiv, frameImg, inventoryDiv, cursorBlockDiv, persistentDiv
+let standardBoxesDiv = get('standardBoxes')
+let customBoxesDiv = get('customBoxes')
+let picsDiv = get('pics')
+let cacheDiv = get('cache') 
+let transitionsDiv = get('transitions')
+let frameImg = get('frame')
+let persistentDiv = get('persistents')
+let inventoryDiv = get('inventory')
+let moviesDiv = get('movies')
+let cursorBlockDiv = get('cursorBlock')
+let allDiv = get('all')
 
-// Constants:
-let CURSOR_PATH, WIDTH, HEIGHT, SIDE_SPEED, FADE_SPEED
+//paths
+get("favicon").href = GAME_PATH + "/favicon.ico"
+const ASSET_PATH = GAME_PATH + '/assets/'
+const FRAME_PATH = ASSET_PATH + '/frames/'
+const GIF_PATH = ASSET_PATH + '/gifs/'
+const SOUND_PATH = ASSET_PATH + '/sound/'
+const MUSIC_PATH = SOUND_PATH + 'music/'
+const PIC_PATH = ASSET_PATH + '/pics/'
+const INVENTORY_PATH = ASSET_PATH + '/inventory/'
+const MOV_PATH = ASSET_PATH + '/movies/'
+let CURSOR_PATH = '/cursors/'
+
 
 // Global vars:
 let music = new Audio(); music.loop = true; let cacheSet = new Set()
-let sounds = [new Audio(), new Audio(), new Audio, new Audio, new Audio] // TODO: make concurrent sounds variable
+let sounds = [new Audio, new Audio, new Audio, new Audio, new Audio] // TODO: make concurrent sounds variable
 let persistentIds = []
+let c;
 window.onload = waitForData()
 
 // hacky way to wait for gameData & s (state) to load
-function waitForData() { try { config; roomData; s; init() } catch (e) { console.log(e); wait(.2, waitForData) }}
+let waitCounter = 0
+function waitForData() { 
+	try { if (waitCounter > 10) return;
+		waitCounter++; baseConfig; config; roomData; s; init() } 
+	catch (e) { console.log(e); wait(.1, waitForData) }}
 
 function init() {
-	document.title = (location.hostname == "" ? "." : "") + config.title
-	//DOM elements:
-	standardBoxesDiv = get('standardBoxes'); customBoxesDiv = get('customBoxes'); picsDiv = get('pics')
-	cacheDiv = get('cache'); transitionsDiv = get('transitions'); frameImg = get('frame'); persistentDiv = get('persistents')
-	inventoryDiv = get('inventory'); moviesDiv = get('movies'); cursorBlockDiv = get('cursorBlock')
-	// global vars:
-	room = config.room; frame = config.frame; extension = config.extension
-	// constants
-	CURSOR_PATH = config.customCursors ? GAME_FOLDER + '/assets/cursors/' : 'assets/cursors/'
-	setCursor(get('all'), 'n')
-	setCursor(cursorBlockDiv, 's')
+	c = { ...baseConfig, ...config }
 
-	WIDTH = config.frameWidth == null ? 750 : config.frameWidth
-	HEIGHT = config.frameHeight == null ? 750 : config.frameHeight
-	SIDE_SPEED = .35; FADE_SPEED = 1
+	document.title = (location.hostname == "" ? "." : "") + c.title
+	
+	room = c.room; 
+	frame = c.frame; 
+	extension = c.extension
 
-	get("all").style.width = WIDTH + "px"; get("all").style.height = HEIGHT + 100 + "px"
-	get("screen").style.width = WIDTH + "px"; get("screen").style.height = HEIGHT + "px"
-	get("inventory").style.width = WIDTH + "px"
-	updateStyle(); setupStandardBoxes(); goTo(frame, 'fade'); refreshInventory(); setMusic(room)
+	if (c.customCursors) CURSOR_PATH = ASSET_PATH + '/cursors/'
+
+	setCursor(allDiv, c.defaultCursor)
+	setCursor(cursorBlockDiv, c.waitCursor)
+
+	allDiv.style.width = c.width + "px"; 
+	allDiv.style.height = c.height + 100 + "px"
+	get("screen").style.width = c.width + "px"; 
+	get("screen").style.height = c.height + "px"
+	inventoryDiv.style.width = c.width + "px"
+	updateStyle(); setupStandardBoxes(); refreshInventory(); setMusic(room); goTo(frame, 'fade');
 	//window.onclick = launchFullScreen(get('window'))
 }
 
-const standardBoxes = {
-	left: { xy: [0, .2, .2, .8], transition: 'none', cursor: 'l', id: 'l' },
-	right: { xy: [.8, 1, .2, .8], transition: 'none', cursor: 'r', id: 'r' },
-	forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'f', id: 'f' },
-	back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'b', id: 'b' }}
-
-// DOM setup  ******************************************
-function setupStandardBoxes() { for (let i in standardBoxes) { makeBox(standardBoxes[i], standardBoxesDiv) }}
-
 function updateStyle() { // TODO: better.
 	get("style").innerHTML =  `
-	@keyframes leftIn   { from { transform: translateX(0) } to { transform: translateX(${WIDTH}px) }}
+	@keyframes leftIn   { from { transform: translateX(0) } to { transform: translateX(${c.width}px) }}
 	@keyframes leftOut  { from { transform: translateX(0) }}
-	@keyframes rightIn  { from { transform: translateX(0) } to { transform: translateX(-${WIDTH}px) }}
+	@keyframes rightIn  { from { transform: translateX(0) } to { transform: translateX(-${c.width}px) }}
 	@keyframes rightOut { from { transform: translateX(0) }}
 	@keyframes fadeIn   { from { opacity: 0 } to { opacity: 1 }}
 	@keyframes fadeOut  { from { } to { opacity: 0}}
-	.leftIn   { animation:leftIn ${SIDE_SPEED}s }
-	.leftOut  { animation:leftOut ${SIDE_SPEED}s; transform: translateX(${WIDTH}px) }
-	.rightIn  { animation:rightIn ${SIDE_SPEED}s} 
-	.rightOut { animation:rightOut ${SIDE_SPEED}s; transform: translateX(-${WIDTH}px) } 
-	.fadeIn   { animation:fadeIn ${FADE_SPEED}s; } 
-	.fadeOut  { animation:fadeOut ${FADE_SPEED}s; opacity: 0 }`
+	.leftIn   { animation:leftIn ${c.sideSpeed}s }
+	.leftOut  { animation:leftOut ${c.sideSpeed}s; transform: translateX(${c.width}px) }
+	.rightIn  { animation:rightIn ${c.sideSpeed}s} 
+	.rightOut { animation:rightOut ${c.sideSpeed}s; transform: translateX(-${c.width}px) } 
+	.fadeIn   { animation:fadeIn ${c.fadeSpeed}s; } 
+	.fadeOut  { animation:fadeOut ${c.fadeSpeed}s; opacity: 0 }`
 }
 
-function setFade(fade) { FADE_SPEED = fade; updateStyle() }
+// DOM setup  ******************************************
+function setupStandardBoxes() { for (let i in c.standardBoxes) { makeBox(c.standardBoxes[i], standardBoxesDiv) }}
+
+function setFade(fade) { c.fadeSpeed = fade; updateStyle() }
 
 function freeze() { cursorBlockDiv.style.visibility = 'visible' }
 
@@ -87,6 +96,7 @@ function hideInventory() { inventoryDiv.style.visibility = 'hidden' }
 
 // TRANSITIONS ******************************************
 function goTo(newFrame, transitionType = 'fade') { 
+	console.log(transitionType)
 	console.log(newFrame)
 	if (newFrame == null) return
 
@@ -102,7 +112,7 @@ function goTo(newFrame, transitionType = 'fade') {
 	
 	refreshStandardBoxes(frameData); refreshCustomBoxes()
 	if (transitionType != 'none') createTransition(transitionType + 'In')
-	delay = transitionType == 'none' ? 0 : (transitionType == 'fade') ? FADE_SPEED - .5 : SIDE_SPEED
+	delay = transitionType == 'none' ? 0 : (transitionType == 'fade') ? c.fadeSpeed - .5 : c.sideSpeed
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
 	freeze(); wait(delay, () => {
 		transitionsDiv.innerHTML = ''; cacheResources(frameData)
@@ -114,8 +124,8 @@ function createTransition(transitionType) {
 	let pics = picsDiv.cloneNode(true); pics.id = null
 	transition.appendChild(pics)
 	transition.classList.add('transition'); transition.classList.add(transitionType)
-	if (transitionType == 'leftIn') transition.style.left = -WIDTH + 'px'
-	else if (transitionType == 'rightIn') transition.style.left = WIDTH + 'px'
+	if (transitionType == 'leftIn') transition.style.left = -c.width + 'px'
+	else if (transitionType == 'rightIn') transition.style.left = c.width + 'px'
 	transitionsDiv.appendChild(transition) }
 
 // BOXES ******************************************
@@ -146,44 +156,52 @@ function refreshCustomBoxes() {
 		let id = persistentIds[i]
 		if (!newIds.includes(id)) {
 			get(id).classList.add('fadeOut')
-			wait(FADE_SPEED - .1, () => { 
+			wait(c.fadeSpeed - .1, () => {
 				persistentDiv.removeChild(get(id)) })}}
 
 	persistentIds = newIds
 }
 
-function makeBox(X, parent) {
-	let xy = simpleEval(X.xy)
-	if (X.xy == null) return
 
-	let box = document.createElement('div')
-	box.className = 'box'
-	box.style.left = xy[0] * WIDTH + 'px'
-	box.style.width = (xy[1] - xy[0]) * WIDTH + 'px'
-	box.style.bottom = xy[2] * HEIGHT + 'px'
-	box.style.height = (xy[3] - xy[2]) * HEIGHT + 'px'
-	let cursor = orDefault(X.cursor, config.defaultCursor)
-	setCursor(box, cursor)
 
-	let fn = orDefault(X.fn, null, false)
-	let to = orDefault(X.to, null)
-	let transition = orDefault(X.transition, 'fade')
-	if (to != null && fn != null) fn = () => { X.fn(); goTo(to, transition) }
-	else if (to != null) { fn = () => { goTo(to, transition) }}
-	if (fn != null) { box.onclick = fn }
+function makeBox(boxData, parent) {
+	if (boxData.xy == null) return
 	
-	let id = orDefault(X.id, null); if (id != null) box.id = id
+	let element = document.createElement('div'); element.className = 'box'
+
+	let X = { ...c.baseBox, ...boxData }
+	for (key in X) { if (key != 'fn') X[key] = simpleEval(X[key]) }
+	
+	element.style.left = X.xy[0] * c.width + 'px'
+	element.style.width = (X.xy[1] - X.xy[0]) * c.width + 'px'
+	element.style.bottom = X.xy[2] * c.height + 'px'
+	element.style.height = (X.xy[3] - X.xy[2]) * c.height + 'px'
+
+	setCursor(element, X.cursor)
+
+	//let fn = orDefault(X.fn, null, false)
+	//let to = orDefault(X.to, null)
+	if (X.to != null && X.fn != null) {
+		element.onclick = () => { X.fn(); goTo(X.to, X.transition) }
+	} else if (X.to != null) {
+		element.onclick = () => { goTo(X.to, X.transition) }
+	} else if (X.fn != null) {
+		element.onclick = X.fn
+	}
+	
+	if (X.id != null) element.id = X.id
 	if (X.subBoxes != null) {
 		for (i in X.subBoxes) {
-			makePic(X.subBoxes[i], box)
-			makeBox(X.subBoxes[i], box)
+			makePic(X.subBoxes[i], element)
+			makeBox(X.subBoxes[i], element)
 		}
 	}
-	if (X.drag != null) makeDraggable(box, [])
-	parent.appendChild(box) }
+	
+	if (X.drag != null) makeDraggable(element, [])
+	parent.appendChild(element) 
+}
 
 // todo - consolidate into single 'makeBox' method?
-
 
 function makePic(X, parent = picsDiv) {
 	let element = document.createElement('img'); element.classList.add('pic')
@@ -199,8 +217,8 @@ function makePic(X, parent = picsDiv) {
 	let offset = orDefault(X.offset, null)
 	let centerOffset = orDefault(X.centerOffset, false)
 	if (offset != null) {
-		element.style.left = WIDTH * offset[0] - (centerOffset ? (element.width / 2) : 0) + 'px'
-		element.style.top = HEIGHT * (1 - offset[1]) - (centerOffset ? (element.height / 2) : 0) + 'px' }
+		element.style.left = c.width * offset[0] - (centerOffset ? (element.width / 2) : 0) + 'px'
+		element.style.top = c.height * (1 - offset[1]) - (centerOffset ? (element.height / 2) : 0) + 'px' }
 	else { element.classList.add('full') }
 	
 	let scale = orDefault(X.scale, null)
@@ -262,9 +280,7 @@ function movieStep(X) {
 	if (get(X.id) == null || (X.while != null && !X.while())) return
 	X.step++;
 
-	if (X.destination != null && X.step >= X.totalSteps) {
-		goTo(X.destination, 'none')
-	}
+	if (X.destination != null && X.step >= X.totalSteps) { goTo(X.destination, 'none') }
 	if (X.step > X.totalSteps) {
 		console.log('bye')
 		if (X.then != null) X.then()
@@ -292,8 +308,9 @@ function movieStep(X) {
 
 function refreshStandardBoxes(frameData) {
 	if (frameData == null) return
-	refreshStandardBox(standardBoxes.left, frameData.left); refreshStandardBox(standardBoxes.right, frameData.right)
-	refreshStandardBox(standardBoxes.forward, frameData.forward); refreshStandardBox(standardBoxes.back, frameData.back)
+	for (let key in c.standardBoxes) {
+		refreshStandardBox(c.standardBoxes[key], frameData[key])
+	}
 }
 
 function refreshStandardBox(boxData, destinationFrame) {
@@ -324,9 +341,9 @@ function makeInventoryItem(id) {
 
 // Make given inventory box draggable, execute action if dropped on targetId
 function makeDraggable(item, targets) {
-	setCursor(item, 'o')
+	setCursor(item, 'O')
 	item.onmousedown = function(event) {
-		event.preventDefault(); setCursor(item, 'o')	
+		event.preventDefault(); setCursor(item, 'O')	
 		let itemX = parseInt(item.style.left); let itemY = parseInt(item.style.top)
 		let mouseX = event.clientX; let mouseY = event.clientY
 		document.onmousemove = function(event) {
@@ -342,7 +359,7 @@ function makeDraggable(item, targets) {
 				let targetObj = get(target.id)
 				if (targetObj != null && isCollide(item, targetObj)) { console.log(item); target.fn(); return }}
 			item.style.left = itemX; item.style.top = itemY
-			document.onmousemove = null; setCursor(item, 'o') }}}
+			document.onmousemove = null; setCursor(item, 'O') }}}
 
 // GIFS ••••••••••••••••••••••••••••••••••••••••••••••••••
 function playGif(name, newFrame, delay, after = null) {
@@ -412,13 +429,11 @@ function playSound(name, volume = 1) {
 		if (sound.paused) {
 			sound.setAttribute('id', name)
 			sound.setAttribute('src', SOUND_PATH + name + (name.includes('.') ? '' : '.mp3'))
-			sound.volume = volume; sound.play(); return sound }}
-	alert('no sound!') }
+			sound.volume = volume; sound.play(); return sound }}}
 
 function stopSound(name) { 
 	let sound = get(name)
 	console.log(sound)
-	//.stop()
 }
 
 // HELPERS ******************************************	
@@ -431,7 +446,7 @@ function parseFrame(frame) {
 
 function get(id) { return document.getElementById(id) }
 
-function setCursor(element, cursor) { if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png) 25 25, auto' }
+function setCursor(element, cursor) { if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png), auto' }
 
 function launchFullScreen(element) {
 	if (element.requestFullScreen) element.requestFullScreen()

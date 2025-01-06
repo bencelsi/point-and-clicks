@@ -10,6 +10,7 @@
 // ‘No Water’ text
 // live update for heater level
 // card in door target
+// darken front desk chair
 
 //nice to have:
 // TODO: wait for toilet to refill before flushing
@@ -34,6 +35,21 @@
 // use letters for cursor too? Z, L, R, F, B, I, S, N
 // Lobby, Stairs, Pool, Bathroom, Elevator, Halls, Room, Offict, Top, Klock, Janitor
 // idea for ease of use: store helper functions at ends of rooms?
+const config = { 
+    title: 'Griven', 
+    room: 'lobby', frame: 'A1', extension: 'png', width: 1000, height: 750,
+    customCursors: true,
+    defaultCursor: 'N',
+    boxCursor: 'O',
+    waitCursor: 'S',
+    inventoryCursor: 'O',
+    inventoryDragCursor: null,
+    standardBoxes: {
+		left: { xy: [0, .2, .2, .8], transition: 'left', cursor: 'L', id: 'leftBox' },
+		right: { xy: [.8, 1, .2, .8], transition: 'right', cursor: 'R', id: 'rightBox' },
+		forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'f', id: 'forwardBox' },
+		back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'b', id: 'backBox' }}
+}
 
 const elevatorBoxes = [
     { xy: [.81, .84, .06, .1], fn: () => { setElevatorFloor(1)} }, { xy: [.87, .9, .06, .1], fn: () => { setElevatorFloor(2)} },
@@ -55,57 +71,52 @@ const keypadButtons = [
     { xy: [.58, .7, .46, .66], fn: () => { pushKeypad(8) }}, { xy: [.72, .84, .46, .66], fn: () => { pushKeypad(9) }}]
 // START
 
-const config = { 
-    title: 'Griven', 
-    room: 'lobby', frame: 'A1', extension: 'png', frameWidth: 1000, frameHeight: 750,
-    customCursors: true,
-    defaultCursor: 'o'
-} 
+
 
 const roomData = {
 'opening': {
     'menu': { boxes: [{ xy: [0, 1, 0, 1], to: 'A0' }]},
-    'A0': { onEntrance: () => { freeze(); setMusic(null); playSound('music/opening'); setFade(4); goTo('A1');
+    'A0': { onEnter: () => { freeze(); setMusic(null); playSound('music/opening'); setFade(4); goTo('A1');
         wait(4, () => { playGif('opening', 'A2', 4, () => { playSound('music/title'); wait(2, () => { goTo('A3');
         wait(4, () => { goTo('lobby/A1'); wait(4, () => { setFade(1); unfreeze() })})})})})}}},
 'brochure': { 0: { right: 1 }, 1: { left: 0, right: 2 }, 2: { left: 1, right: 3 }, 3: { left: 2, right: 4 }, 4: { left: 3 }},
 'lobby' : { //zlobby
     'A1': { left: 'A4', right: 'A2', forward: 'B1' },
-    'A2': { left: 'A1', right: 'A3', boxes: [{ to: 'A5', xy: [.37, .76, .25, .7], cursor: 'z' }]},
+    'A2': { left: 'A1', right: 'A3', boxes: [{ to: 'A5', xy: [.37, .76, .25, .7], cursor: 'Z' }]},
     'A3': { left: 'A2', right: 'A4' },
     'A4': { left: 'A3', right: 'A1' },
     'A5': { back: 'A2' },
     'B1': { left: 'B4', right: 'B2', forward: () => { playSound('grandUp'); 
         makePic({mov: 'grandUp', totalSteps: 10, delay: .2, destination: 'C1'})},
         //playGif('grandUp', 'C1', 10 * .15)},
-        boxes: [{ to: 'D1', xy: [.15, .23, .4, .56], cursor: 'f' }, { to: 'E1', xy: [.84, .95, .4, .58], cursor: 'f' }]},
-    'B2': { left: 'B1', right: 'B3', forward: 'E2', boxes: [{ xy: [.4, .63, .7, 1], to: 'E4', cursor: 'z' }]},
+        boxes: [{ to: 'D1', xy: [.15, .23, .4, .56], cursor: 'F' }, { to: 'E1', xy: [.84, .95, .4, .58], cursor: 'F' }]},
+    'B2': { left: 'B1', right: 'B3', forward: 'E2', boxes: [{ xy: [.4, .63, .7, 1], to: 'E4', cursor: 'Z' }]},
     'B3': { left: 'B2', right: 'B4', forward: 'A3' },
     'B4': { left: 'B3', right: 'B1', forward: 'D3', boxes: [{ pic: 'cabinetDown3', if: () => { return s.cabinetDown }}]},
-    'C1': { left: 'C4', right: 'C2', boxes: [outerElevatorBox, { xy: [.28, .31, .48, .52],
-        to: () => { return s.elevatorFloor == 1 ? 'C1b' : (!s.elevatorFixed ? 'C1a' : null) },
+    'C1': { left: 'C4', right: 'C2', boxes: [outerElevatorBox, 
+        { xy: [.28, .31, .48, .52], to: () => { return s.elevatorFloor == 1 ? 'C1b' : (!s.elevatorFixed ? 'C1a' : null) },
         fn: () => { if (s.elevatorFloor == 1 || !s.elevatorFixed) { playSound('elevatorOpen') } else { callElevator() }}}]},
     'C1a':{ left: () => { playSound('elevatorClose'); return 'C4' }, right: () => { playSound('elevatorClose'); return 'C2' },
-        boxes: [outerElevatorBox, { to: 'C5', xy: [.35, .66, .17, .88], cursor: 'z' },
+        boxes: [outerElevatorBox, { to: 'C5', xy: [.35, .66, .17, .88], cursor: 'Z' },
         { to: 'C1', fn: () => { playSound('elevatorClose') }, xy: [.28, .31, .48, .52] }]},
     'C1b':{ left: () => { playSound('elevatorClose'); return 'C4' }, right: () => { playSound('elevatorClose'); return 'C2' },
         boxes: [outerElevatorBox, { to: 'C1', fn: () => { playSound('elevatorClose') }, xy: [.28, .31, .48, .52] },
         { to: 'elevator/A1', xy: [.35, .66, .17, .88] }]},
     'C2': { left: 'C1', right: 'C3' },
     'C3': { left: 'C2', right: 'C4', forward: () => {  playSound('grandDown'); playGif('grandDown', 'B3', 10 * .15)}},
-    'C4': { left: 'C3', right: 'C1', boxes: [{ to: 'C6', xy: [.4, .61, .25, .36], cursor: 'z' }]},
+    'C4': { left: 'C3', right: 'C1', boxes: [{ to: 'C6', xy: [.4, .61, .25, .36], cursor: 'Z' }]},
     'C5': { back: 'C1a' },
     'C6': { back: 'C4' },
     'D1': { left: 'D3', right: 'D2', forward: 'F1'},
-    'D2': { left: 'D1', right: 'D3', boxes: [{ to: 'B2', xy: [.2, .4, .2, .8], cursor: 'f' }, 
-        { to: 'B3', xy: [.4, .8, .2, .8], cursor: 'f' }]},
+    'D2': { left: 'D1', right: 'D3', boxes: [{ to: 'B2', xy: [.2, .4, .2, .8], cursor: 'F' }, 
+        { to: 'B3', xy: [.4, .8, .2, .8], cursor: 'F' }]},
     'D3': { left: 'D2', right: 'D1', boxes: [{ fn: () => { playSound('bell') }, xy: [.49, .55, .34, .4] },
         { fn: () => { playSound('lightswitch'); s.lightsOn = !s.lightsOn; refresh()}, xy: [.84, .88, .57, .64] },
         { pic: 'switch', if: () => { return s.lightsOn }}, { pic: 'smallKey2', if: () => { return s.smallKey == 2 }},
         { xy: () => { return s.drawers[0] ? [.3, .37, .38, .48] : [.22, .3, .38, .48] }, 
             fn: () => { if (s.smallKey == 2) { playSound('cabinet' + (s.drawers[0] ? 'Close' : 'Open')); changeDrawer(0) }
                  else { goTo('D4') }}, if: () => { return !s.cabinetDown }, 
-            cursor: () => { return s.smallKey == 2 ? 'o' : 'z' }},
+            cursor: () => { return s.smallKey == 2 ? 'O' : 'Z' }},
         { pic: 'drawer0', if: () => { return s.drawers[0] }},
         { xy: () => { return s.drawers[1] ? [.3, .37, .48, .57] : [.22, .3, .48, .57] }, 
             fn: () => { playSound('cabinet' + (s.drawers[1] ? 'Close' : 'Open')); changeDrawer(1) }, 
@@ -125,8 +136,8 @@ const roomData = {
         { pic: () => { return 'cabinetDown' + (s.lightsOn ? '2' : '1') }, if: () => { return s.cabinetDown }}],
     toCache: ['lightRight', 'lightRightKey', 'cabinetDown1', 'cabinetDown2']},
     'D4': { back: 'D3', boxes: [{ xy: [.41, .48, .6, .67], id: 'keyhole', cursor: 'n' }] },
-    'E1': { left: 'E3', right: 'E2', boxes: [{ to: 'G1', xy: [.57, .73, .35, .62], cursor: 'f' }]},
-    'E2': { left: 'E1', right: 'E3', boxes: [{ to: 'E4', xy: [.4, .85, .8, 1], cursor: 'z' }]},
+    'E1': { left: 'E3', right: 'E2', boxes: [{ to: 'G1', xy: [.57, .73, .35, .62], cursor: 'F' }]},
+    'E2': { left: 'E1', right: 'E3', boxes: [{ to: 'E4', xy: [.4, .85, .8, 1], cursor: 'Z' }]},
     'E3': { left: 'E2', right: 'E1', boxes: [{ to: 'B3', xy: [.2, .5, .2, .8] }, { to: 'B4', xy: [.5, .8, .2, .8] },
         { if: () => { return s.cabinetDown }, pic: 'cabinetDown4'}]},
     'E4': { back: 'E2', boxes: [{ pic: 'clockHand1', offset: [.485, .81], style: () => { 
@@ -139,14 +150,14 @@ const roomData = {
     'F2': { left: 'F1', right: 'F1', forward: 'D2' },
     'G1': { left: 'G2', right: 'G2', forward: 'H1' },
     'G2': { left: 'G1', right: 'G1', forward: 'E3', back: 'H3' },
-    'H1': { left: 'H4', right: 'H2', boxes: [{ to: 'I1', xy: [.35, .48, .23, .55], cursor: 'f' }]},
+    'H1': { left: 'H4', right: 'H2', boxes: [{ to: 'I1', xy: [.35, .48, .23, .55], cursor: 'F' }]},
     'H2': { left: 'H1', right: 'H3', boxes: [{ to: 'pool/A2', xy: [.25, .48, .23, .73] } ]},
     'H3': { left: 'H2', right: 'H4', boxes: [{ to: 'G2', xy: [.25, .5, .2, .6] }]},
     'H4': { left: 'H3', right: 'H1', boxes: [{ xy: [.57, .7, .4, .63], to: () => { if (s.cUnlockedcked) return 'H4a' },
         fn: () => { playSound(s.cUnlockedcked ? 'doorOpen' : 'doorLocked') }}]},
     'H4a': { left: () => { playSound('doorClose'); return 'H3'}, right: () => { playSound('doorClose'); return 'H1'}, 
         boxes: [{ to: 'cafe/A4', xy: [.4, .85, .2, .8] }]},
-    'I1': { left: 'I4', right: 'I2', boxes: [{ to: 'I5', xy: [.57, .8, .53, .68], cursor: 'z' }]},
+    'I1': { left: 'I4', right: 'I2', boxes: [{ to: 'I5', xy: [.57, .8, .53, .68], cursor: 'Z' }]},
     'I2': { left: 'I1', right: 'I3', boxes: [{ xy: [.39, .43, .53, .64], fn: () => { 
             playSound('toilet' + (s.valves[0] ? 'Flush' : 'Empty')); makePic({ pic: 'toiletHandle', life: .7}); 
             if (s.valves[0] && s.valves[1] && s.pipe == 2) s.heaterLevel = Math.min(100, s.heaterLevel + 10) }}]},
@@ -154,14 +165,14 @@ const roomData = {
     'I4': { left: 'I3', right: 'I1' },
     'I5': { back: 'I1' }},
 'pool': { //zpool
-    'A1': { left: 'A4', right: 'A2', boxes: [{ to: 'A7', xy: [.37, .65, .35, .75], cursor: 'z' },
+    'A1': { left: 'A4', right: 'A2', boxes: [{ to: 'A7', xy: [.37, .65, .35, .75], cursor: 'Z' },
         { pic: 'valve0-mini', if: () => { return s.valves[0] }},
         { pic: 'poolPigKey', if: () => { return s.goldKey == 2 }},
         { pic: 'poolPigKey', if: () => { return s.goldKey == 2 }},
         { pic: 'poolPig', if: () => { return s.pig == 2 & s.goldKey != 2  }}]},
     'A2': { left: 'A1', right: 'A3', forward: 'A5' },
     'A3': { left: 'A2', right: 'A4', boxes: [
-        { xy: [.54, .65, .3, .51], to: () => { return s.kUnlocked ? 'A3a' : 'A6' }, cursor: () => { return s.kUnlocked ? 'o' : 'z' }}]},
+        { xy: [.54, .65, .3, .51], to: () => { return s.kUnlocked ? 'A3a' : 'A6' }, cursor: () => { return s.kUnlocked ? 'O' : 'Z' }}]},
     'A3a':{ left: () => { playSound('doorClose'); return 'A2' },
             right: () => { playSound('doorClose'); return 'A4' }, boxes: [{ to: 'B3', xy: [.54, .65, .3, .51], cursor: 'forward' }]},
     'A4': { left: 'A3', right: 'A1', forward: 'lobby/H4' },
@@ -172,7 +183,7 @@ const roomData = {
     'B1': { left: 'B4', right: 'B2', forward: 'A1' },
     'B2': { left: 'B1', right: 'B3' },
     'B3': { left: 'B2', right: 'B4', boxes: [
-        { xy: [.2, .8, .4, 1], fn: () => { playGif('ladderUp', 'clockroom/A3', 10 * .15) }, cursor: 'f'}]},
+        { xy: [.2, .8, .4, 1], fn: () => { playGif('ladderUp', 'clockroom/A3', 10 * .15) }, cursor: 'F'}]},
     'B4': { left: 'B3', right: 'B1' }},
 'clockroom' : {
     'A1': { left: 'A4', right: 'A2', forward: () => { playGif('ladderDown', 'pool/B1', 10 * .15) }},
@@ -182,7 +193,7 @@ const roomData = {
         { mov: 'gear1', steps: 3, fate: 'loop', if: () => { return s.clockOn }, while: () => { return s.clockOn }},
         { pic: 'lever', if: () => { return s.clockOn } },
         { xy: [.48, .6, .22, .3], to: 'A5' },
-        { xy: [.65, .75, .21, .29], to: 'A6', pic: 'jesusNote', if: () => { return s.jesusCount >= 3 }, cursor: 'z'}]},
+        { xy: [.65, .75, .21, .29], to: 'A6', pic: 'jesusNote', if: () => { return s.jesusCount >= 3 }, cursor: 'Z'}]},
     'A3': { left: 'A2', right: 'A4', boxes: [
         // { pic: 'gear2.gif', offset: [0,.6], scale: 10 },
         // { pic: 'gear3.gif', offset: [.77,.82], scale: 23 },
@@ -207,8 +218,8 @@ const roomData = {
     'A6': { back: 'A2' },
     'A7': { alt: { name: 'A7.gif', if: () => { return s.clockOn }}, back: 'A4' }},
 'cafe': { //zcafe
-    'A1': { left: 'A4', right: 'A2', boxes: [{ to: 'A7', xy: [.62, .78, .42, .6], cursor: 'z' }, 
-        { to: () => { return s.jUnlocked ? 'A1a' : 'A6' }, xy: [.3, .35, .5, .6], cursor: () => { return s.jUnlocked ? 'o' : 'z' },
+    'A1': { left: 'A4', right: 'A2', boxes: [{ to: 'A7', xy: [.62, .78, .42, .6], cursor: 'Z' }, 
+        { to: () => { return s.jUnlocked ? 'A1a' : 'A6' }, xy: [.3, .35, .5, .6], cursor: () => { return s.jUnlocked ? 'O' : 'Z' },
           fn: () => { if (s.jUnlocked) playSound('doorOpen') }}]},
     'A1a': { left: () => { playSound('doorClose'); return 'A4' }, right: () => { playSound('doorClose'); return 'A2'}, 
         boxes: [{ to: 'A5', xy: [.28, .46, .28, .75] }, { to: 'A7', xy: [.62, .78, .42, .6] }]},
@@ -217,7 +228,7 @@ const roomData = {
     'A4': { left: 'A3', right: 'A1', forward: 'B4' },
     'A6': { back: 'A1', boxes: keypadButtons }, 
     'A7': { back: () => { return s.plumbOpen ? 'A1a' : 'A1' }, boxes: [
-        { pic: 'coffee1', xy: [.34, .44, .18, .4], cursor: () => { return s.coffee == 2 ? 'f' : null },
+        { pic: 'coffee1', xy: [.34, .44, .18, .4], cursor: () => { return s.coffee == 2 ? 'F' : null },
             fn: () => { if (s.coffee == 2) { s.coffee = 0; refresh()}}, if: () => { return s.coffee == 1 || s.coffee == 2 }},
         { xy: [.34, .4, .46, .52], fn: () => { playSound('button')
             if (s.heaterLevel > 0 && !s.valves[2] && s.valves[4] && s.pipe == 3) { 
@@ -270,7 +281,7 @@ const roomData = {
         { xy: [.01, .1, .4, .5], pic: () => { return s.valves[3] ? 'valve3' : null }, fn: () => { flipValve(3) }},
         { xy: [.33, .4, .77, .86], pic: () => { return s.valves[4] ? 'valve4' : null }, fn: () => { flipValve(4) }},
         { xy: [.88, .95, .71, .8], pic: () => { return s.valves[5] ? 'valve5' : null }, fn: () => {  flipValve(5) }}, 
-        { xy: [.25, .5, .86, 1], cursor: () => { return s.pipe == 3 ? 'f' : null }, 
+        { xy: [.25, .5, .86, 1], cursor: () => { return s.pipe == 3 ? 'F' : null }, 
             pic: () => { return s.pipe == 3 ? 'pipe3' : null }, id: 'pipe3',
             fn: () => { if (s.pipe == 3) { s.pipe = 0; refreshCustomBoxes(); refresh() }}}]},
     'A4': { left: 'A3', right: 'A1', boxes: [{ to: 'A5', xy: [.15, .3, .08, .9]},
@@ -281,7 +292,7 @@ const roomData = {
     'B1': { left: 'B4', right: 'B2', boxes: [{ to: 'B5', xy: [.3, .5, .48, .65] }]},
     'B2': { left: 'B1', right: 'B3', boxes: [
         { xy: [.64, .69, .43, .5], pic: () => { return s.valves[1] ? 'valve1' : null }, fn: () => { flipValve(1) }},
-        { xy: [.38, .57, .6, .71], cursor: () => { return s.pipe == 2 ? 'f' : null },
+        { xy: [.38, .57, .6, .71], cursor: () => { return s.pipe == 2 ? 'F' : null },
             pic: () => { return s.pipe == 2 ? 'pipe2' : null }, id: 'pipe2',
             fn: () => { if (s.pipe == 2) { s.pipe = 0 }; refreshCustomBoxes(); refresh() }},
         { pic: 'heaterMeter', scale: 3, offset: () => 
@@ -327,7 +338,7 @@ const roomData = {
         forward: () => { hallForward(); return 'A4' }},
     'A4': { left: () => { hallLeft(); return 'A5' }, right: () => { hallRight(); return 'A5' }},
     'A5': { left: () => { hallLeft(); return hallTurnLogic() }, right: () => { hallRight(); return hallTurnLogic() },
-        boxes: [{ to: 'A10', xy: [.6, .67, .32, .45], cursor: 'z'}, 
+        boxes: [{ to: 'A10', xy: [.6, .67, .32, .45], cursor: 'Z'}, 
         { pic: () => { return 'roomFloor' + s.floor }, offset: [.44,.94]},
         { pic: () => { return 'room' + (s.hallPosition + (s.hallDirection == 1 ? 1 : 4) 
             + (s.hallPosition < 4 ? 0 : 2) - (s.hallPosition % 4 == 3 ? 1 : 0))}, offset: [.46,.94] }]},
@@ -355,18 +366,18 @@ const roomData = {
     'B4': { left: 'B3', right: 'B1', forward: () => { s.hallDirection = 3; s.hallPosition = 2; return 'A6' }},
     'B5': { back: 'B1a' }},
 'elevator': { //zelevator
-    'A1': { left: () => { return 'A2' + 
-            (s.elevatorFloor != s.elevatorGoal ? 'd' : (s.elevatorFloor == 1 ? 'a' : (s.elevatorFloor == 10 ? 'c' : 'b'))) },
+    'A1': { left: () => { 
+        return s.elevatorFloor != s.elevatorGoal ? 'A2d' : (s.elevatorFloor == 1 ? 'A2a' : (s.elevatorFloor == 10 ? 'A2c' : 'A2b'))},
         right: () => { 
-            return s.elevatorFloor != s.elevatorGoal ? 'A2d' : (s.elevatorFloor == 1 ? 'A2a' : (s.elevatorFloor == 10 ? 'A2c' : 'A2b')) }},
+            return s.elevatorFloor != s.elevatorGoal ? 'A2d' : (s.elevatorFloor == 1 ? 'A2a' : (s.elevatorFloor == 10 ? 'A2c' : 'A2b'))}},
     'A2a': { left: 'A1', forward: () => { playSound('elevatorClose'); return 'lobby/C3'}, boxes: elevatorBoxes },
     'A2b': { left: 'A1', forward: () => { playSound('elevatorClose'); return 'hall/B3'}, boxes: elevatorBoxes },
     'A2c': { left: 'A1', forward: () => { playSound('elevatorClose'); return 'top/A3'}, boxes: elevatorBoxes },
     'A2d': { left: 'A1', boxes: elevatorBoxes },
     'A3': { forward: () => { playSound('panel'); return 'A3a' }, back: () => { 
-        return 'A2' + (s.elevatorMoving ? 'd' : (s.floor == 1 ? 'a' : (s.floor == 10 ? 'c' : 'b'))) }},
+        return s.elevatorMoving ? 'A2d' : (s.floor == 1 ? 'A2a' : (s.floor == 10 ? 'A2c' : 'A2b'))}},
     'A3a': { back: () => { playSound('panel')
-        return 'A2' + (s.elevatorMoving ? 'd' : (s.floor == 1 ? 'a' : (s.floor == 10 ? 'c' : 'b')))}, boxes: [
+        return s.elevatorMoving ? 'A2d' : (s.floor == 1 ? 'A2a' : (s.floor == 10 ? 'A2c' : 'A2b'))}, boxes: [
         { pic: () => { return 'elevatorLight' + (s.elevatorFixed ? 'Green' : 'Red') }, offset: [.47, .96] },
         { xy: [.25, .35, .26, .32], offset: () => { return [[.26, .32], [.295, .32], [.33, .32]][s.circuits[0]]},
             pic: 'circuit', scale: 1, fn: () => { s.circuits[0] = (s.circuits[0] + 1) % 3; checkCircuits() }},
@@ -414,7 +425,7 @@ const roomData = {
     'C1': { left: 'C4', right: 'C2' },
     'C2': { left: 'C1', right: 'C3', forward: 'C5' },
     'C3': { left: 'C2', right: 'C4', forward: 'B3' },
-    'C4': { left: 'C3', right: 'C1', boxes: [{ to: 'C6', xy: [.41, .57, .71, .93], cursor: 'z' },
+    'C4': { left: 'C3', right: 'C1', boxes: [{ to: 'C6', xy: [.41, .57, .71, .93], cursor: 'Z' },
         { if: () => { return s.pig == 1 }, xy: [.25, .35, .4, .53], fn: () => { s.pig = 0; refresh() }},
         { if: () => { return s.pig == 1 }, pic: 'pig' }]},
     'C5': { back: 'C2' },
@@ -452,7 +463,7 @@ const roomData = {
         { to: 'D3', fn: () => { playSound('doorClose'); playSound('bobb/left') }, xy: [.35, .65, .22, .82] }]},
     'C3': { boxes: keypadButtons, back: 'C2' },    
     'D1': { left: 'D4', right: 'D2', boxes: [{ xy: [.4, .6, .3, .75], fn: () => { playSound('doorLocked') }}]},
-    'D2': { left: 'D1', right: 'D3', onEntrance: () => { if (s.bobbSpeech) return 
+    'D2': { left: 'D1', right: 'D3', onEnter: () => { if (s.bobbSpeech) return 
         freeze(); wait(1, () => { goTo('D5'); setMusic(null); playSound('bobb/speech')
             wait(305, () => { s.bobbSpeech = true; s.otherLeft = false; goTo('D2'); unfreeze() })})}},
     'D3': { left: 'D2', right: () => { if (s.otherLeft) { playSound('bobb/otherLeft'); s.otherLeft = false } return 'D4' }, 
@@ -463,26 +474,26 @@ const roomData = {
         wait(2, () => { scream.pause(); playSound('splat'); goTo('credits/1') })})})}}]},
     'D4': { left: 'D3', right: 'D1' }},
 'credits': {
-    1: { onEntrance: () => { setFade(4); wait(4, () => { goTo(2) })}},
-    2: { onEntrance: () => { wait(3, () => { goTo(3) })}},
-    3: { onEntrance: () => { wait(3, () => { goTo(4) })}},
-    4: { onEntrance: () => { wait(4, () => { goTo(5) })}},
-    5: { onEntrance: () => { wait(4, () => { goTo(6) })}},
-    6: { onEntrance: () => { wait(4, () => { goTo(7) })}},
-    7: { onEntrance: () => { wait(4, () => { goTo(8) })}},
-    8: { onEntrance: () => { setFade(.2); wait(.2, () => { goTo(9) })}},
-    9: { onEntrance: () => { wait(.2, () => { goTo(10) })}},
-    10: { onEntrance: () => { wait(.2, () => { goTo(11) })}},
-    11: { onEntrance: () => { wait(.2, () => { goTo(12) })}},
-    12: { onEntrance: () => { wait(.2, () => { goTo(13) })}},
-    13: { onEntrance: () => { wait(.2, () => { goTo(14) })}},
-    14: { onEntrance: () => { wait(.2, () => { goTo(15) })}},
-    15: { onEntrance: () => { wait(.2, () => { goTo(16) })}},
-    16: { onEntrance: () => { wait(.2, () => { goTo(17) })}},
-    17: { onEntrance: () => { wait(.2, () => { goTo(18) })}},
-    18: { onEntrance: () => { wait(.2, () => { goTo(19) })}},
-    19: { onEntrance: () => { wait(3, () => { goTo(20) })}},
-    20: { onEntrance: () => { setFade(20); wait(5, () => { goTo('top/D6'); setMusic(null) }); wait(() => {20, goTo('opening/A1')})
+    1: { onEnter: () => { setFade(4); wait(4, () => { goTo(2) })}},
+    2: { onEnter: () => { wait(3, () => { goTo(3) })}},
+    3: { onEnter: () => { wait(3, () => { goTo(4) })}},
+    4: { onEnter: () => { wait(4, () => { goTo(5) })}},
+    5: { onEnter: () => { wait(4, () => { goTo(6) })}},
+    6: { onEnter: () => { wait(4, () => { goTo(7) })}},
+    7: { onEnter: () => { wait(4, () => { goTo(8) })}},
+    8: { onEnter: () => { setFade(.2); wait(.2, () => { goTo(9) })}},
+    9: { onEnter: () => { wait(.2, () => { goTo(10) })}},
+    10: { onEnter: () => { wait(.2, () => { goTo(11) })}},
+    11: { onEnter: () => { wait(.2, () => { goTo(12) })}},
+    12: { onEnter: () => { wait(.2, () => { goTo(13) })}},
+    13: { onEnter: () => { wait(.2, () => { goTo(14) })}},
+    14: { onEnter: () => { wait(.2, () => { goTo(15) })}},
+    15: { onEnter: () => { wait(.2, () => { goTo(16) })}},
+    16: { onEnter: () => { wait(.2, () => { goTo(17) })}},
+    17: { onEnter: () => { wait(.2, () => { goTo(18) })}},
+    18: { onEnter: () => { wait(.2, () => { goTo(19) })}},
+    19: { onEnter: () => { wait(3, () => { goTo(20) })}},
+    20: { onEnter: () => { setFade(20); wait(5, () => { goTo('top/D6'); setMusic(null) }); wait(() => {20, goTo('opening/A1')})
 }}}}
 
 function showerStep() { //TODO - this should be triggered by any potential change? or, just never stop?
