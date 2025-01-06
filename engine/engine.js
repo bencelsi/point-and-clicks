@@ -5,33 +5,33 @@
 // TODO: cache pics/gifs
 
 // DOM globals:
-let standardBoxesDiv = get('standardBoxes')
-let customBoxesDiv = get('customBoxes')
-let picsDiv = get('pics')
-let cacheDiv = get('cache') 
-let transitionsDiv = get('transitions')
-let frameImg = get('frame')
-let persistentDiv = get('persistents')
-let inventoryDiv = get('inventory')
-let moviesDiv = get('movies')
-let cursorBlockDiv = get('cursorBlock')
-let allDiv = get('all')
+let standardBoxesDiv = 	get('standardBoxes')
+let customBoxesDiv = 	get('customBoxes')
+let picsDiv = 			get('pics')
+let cacheDiv = 			get('cache') 
+let transitionsDiv = 	get('transitions')
+let frameImg = 			get('frame')
+let persistentDiv = 	get('persistents')
+let inventoryDiv = 		get('inventory')
+let moviesDiv = 		get('movies')
+let cursorBlockDiv = 	get('cursorBlock')
+let allDiv = 			get('all')
 
 //paths
-get("favicon").href = GAME_PATH + "/favicon.ico"
-const ASSET_PATH = GAME_PATH + '/assets/'
-const FRAME_PATH = ASSET_PATH + '/frames/'
-const GIF_PATH = ASSET_PATH + '/gifs/'
-const SOUND_PATH = ASSET_PATH + '/sound/'
-const MUSIC_PATH = SOUND_PATH + 'music/'
-const PIC_PATH = ASSET_PATH + '/pics/'
-const INVENTORY_PATH = ASSET_PATH + '/inventory/'
-const MOV_PATH = ASSET_PATH + '/movies/'
-let CURSOR_PATH = '/cursors/'
+get("favicon").href = 	GAME_PATH + '/favicon.ico'
+const ASSET_PATH = 		GAME_PATH + '/assets/'
+const FRAME_PATH = 		ASSET_PATH + '/frames/'
+const GIF_PATH = 		ASSET_PATH + '/gifs/'
+const SOUND_PATH = 		ASSET_PATH + '/sound/'
+const MUSIC_PATH = 		SOUND_PATH + 'music/'
+const PIC_PATH = 		ASSET_PATH + '/pics/'
+const INVENTORY_PATH = 	ASSET_PATH + '/inventory/'
+const MOV_PATH = 		ASSET_PATH + '/movies/'
+let CURSOR_PATH = 		'/cursors/'
 
 
 // Global vars:
-let music = new Audio(); music.loop = true; let cacheSet = new Set()
+let music = new Audio; music.loop = true; let cacheSet = new Set()
 let sounds = [new Audio, new Audio, new Audio, new Audio, new Audio] // TODO: make concurrent sounds variable
 let persistentIds = []
 let c;
@@ -40,7 +40,7 @@ window.onload = waitForData()
 // hacky way to wait for gameData & s (state) to load
 let waitCounter = 0
 function waitForData() { 
-	try { if (waitCounter > 10) return;
+	try { if (waitCounter > 10) return
 		waitCounter++; baseConfig; config; roomData; s; init() } 
 	catch (e) { console.log(e); wait(.1, waitForData) }}
 
@@ -69,22 +69,22 @@ function init() {
 
 function updateStyle() { // TODO: better.
 	get("style").innerHTML =  `
-	@keyframes leftIn   { from { transform: translateX(0) } to { transform: translateX(${c.width}px) }}
-	@keyframes leftOut  { from { transform: translateX(0) }}
-	@keyframes rightIn  { from { transform: translateX(0) } to { transform: translateX(-${c.width}px) }}
-	@keyframes rightOut { from { transform: translateX(0) }}
-	@keyframes fadeIn   { from { opacity: 0 } to { opacity: 1 }}
-	@keyframes fadeOut  { from { } to { opacity: 0}}
-	.leftIn   { animation:leftIn ${c.sideSpeed}s }
-	.leftOut  { animation:leftOut ${c.sideSpeed}s; transform: translateX(${c.width}px) }
-	.rightIn  { animation:rightIn ${c.sideSpeed}s} 
-	.rightOut { animation:rightOut ${c.sideSpeed}s; transform: translateX(-${c.width}px) } 
-	.fadeIn   { animation:fadeIn ${c.fadeSpeed}s; } 
-	.fadeOut  { animation:fadeOut ${c.fadeSpeed}s; opacity: 0 }`
+		@keyframes leftIn   { from { transform: translateX(0) } to { transform: translateX(${c.width}px) }}
+		@keyframes leftOut  { from { transform: translateX(0) }}
+		@keyframes rightIn  { from { transform: translateX(0) } to { transform: translateX(-${c.width}px) }}
+		@keyframes rightOut { from { transform: translateX(0) }}
+		@keyframes fadeIn   { from { opacity: 0 } to { opacity: 1 }}
+		@keyframes fadeOut  { from { } to { opacity: 0}}
+		.leftIn   { animation:leftIn ${c.sideSpeed}s }
+		.leftOut  { animation:leftOut ${c.sideSpeed}s; transform: translateX(${c.width}px) }
+		.rightIn  { animation:rightIn ${c.sideSpeed}s} 
+		.rightOut { animation:rightOut ${c.sideSpeed}s; transform: translateX(-${c.width}px) } 
+		.fadeIn   { animation:fadeIn ${c.fadeSpeed}s; } 
+		.fadeOut  { animation:fadeOut ${c.fadeSpeed}s; opacity: 0 }`
 }
 
 // DOM setup  ******************************************
-function setupStandardBoxes() { for (let i in c.standardBoxes) { makeBox(c.standardBoxes[i], standardBoxesDiv) }}
+function setupStandardBoxes() { for (let i in c.standardBoxes) makeBox(c.standardBoxes[i], standardBoxesDiv) }
 
 function setFade(fade) { c.fadeSpeed = fade; updateStyle() }
 
@@ -162,8 +162,6 @@ function refreshCustomBoxes() {
 	persistentIds = newIds
 }
 
-
-
 function makeBox(boxData, parent) {
 	if (boxData.xy == null) return
 	
@@ -171,7 +169,7 @@ function makeBox(boxData, parent) {
 
 	let X = { ...c.baseBox, ...boxData }
 	for (key in X) { if (key != 'fn') X[key] = simpleEval(X[key]) }
-	
+
 	element.style.left = X.xy[0] * c.width + 'px'
 	element.style.width = (X.xy[1] - X.xy[0]) * c.width + 'px'
 	element.style.bottom = X.xy[2] * c.height + 'px'
@@ -181,56 +179,55 @@ function makeBox(boxData, parent) {
 
 	//let fn = orDefault(X.fn, null, false)
 	//let to = orDefault(X.to, null)
-	if (X.to != null && X.fn != null) {
-		element.onclick = () => { X.fn(); goTo(X.to, X.transition) }
-	} else if (X.to != null) {
-		element.onclick = () => { goTo(X.to, X.transition) }
-	} else if (X.fn != null) {
-		element.onclick = X.fn
-	}
+	if (X.to != null && X.fn != null) { element.onclick = () => { X.fn(); goTo(X.to, X.transition) }}
+	else if (X.to != null) { element.onclick = () => { goTo(X.to, X.transition) }}
+	else if (X.fn != null) { element.onclick = X.fn }
 	
 	if (X.id != null) element.id = X.id
 	if (X.subBoxes != null) {
-		for (i in X.subBoxes) {
-			makePic(X.subBoxes[i], element)
-			makeBox(X.subBoxes[i], element)
-		}
+		for (i in X.subBoxes) makePic(X.subBoxes[i], element); makeBox(X.subBoxes[i], element)
 	}
 	
 	if (X.drag != null) makeDraggable(element, [])
-	parent.appendChild(element) 
+	parent.appendChild(element)
 }
 
 // todo - consolidate into single 'makeBox' method?
 
 function makePic(X, parent = picsDiv) {
+
+	let basePic = {
+		centerOffset: false
+	}
+	
+	X = {...basePic, ...X}
+	for (key in X) { if (key != 'fn' && key != 'while') X[key] = simpleEval(X[key]) }
+
 	let element = document.createElement('img'); element.classList.add('pic')
 
 	let isMovie = X.mov != null
 	if (isMovie) parent = moviesDiv
-	let name = simpleEval(isMovie ? X.mov : X.pic)
+	let name = isMovie ? X.mov : X.pic
 	if (name == null) return
 	element.src = (isMovie ? MOV_PATH + name + '/1' : PIC_PATH + name) + (name.includes('.') ? '' : '.png')
 
-	let style = orDefault(X.style, null); if (style != null) { element['style'] = style }
-	let id = orDefault(X.id, isMovie ? Math.random() : null); if (id != null) { element.id = id }
-	let offset = orDefault(X.offset, null)
-	let centerOffset = orDefault(X.centerOffset, false)
-	if (offset != null) {
-		element.style.left = c.width * offset[0] - (centerOffset ? (element.width / 2) : 0) + 'px'
-		element.style.top = c.height * (1 - offset[1]) - (centerOffset ? (element.height / 2) : 0) + 'px' }
+	if (X.style != null) element['style'] = style
+	X.id = orDefault(X.id, isMovie ? Math.random() : null); 
+	if (X.id != null) element.id = X.id
+	if (X.offset != null) {
+		element.style.left = c.width * X.offset[0] - (X.centerOffset ? (element.width / 2) : 0) + 'px'
+		element.style.top = c.height * (1 - X.offset[1]) - (X.centerOffset ? (element.height / 2) : 0) + 'px' }
 	else { element.classList.add('full') }
 	
-	let scale = orDefault(X.scale, null)
-	if (scale != null) { // todo: better
-		element.style.width = scale + '%'
+	if (X.scale != null) { // todo: better
+		element.style.width = X.scale + '%'
 		element.style.height = 'auto' }
 	
 	parent.appendChild(element)
 
 	if (isMovie) {
 		movieStep({ 
-			obj: element, 
+			element: element, 
 			path: MOV_PATH + name + '/', 
 			while: X.while,
 			step: 0, 
@@ -242,14 +239,9 @@ function makePic(X, parent = picsDiv) {
 			fate: orDefault(X.fate, 'end'), 
 			id: id })}
 	
-	let life = simpleEval(X.life, null)
-	if (life != null) wait(life, () => { parent.removeChild(element) })
+	if (X.life != null) wait(X.life, () => { parent.removeChild(element) })
 	
 	return element }
-
-function setIfNotNull(toSet) {
-
-}
 
 // function playMovie(X) {
 // let id = orDefault(X.id, Math.random())
@@ -258,20 +250,20 @@ function setIfNotNull(toSet) {
 // 		then: X.then, fate: X.fate, id: id })}
 
 function playMovie(name, totalSteps, destination) {
-	let obj = makePic({ mov: name, id: name, totalSteps: totalSteps }, moviesDiv)
-	console.log(obj)
+	let element = makePic({ mov: name, id: name, totalSteps: totalSteps }, moviesDiv)
+	console.log(element)
 	//movieStep2(obj, 1, .2, MOV_PATH + name + '/', totalSteps, destination)
 	//goTo(destination, 'none')
 }
 
-function movieStep2(obj, step, delay, path, totalSteps, destination) {
+function movieStep2(element, step, delay, path, totalSteps, destination) {
 	if (step == totalSteps) {
-		moviesDiv.removeChild(obj)
+		moviesDiv.removeChild(element)
 		return
 	}
 	wait(delay, () => {
-		step++; obj.src = path + step + '.png'
-		movieStep2(obj, step, delay, path, totalSteps, destination)
+		step++; element.src = path + step + '.png'
+		movieStep2(element, step, delay, path, totalSteps, destination)
 	})
 }
 
@@ -284,12 +276,12 @@ function movieStep(X) {
 	if (X.step > X.totalSteps) {
 		console.log('bye')
 		if (X.then != null) X.then()
-		if (X.fate == 'end') { moviesDiv.removeChild(X.obj); return }
+		if (X.fate == 'end') { moviesDiv.removeChild(X.element); return }
 		if (X.fate == 'stay') return
 		if (X.fate == 'loop') X.step = 0 }
 
 	wait(X.delay, () => { 
-		X.obj.src = X.path + X.step + '.png';
+		X.element.src = X.path + X.step + '.png';
 		console.log(X)
 		movieStep(X) })}
 
@@ -454,9 +446,9 @@ function launchFullScreen(element) {
 	else if (element.webkitRequestFullScreen) element.webkitRequestFullScreen() }
 
 // If x is a function, returns the result of evaluating x, otherwise returns x
-function simpleEval(x) { return (x instanceof Function) ? x() : x }
+function simpleEval(x) { return (x instanceof Function) ? x() : x }	
 
-function orDefault(value, def, eval = true) { return (value == null) ? def : (eval ? simpleEval(value) : value) }
+function orDefault(value, def) { return (value == null) ? def : value }
 
 function isCollide(a, b) { 
 	console.log(a)
