@@ -5,10 +5,11 @@ const GAME_PATH = "../games/" + GAME_NAME
 
 // first, load the game data
 addScript(GAME_PATH + "/" + GAME_NAME + ".js")
+addStyle("engine.css")
+//addStyle(GAME_PATH + "/" + GAME_NAME + ".css")
 
 // then, load the engine which wil run the game
 addScript("baseConfig.js")
-
 addScript("engine.js")
 
 function addScript(src) {
@@ -16,6 +17,14 @@ function addScript(src) {
     script.type = "text/javascript"
     script.src = src
     document.head.appendChild(script);
+}
+
+function addStyle(fileName) {
+    let link = document.createElement("link");
+    link.type = "text/css";
+    link.rel = "stylesheet";
+    link.href = fileName;
+    document.head.appendChild(link);
 }
 
 // shared functions

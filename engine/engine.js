@@ -31,7 +31,8 @@ let CURSOR_PATH = 		'/cursors/'
 
 
 // Global vars:
-let music = new Audio; music.loop = true; let cacheSet = new Set()
+let music = new Audio; music.loop = true; 
+let cacheSet = new Set()
 let sounds = [new Audio, new Audio, new Audio, new Audio, new Audio] // TODO: make concurrent sounds variable
 let persistentIds = []
 let c;
@@ -63,12 +64,13 @@ function init() {
 	get("screen").style.width = c.width + "px"; 
 	get("screen").style.height = c.height + "px"
 	inventoryDiv.style.width = c.width + "px"
-	updateStyle(); setupStandardBoxes(); refreshInventory(); setMusic(room); goTo(frame, 'fade');
+	updateStyle(); setupStandardBoxes(); refreshInventory(); goTo(frame, 'fade');
 	//window.onclick = launchFullScreen(get('window'))
 }
 
 function updateStyle() { // TODO: better.
 	get("style").innerHTML =  `
+		body { background-color: blue }
 		@keyframes leftIn   { from { transform: translateX(0) } to { transform: translateX(${c.width}px) }}
 		@keyframes leftOut  { from { transform: translateX(0) }}
 		@keyframes rightIn  { from { transform: translateX(0) } to { transform: translateX(-${c.width}px) }}
@@ -163,6 +165,7 @@ function refreshCustomBoxes() {
 }
 
 function makeBox(boxData, parent) {
+	console.log(boxData)
 	if (boxData.xy == null) return
 	
 	let element = document.createElement('div'); element.className = 'box'
@@ -211,7 +214,7 @@ function makePic(X, parent = picsDiv) {
 	if (name == null) return
 	element.src = (isMovie ? MOV_PATH + name + '/1' : PIC_PATH + name) + (name.includes('.') ? '' : '.png')
 
-	if (X.style != null) element['style'] = style
+	if (X.style != null) element['style'] = X.style
 	X.id = orDefault(X.id, isMovie ? Math.random() : null); 
 	if (X.id != null) element.id = X.id
 	if (X.offset != null) {
@@ -300,8 +303,13 @@ function movieStep(X) {
 
 function refreshStandardBoxes(frameData) {
 	if (frameData == null) return
+
 	for (let key in c.standardBoxes) {
-		refreshStandardBox(c.standardBoxes[key], frameData[key])
+		if (typeof frameData[key] === 'object') {
+			makeBox({...c.standardBoxes[key], ...frameData[key]}, customBoxesDiv)
+		} else {
+			refreshStandardBox(c.standardBoxes[key], frameData[key])
+		}
 	}
 }
 
@@ -394,11 +402,21 @@ function cacheFrame(frame) {
 // todo: add variable length gaps
 
 //music.setAttribute('loop', true)
-function setMusic(newMusic) {
-	if (newMusic == null) fadeOutMusic(music)
-	else { fadeOutMusic(music, () => {
-		music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
-		music.play(); fadeInMusic(music) })}}
+function setMusic(newMusic, fade = true) {
+		console.log(newMusic)
+		if (newMusic == null) fadeOutMusic(music)
+		else if (fade) { 
+			fadeOutMusic(music, () => {
+			music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
+			music.play(); fadeInMusic(music) })
+		} else {
+			music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
+			music.play() }}
+
+function setMusicVolume(volume) {
+	console.log('ok')
+	music.volume = volume
+}
 
 var fadeAudio
 function fadeOutMusic(sound, then = null) {
@@ -419,12 +437,16 @@ function playSound(name, volume = 1) {
 	for (i in sounds) {
 		let sound = sounds[i]
 		if (sound.paused) {
-			sound.setAttribute('id', name)
+			sound.setAttribute('id', name + 'Sound')
 			sound.setAttribute('src', SOUND_PATH + name + (name.includes('.') ? '' : '.mp3'))
 			sound.volume = volume; sound.play(); return sound }}}
 
 function stopSound(name) { 
-	let sound = get(name)
+	let sound = get(name + 'Sound')
+	if (sound != null) {
+
+		sound.stop()
+	}
 	console.log(sound)
 }
 
