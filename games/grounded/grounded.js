@@ -6,7 +6,6 @@ Radio working
 Put back piggy
 Put back key
 Targets working
-Under bed
 Sound system for variable volume
 Fix numbers
 Hitbox offset
@@ -45,12 +44,12 @@ const config = {
     customCursors: true,
     boxCursor: 'O',
     defaultCursor: 'N',
-    waitCursor: 'S',
+    waitCursor: null,
     defaultBox: { cursor: 'O'},
     standardBoxes: {
+		forward: { xy: [0, 1, 0, 1], transition: 'fade', cursor: 'f', id: 'forwardBox' },
 		left: { xy: [0, .2, .2, .8], transition: 'none', cursor: 'L', id: 'leftBox' },
 		right: { xy: [.8, 1, .2, .8], transition: 'none', cursor: 'R', id: 'rightBox' },
-		forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'f', id: 'forwardBox' },
 		back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'b', id: 'backBox' }}
 }
 
@@ -130,12 +129,16 @@ const roomData = {
         'A6c': { forward: 'E2'},
         'A7': { left: 'A6', right: 'A8', forward: 'A7a' },
         'A7a': { back: 'A7' },
-        'A8': { left: 'A7', right: 'A9', boxes: [{ xy: [.52, .61, .4, .55], cursor: 'Z', to: 'A8a' }]},
+        'A8': { left: 'A7', right: 'A9', boxes: [{ xy: [.52, .61, .4, .55], cursor: 'Z', to: 'A8a' },
+            {xy: [.2,.45,.1,.35], cursor: 'Z', to: 'A8c'}]},
         'A8a': { back: 'A8', boxes: [{ xy: [.4, .6, .3, .65], fn: ()=> { goTo('A8b', 'none'); wait(.02, ()=> { goTo('A8a', 'none')})}}] },
+        'A8c': { back: 'A8' },
         'A9': { left: 'A8', right: 'A10', boxes: [{ xy: [.25, .45, .6, .8], cursor: 'Z', to: 'A9a' }] },
         'A9a': { back: 'A9', boxes: [
+            { xy: [.65, .7, .33, .4], fn: () => { s.radioOn = !s.radioOn; refreshCustomBoxes() }},
+            { xy: [.5, .55, .33, .4], fn: () => { s.radio = (s.radio + 1) % 7; refreshCustomBoxes() }},
             { pic: () => { return s.radioOn ? 'on' : 'off' }, offset: [.64, .4], style: 'width: 30px' },
-            { pic: () => { return 'numbers/' + s.radio  }, offset: [.5, .4], style: 'width: 30px' },
+            { pic: () => { return 'numbers/' + s.radio  }, offset: [.5, .4], style: 'height: 10px' },
             { pic: 'dial', offset: [.5, .52], style: 'height: 30px' }]},
         'A10': { left: 'A9', right: 'A11', forward: 'B1' },
         'A11': { left: 'A10', right: 'A1', boxes: [

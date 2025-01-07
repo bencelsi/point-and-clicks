@@ -56,7 +56,7 @@ function init() {
 	if (c.customCursors) CURSOR_PATH = ASSET_PATH + '/cursors/'
 
 	setCursor(allDiv, c.defaultCursor)
-	setCursor(cursorBlockDiv, c.waitCursor)
+	if (c.waitCursor != null) setCursor(cursorBlockDiv, c.waitCursor)
 
 	allDiv.style.width = c.width + "px"; 
 	allDiv.style.height = c.height + 100 + "px"
