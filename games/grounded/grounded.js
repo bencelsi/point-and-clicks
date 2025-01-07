@@ -36,7 +36,7 @@ different songs ma
 
 */
 
-const config = { 
+const config = {
     title: 'Grounded',
     width: 640,
     height: 480,
@@ -49,11 +49,11 @@ const config = {
     waitCursor: null,
     defaultBox: { cursor: 'O'},
     style: '',
-    standardBoxes: {
-		forward: { xy: [.2, .8, 0, 1], transition: 'fade', cursor: 'f', id: 'forwardBox' },
-		left: { xy: [0, .2, .2, .8], transition: 'none', cursor: 'L', id: 'leftBox' },
-		right: { xy: [.8, 1, .2, .8], transition: 'none', cursor: 'R', id: 'rightBox' },
-		back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'b', id: 'backBox' }}
+    commonBoxes: {
+		forward: { xy: [.2, .8, 0, 1], transition: 'fade', cursor: 'f' },
+		left: { xy: [0, .2, .2, .8], transition: 'none', cursor: 'L' },
+		right: { xy: [.8, 1, .2, .8], transition: 'none', cursor: 'R' },
+		back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'b' }}
 }
 
 /* radio songs - 

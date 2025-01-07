@@ -134,24 +134,20 @@ function refreshBoxes() {
 
 	picsDiv.innerHTML = ''; boxesDiv.innerHTML = ''
 	let frameData = roomData[room][frame]
-	
-	// standard boxes
-	for (let key in c.standardBoxes) {
+	if (frameData == null) return
+
+	for (let key in c.commonBoxes) {
 		if (frameData[key] == null) continue
-		if (typeof frameData[key] === 'object') {
-			makeBox({...c.standardBoxes[key], ...frameData[key]}, boxesDiv)
-		} else {
-			makeBox({...c.standardBoxes[key], to: frameData[key]}, boxesDiv)
-		}
+		if (typeof frameData[key] === 'object') makeBox({...c.commonBoxes[key], ...frameData[key]})
+		else makeBox({...c.commonBoxes[key], to: frameData[key]})
 	}
 
-	if (frameData == null) return
 	let boxes = frameData.boxes
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
 			let X = boxes[i]
 			if (X.if != null && !X.if()) continue
-			makeBox(X, boxesDiv); makePic(X) }}
+			makeBox(X); makePic(X) }}
 
 	// Persistents
 	let newIds = []
@@ -173,8 +169,7 @@ function refreshBoxes() {
 	persistentIds = newIds
 }
 
-function makeBox(boxData, parent) {
-	console.log(boxData)
+function makeBox(boxData, parent = boxesDiv) {
 	if (boxData.xy == null) return
 	
 	let element = document.createElement('div'); element.className = 'box'
@@ -249,7 +244,7 @@ function makePic(X, parent = picsDiv) {
 			delay: orDefault(X.delay, .1), 
 			then: X.then, 
 			fate: orDefault(X.fate, 'end'), 
-			id: id })}
+			id: X.id })}
 	
 	if (X.life != null) wait(X.life, () => { parent.removeChild(element) })
 	
@@ -432,10 +427,7 @@ function playSound(name, volume = 1) {
 
 function stopSound(name) { 
 	let sound = get(name + 'Sound')
-	if (sound != null) {
-
-		sound.stop()
-	}
+	if (sound != null) sound.stop()
 	console.log(sound)
 }
 
