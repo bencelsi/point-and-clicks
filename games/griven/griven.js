@@ -188,8 +188,8 @@ const roomData = {
 'clockroom' : {
     'A1': { left: 'A4', right: 'A2', forward: () => { playGif('ladderDown', 'pool/B1', 10 * .15) }},
     'A2': { left: 'A1', right: 'A3', boxes: [{ xy: [.29, .34, .42, .48], if: () => { return !s.clockOn }, 
-        fn: () => { playSound('gearsRunning'); s.clockOn = true; refreshCustomBoxes()
-        if (s.gearsOk) { clockOn() } else { freeze(); wait(4.5, () => { s.clockOn = false; refreshCustomBoxes(); unfreeze() })}}},
+        fn: () => { playSound('gearsRunning'); s.clockOn = true; refreshBoxes()
+        if (s.gearsOk) { clockOn() } else { freeze(); wait(4.5, () => { s.clockOn = false; refreshBoxes(); unfreeze() })}}},
         { mov: 'gear1', steps: 3, fate: 'loop', if: () => { return s.clockOn }, while: () => { return s.clockOn }},
         { pic: 'lever', if: () => { return s.clockOn } },
         { xy: [.48, .6, .22, .3], to: 'A5' },
@@ -232,7 +232,7 @@ const roomData = {
             fn: () => { if (s.coffee == 2) { s.coffee = 0; refresh()}}, if: () => { return s.coffee == 1 || s.coffee == 2 }},
         { xy: [.34, .4, .46, .52], fn: () => { playSound('button')
             if (s.heaterLevel > 0 && !s.valves[2] && s.valves[4] && s.pipe == 3) { 
-                playSound('slurp'); s.coffee = 2; refreshCustomBoxes() }
+                playSound('slurp'); s.coffee = 2; refreshBoxes() }
             else { makePic({ pic: 'noWater', life: 1 })}}}]},
     'A5': { forward: 'plumbingroom/A1', back: 'A1a' },
     'B1': { left: 'B4', right: 'B2', boxes: [{ xy: [.2,.8,.4,1], to: 'B5' }]},
@@ -283,10 +283,10 @@ const roomData = {
         { xy: [.88, .95, .71, .8], pic: () => { return s.valves[5] ? 'valve5' : null }, fn: () => {  flipValve(5) }}, 
         { xy: [.25, .5, .86, 1], cursor: () => { return s.pipe == 3 ? 'F' : null }, 
             pic: () => { return s.pipe == 3 ? 'pipe3' : null }, id: 'pipe3',
-            fn: () => { if (s.pipe == 3) { s.pipe = 0; refreshCustomBoxes(); refresh() }}}]},
+            fn: () => { if (s.pipe == 3) { s.pipe = 0; refreshBoxes(); refresh() }}}]},
     'A4': { left: 'A3', right: 'A1', boxes: [{ to: 'A5', xy: [.15, .3, .08, .9]},
         { pic: 'valve5-mini', if: () => { return s.valves[5] }},
-        { xy: [.6,.7,.25,.32], fn: () => { s.pipe = 0; refreshCustomBoxes(); refresh()},
+        { xy: [.6,.7,.25,.32], fn: () => { s.pipe = 0; refreshBoxes(); refresh()},
             pic: 'pipe1', if: () => { return s.pipe == 1 }}]},
     'A5': { forward: () => { playSound('doorClose'); return 'cafe/A3' }, back: 'A4' },
     'B1': { left: 'B4', right: 'B2', boxes: [{ to: 'B5', xy: [.3, .5, .48, .65] }]},
@@ -294,7 +294,7 @@ const roomData = {
         { xy: [.64, .69, .43, .5], pic: () => { return s.valves[1] ? 'valve1' : null }, fn: () => { flipValve(1) }},
         { xy: [.38, .57, .6, .71], cursor: () => { return s.pipe == 2 ? 'F' : null },
             pic: () => { return s.pipe == 2 ? 'pipe2' : null }, id: 'pipe2',
-            fn: () => { if (s.pipe == 2) { s.pipe = 0 }; refreshCustomBoxes(); refresh() }},
+            fn: () => { if (s.pipe == 2) { s.pipe = 0 }; refreshBoxes(); refresh() }},
         { pic: 'heaterMeter', scale: 3, offset: () => 
             { return [.242 - (.019 * (s.heaterLevel / 100)), .016 + (.383 * (s.heaterLevel / 100))]}}]},
     'B3': { left: 'B2', right: 'B4', boxes: [{ to: 'B6', xy: [.15,.4,.2,.35] },
@@ -394,7 +394,7 @@ const roomData = {
         { xy: [.69, .74, .61, .68], offset: () => { return [[.695, .676], [.727, .676]][s.circuits[6]]},
             pic: 'circuit', scale: 1, fn: () => { s.circuits[6] = (s.circuits[6] + 1) % 2; checkCircuits() }},
         { xy: [.62, .71, .81, .87], offset: () => { return [[.625, .87], [.66, .87], [.695, .87]][s.circuits[7]]},
-            pic: 'circuit', scale: 1, fn: () => { s.circuits[7] = (s.circuits[7] + 1) % 3; refreshCustomBoxes() }},
+            pic: 'circuit', scale: 1, fn: () => { s.circuits[7] = (s.circuits[7] + 1) % 3; refreshBoxes() }},
         { xy: [.655, .68, .5, .55], offset: () => { return [[.65, .51], [.65, .552]][s.circuits[8]]},
             pic: 'circuit2', scale: 4, fn: () => { s.circuits[8] = (s.circuits[8] + 1) % 2; checkCircuits() }},
         { xy: [.45, .5, .72, .8], offset: () => { return [[.455, .738], [.455, .796]][s.circuits[9]]},
@@ -437,9 +437,9 @@ const roomData = {
     'D3a': { left: () => { playSound('doorClose'); return 'D2' }, right: () => { playSound('doorClose'); return 'D4' },
             forward: () => { playSound('doorClose'); return 'A3' }},
     'D4': { left: 'D3', right: 'D1', boxes: [
-        { xy: [.39, .42, .44, .48], fn: () => { playSound('valve'); s.shower = 1; refreshCustomBoxes() }},
-        { xy: [.42, .45, .44, .48], fn: () => { playSound('valve'); s.shower = 0; refreshCustomBoxes() }},
-        { xy: [.45, .48, .44, .48], fn: () => { playSound('valve'); s.shower = 2; refreshCustomBoxes(); showerStep() }},
+        { xy: [.39, .42, .44, .48], fn: () => { playSound('valve'); s.shower = 1; refreshBoxes() }},
+        { xy: [.42, .45, .44, .48], fn: () => { playSound('valve'); s.shower = 0; refreshBoxes() }},
+        { xy: [.45, .48, .44, .48], fn: () => { playSound('valve'); s.shower = 2; refreshBoxes(); showerStep() }},
         { if: () => { return s.shower != 0 }, pic: () => { return s.shower == 1 ? 'cold' : 'hot' }},
         { mov: 'shower', steps: 8, delay: .075, fate: 'loop', if: () => { 
             return ((s.floorValve == 2 && s.shower == 1) || showerHot()) }}]},
@@ -516,7 +516,7 @@ function clockOn() { wait(10, () => {
     if (s.clock1 == 0 && s.clock2 == 0) { // todo - vary volume, elevator, plumbingroom... vary # of dings???
         if (room == 'lobby' || room == 'pool' || room == 'clockroom') playSound('clock')
         s.cUnlockedcked = true }
-    if (frame == 'E4' && room == 'lobby') refreshCustomBoxes()
+    if (frame == 'E4' && room == 'lobby') refreshBoxes()
     clockOn() })}
 
 // non-saveable state
@@ -563,13 +563,13 @@ const inventory = {
 function checkCircuits() {
     s.elevatorFixed = (s.circuits[0] == 2 && s.circuits[1] == 0 && s.circuits[2] == 0 && s.circuits[3] == 1 
         && s.circuits[4] == 1 && s.circuits[5] == 0 && s.circuits[6] == 1 && s.circuits[8] == 0 && s.circuits[9] == 1)
-    refreshCustomBoxes() }
+    refreshBoxes() }
 
 function changeDrawer(n) {
     s.drawers[n] = !s.drawers[n]
     if (s.drawers[0] && s.drawers[1] && s.drawers[2] && s.drawers[3]) {
         playSound('cabinetDown2'); s.lightsOn = false; s.cabinetDown = true }
-    refreshCustomBoxes() }
+    refreshBoxes() }
 
 function pushKeypad(n) {
     playSound('beep'); combo.push(n); if (combo.length > 5) combo.shift()
@@ -582,9 +582,9 @@ function comboIs(goal) { for (i in goal) { if (combo[i] != goal[i]) return false
 
 function saladButton(n) { playSound('button'); if (s.salads[n] > 0) { playSound('slurp'); s.salads[n]-- }}
 
-function flipValve(n) { playSound('valve'); s.valves[n] = !s.valves[n]; refreshCustomBoxes() }
+function flipValve(n) { playSound('valve'); s.valves[n] = !s.valves[n]; refreshBoxes() }
 
-function setFloorValve(n) { playSound('valve'); s.floorValve = n; refreshCustomBoxes() }
+function setFloorValve(n) { playSound('valve'); s.floorValve = n; refreshBoxes() }
 
 function hallLeft() { s.hallDirection = s.hallDirection == 0 ? 3 : s.hallDirection - 1 }
 
@@ -616,7 +616,7 @@ function moveElevator() {
     wait(2, () => { 
         s.elevatorFloor += (s.elevatorGoal > s.elevatorFloor ? 1 : -1)
         if (room == 'elevator') s.floor = s.elevatorFloor
-        refreshCustomBoxes()
+        refreshBoxes()
         if (s.elevatorGoal == s.elevatorFloor) { openElevator(); return }
         moveElevator() })}
 

@@ -143,7 +143,7 @@ const roomData = {
         'A9': { left: 'A8', right: 'A10', boxes: [{ xy: [.25, .45, .6, .8], cursor: 'Z', to: 'A9a' }] },
         'A9a': { back: 'A9', boxes: [
             { xy: [.65, .7, .33, .4], fn: () => { s.radioOn = !s.radioOn; refresh(); setMusic(s.radioOn ? songs[s.radio] : null, false) }},
-            { xy: [.5, .55, .33, .4], fn: () => { s.radio = (s.radio + 1) % 7; setMusic(songs[s.radio]); refreshCustomBoxes() }},
+            { xy: [.5, .55, .33, .4], fn: () => { s.radio = (s.radio + 1) % 7; setMusic(songs[s.radio]); refreshBoxes() }},
             { pic: () => { return s.radioOn ? 'on' : 'off' }, offset: [.64, .4], style: 'width: 30px' },
             { pic: () => { return 'numbers/' + (s.radio + 1) }, offset: [.5, .4], style: 'height: 30px' },
             { pic: 'dial', offset: () => { return [.49 + (s.radio * .03), .52]}, style: 'height: 30px' }]},
@@ -178,7 +178,7 @@ const roomData = {
 function runClock() {
     if (!s.clockOn) return
     playSound('tick'); s.time += 1;
-    if (frame == 'A3a' || frame == 'A3b') refreshCustomBoxes(); 
+    if (frame == 'A3a' || frame == 'A3b') refreshBoxes(); 
 
     if (s.time % 60 == 0) {
         if (frame == 'A3a') {

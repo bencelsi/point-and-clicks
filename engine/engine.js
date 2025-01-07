@@ -5,8 +5,7 @@
 // TODO: cache pics/gifs
 
 // DOM globals:
-let standardBoxesDiv = 	get('standardBoxes')
-let customBoxesDiv = 	get('customBoxes')
+let boxesDiv = 			get('boxes')
 let picsDiv = 			get('pics')
 let cacheDiv = 			get('cache') 
 let transitionsDiv = 	get('transitions')
@@ -64,7 +63,7 @@ function init() {
 	get("screen").style.width = c.width + "px"; 
 	get("screen").style.height = c.height + "px"
 	inventoryDiv.style.width = c.width + "px"
-	updateStyle(); setupStandardBoxes(); refreshInventory(); goTo(frame, 'fade');
+	updateStyle(); refreshInventory(); goTo(frame, 'fade');
 	//window.onclick = launchFullScreen(get('window'))
 }
 
@@ -86,8 +85,6 @@ function updateStyle() { // TODO: better.
 }
 
 // DOM setup  ******************************************
-function setupStandardBoxes() { for (let i in c.standardBoxes) makeBox(c.standardBoxes[i], standardBoxesDiv) }
-
 function setFade(fade) { c.fadeSpeed = fade; updateStyle() }
 
 function freeze() { cursorBlockDiv.style.visibility = 'visible' }
@@ -112,7 +109,7 @@ function goTo(newFrame, transitionType = 'fade') {
 	else img = frame + '.' + (newExtension == null ? extension : newExtension)
 	frameImg.src = FRAME_PATH + room + '/' + img
 	
-	refreshStandardBoxes(frameData); refreshCustomBoxes()
+	refreshBoxes()
 	if (transitionType != 'none') createTransition(transitionType + 'In')
 	delay = transitionType == 'none' ? 0 : (transitionType == 'fade') ? c.fadeSpeed - .5 : c.sideSpeed
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
@@ -131,18 +128,30 @@ function createTransition(transitionType) {
 	transitionsDiv.appendChild(transition) }
 
 // BOXES ******************************************
-function refresh() { refreshCustomBoxes(); refreshStandardBoxes(); refreshInventory() }
+function refresh() { refreshBoxes(); refreshInventory() }
 
-function refreshCustomBoxes() {
-	picsDiv.innerHTML = ''; customBoxesDiv.innerHTML = ''
+function refreshBoxes() {
+
+	picsDiv.innerHTML = ''; boxesDiv.innerHTML = ''
 	let frameData = roomData[room][frame]
+	
+	// standard boxes
+	for (let key in c.standardBoxes) {
+		if (frameData[key] == null) continue
+		if (typeof frameData[key] === 'object') {
+			makeBox({...c.standardBoxes[key], ...frameData[key]}, boxesDiv)
+		} else {
+			makeBox({...c.standardBoxes[key], to: frameData[key]}, boxesDiv)
+		}
+	}
+
 	if (frameData == null) return
 	let boxes = frameData.boxes
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
 			let X = boxes[i]
 			if (X.if != null && !X.if()) continue
-			makeBox(X, customBoxesDiv); makePic(X) }}
+			makeBox(X, boxesDiv); makePic(X) }}
 
 	// Persistents
 	let newIds = []
@@ -301,26 +310,6 @@ function movieStep(X) {
 // style			X					X				X
 // id				?					?				X
 
-function refreshStandardBoxes(frameData) {
-	if (frameData == null) return
-
-	for (let key in c.standardBoxes) {
-		if (typeof frameData[key] === 'object') {
-			makeBox({...c.standardBoxes[key], ...frameData[key]}, customBoxesDiv)
-		} else {
-			refreshStandardBox(c.standardBoxes[key], frameData[key])
-		}
-	}
-}
-
-function refreshStandardBox(boxData, destinationFrame) {
-	let element = get(boxData.id)
-	if (destinationFrame == null) element.style.visibility = 'hidden'
-	else {
-		element.style.visibility = 'visible'
-		element.onclick = () => { goTo(simpleEval(destinationFrame), boxData.transition) }
-	}
-}
 
 // INVENTORY ••••••••••••••••••••••••••••••••••••••••••••••••••
 
