@@ -41,6 +41,7 @@ const config = {
     defaultCursor: 'N',
     boxCursor: 'O',
     waitCursor: 'S',
+    fadeSpeed: 1,
     inventoryCursor: 'O',
     inventoryDragCursor: null,
     commonBoxes: {

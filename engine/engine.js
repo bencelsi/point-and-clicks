@@ -63,13 +63,13 @@ function init() {
 	get("screen").style.width = c.width + "px"; 
 	get("screen").style.height = c.height + "px"
 	inventoryDiv.style.width = c.width + "px"
-	updateStyle(); refreshInventory(); goTo(frame, 'fade');
+	updateStyle(); refreshInventory(); goTo(frame, 'none');
 	//window.onclick = launchFullScreen(get('window'))
 }
 
 function updateStyle() { // TODO: better.
 	get("style").innerHTML =  `
-		body { background-color: blue }
+		body { background-color: purple }
 		@keyframes leftIn   { from { transform: translateX(0) } to { transform: translateX(${c.width}px) }}
 		@keyframes leftOut  { from { transform: translateX(0) }}
 		@keyframes rightIn  { from { transform: translateX(0) } to { transform: translateX(-${c.width}px) }}
@@ -81,7 +81,8 @@ function updateStyle() { // TODO: better.
 		.rightIn  { animation:rightIn ${c.sideSpeed}s} 
 		.rightOut { animation:rightOut ${c.sideSpeed}s; transform: translateX(-${c.width}px) } 
 		.fadeIn   { animation:fadeIn ${c.fadeSpeed}s; } 
-		.fadeOut  { animation:fadeOut ${c.fadeSpeed}s; opacity: 0 }`
+		.fadeOut  { animation:fadeOut ${c.fadeSpeed}s; opacity: 0 }
+	`
 }
 
 // DOM setup  ******************************************
@@ -95,36 +96,45 @@ function hideInventory() { inventoryDiv.style.visibility = 'hidden' }
 
 // TRANSITIONS ******************************************
 function goTo(newFrame, transitionType = 'fade') { 
-	console.log('goto' + newFrame)
+	console.log('goTo ' + newFrame)
 	if (newFrame == null) return
 
-	if (transitionType != 'none') { createTransition(transitionType + 'Out') }
+	if (transitionType != 'none') { makeTransition(transitionType + 'Out') }
 	
 	[frame, newRoom, newExtension] = parseFrame(newFrame)
 	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
-	let frameData = roomData[room][frame]; if (frameData == null) frameData = {}
+	let frameData = roomData[room][frame]; 
+	if (frameData == null) frameData = {}
 	let img
 	if (frameData.alt != null && frameData.alt.if()) img = frameData.alt.name
 	else img = frame + '.' + (newExtension == null ? extension : newExtension)
 	frameImg.src = FRAME_PATH + room + '/' + img
 	
 	refreshBoxes()
-	if (transitionType != 'none') createTransition(transitionType + 'In')
-	delay = transitionType == 'none' ? 0 : (transitionType == 'fade') ? c.fadeSpeed - .5 : c.sideSpeed
+	if (transitionType != 'none') makeTransition(transitionType + 'In')
+	delay = transitionType == 'none' ? 0 : (transitionType == 'fade' ? c.fadeSpeed - .5 : c.sideSpeed)
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
-	freeze(); wait(delay, () => {
+	freeze();
+	wait(delay, () => {
 		transitionsDiv.innerHTML = ''; cacheResources(frameData)
 		if (frameData.onEnter != null) frameData.onEnter()
-		unfreeze() })}
+		unfreeze() })
+	}
 
-function createTransition(transitionType) {
-	let transition = document.createElement('div'); transition.appendChild(frameImg.cloneNode(true)) //creates duplicate img
+function makeTransition(transitionType) {
+	
+	let transition = document.createElement('div');
+	let cloned = frameImg.cloneNode(true)
+	transition.appendChild(cloned) //creates duplicate img
 	let pics = picsDiv.cloneNode(true); pics.id = null
 	transition.appendChild(pics)
-	transition.classList.add('transition'); transition.classList.add(transitionType)
+	transition.classList.add('transition')
+	transition.classList.add(transitionType)
 	if (transitionType == 'leftIn') transition.style.left = -c.width + 'px'
 	else if (transitionType == 'rightIn') transition.style.left = c.width + 'px'
-	transitionsDiv.appendChild(transition) }
+
+	transitionsDiv.appendChild(transition)
+}
 
 // BOXES ******************************************
 function refresh() { refreshBoxes(); refreshInventory() }
@@ -325,7 +335,7 @@ function makeInventoryItem(id) {
 function makeDraggable(item, targets) {
 	setCursor(item, 'O')
 	item.onmousedown = function(event) {
-		event.preventDefault(); setCursor(item, 'O')	
+		event.preventDefault(); setCursor(item, 'C')	
 		let itemX = parseInt(item.style.left); let itemY = parseInt(item.style.top)
 		let mouseX = event.clientX; let mouseY = event.clientY
 		document.onmousemove = function(event) {
@@ -339,7 +349,7 @@ function makeDraggable(item, targets) {
 				if (target.if != null && target.if()) { return }
 				if (frame == target.frame) { target.fn(); return }
 				let targetObj = get(target.id)
-				if (targetObj != null && isCollide(item, targetObj)) { console.log(item); target.fn(); return }}
+				if (targetObj != null && isTouching(item, targetObj)) { target.fn(); return }}
 			item.style.left = itemX; item.style.top = itemY
 			document.onmousemove = null; setCursor(item, 'O') }}}
 
@@ -385,7 +395,6 @@ function cacheFrame(frame) {
 
 //music.setAttribute('loop', true)
 function setMusic(newMusic, fade = true) {
-		console.log(newMusic)
 		if (newMusic == null) fadeOutMusic(music)
 		else if (fade) { 
 			fadeOutMusic(music, () => {
@@ -395,10 +404,7 @@ function setMusic(newMusic, fade = true) {
 			music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
 			music.play() }}
 
-function setMusicVolume(volume) {
-	console.log('ok')
-	music.volume = volume
-}
+function setMusicVolume(volume) { music.volume = volume }
 
 var fadeAudio
 function fadeOutMusic(sound, then = null) {
@@ -429,7 +435,16 @@ function stopSound(name) {
 	console.log(sound)
 }
 
-// HELPERS ******************************************	
+// HELPERS ******************************************
+// [A, 3, B] does A, waits 3 seconds, then does B
+function doInSequence(arr) {
+	let time = 0
+	for (const x of arr) {
+		if (typeof x === "number") time += x
+		else wait(time, x)
+	}
+}
+
 function parseFrame(frame) {
 	if (typeof frame != 'string') return [frame, null, null]
 	let room = newExt = null
@@ -451,7 +466,9 @@ function simpleEval(x) { return (x instanceof Function) ? x() : x }
 
 function orDefault(value, def) { return (value == null) ? def : value }
 
-function isCollide(a, b) { 
-	console.log(a)
-	console.log(b)
-	return !(a.y + a.height < b.y || a.y > b.y + b.height || a.x + a.width < b.x || a.x > b.x + b.width) }
+function isTouching(a, b) {
+	a = a.getBoundingClientRect();
+	b = b.getBoundingClientRect();
+    return Math.abs(a.x - b.x) < (a.x < b.x ? b.width : a.width) && Math.abs(a.y - b.y) < (a.y < b.y ? b.height : a.height);
+
+}

@@ -1,21 +1,12 @@
 /*
 TODOs:
 
-End credits
-Targets working
-Sound system for variable volume
-Fix numbers
-Inventory sizes
-small clockhands
+Small clockhands
 Hitbox offset
-Check songs on old computer
+Get songs/numbers on old computer
 Trim songs o start immediately
-
-
-Nice to have:
-make set of constant xy's, for left right etc, reference in game data
-Strong specs- config objects- etc
-
+Stop cuckoo sounds
+Blacken dark closet frame
 
 SOUND SYSTEM - 
 
@@ -33,15 +24,12 @@ ideally workable for overlapping sounds
 vars for 'music space'
 different songs ma
 
-
 */
 
 const config = {
     title: 'Grounded',
-    width: 640,
-    height: 480,
-    room: 'room',
-    frame: 'M',
+    width: 640, height: 480,
+    room: 'room', frame: 'A0',
     extension: 'jpeg',
     customCursors: true,
     boxCursor: 'O',
@@ -72,7 +60,7 @@ const songs = ['abc', 'circlesong.m4a', 'dentist', 'heart', 'martha.m4a', 'rock.
 
 const roomData = {
     'room': {
-        'M': { boxes: [{ xy: [0, 1, 0, 1], cursor: 'N', fn: () => { setFade(3); setMusic(songs[s.radio], false); goTo('A1'); wait(3, () => { setFade(1) })}}]},
+        'A0': { boxes: [{ xy: [0, 1, 0, 1], cursor: 'N', fn: () => { setFade(3); setMusic(songs[s.radio], false); goTo('A1'); wait(3, () => { setFade(1) })}}]},
         'A1': { left: 'A11', right: 'A2', boxes: [{ xy: [.6, .67, .35, .51], cursor: 'Z', to: 'A1a' },
             { xy: [0, .1, .4, .55], cursor: 'Z', to: () => { return s.lightOn ? 'A11b' : 'A11a' }},
             { xy: [.85,1, .5,.85], cursor: 'Z', to: 'A2a'}, { pic: 'lightswitch1', if: () => { return s.lightOn } }]},
@@ -126,7 +114,7 @@ const roomData = {
             { pic: 'clockSecond', offset: [.5, .52], style: () => { 
                 return 'transform: rotate(' + s.time * 6 + 'deg); transform-origin: center bottom; height: 60px' }}]},
         'A3c': { back: 'A3b', boxes: [{ xy: [.3, .9, .4, .7], fn: () => { s.key = 0; goTo('A3d'); refreshInventory() }}]},
-        'A3d': { back: 'A3b', boxes: [{ xy: [.3, .9, .4, .7], id: 'clock' }]},
+        'A3d': { back: 'A3b', boxes: [{ xy: [.3, .9, .4, .7], cursor: 'N', id: 'clock' }]},
         'A4': { left: 'A3', right: 'A5' },
         'A5': { left: 'A4', right: 'A6', boxes: [{ xy: [.41, .89, .3, .6], cursor: 'Z', to: 'A5a' }]},
         'A5a': { back: 'A5', boxes: [{ xy: [.45, .59, .37, .53], cursor: 'O', to: 'A5b', fn: () => { playSound('open') }}]},
@@ -147,18 +135,19 @@ const roomData = {
             { pic: () => { return s.radioOn ? 'on' : 'off' }, offset: [.64, .4], style: 'width: 30px' },
             { pic: () => { return 'numbers/' + (s.radio + 1) }, offset: [.5, .4], style: 'height: 30px' },
             { pic: 'dial', offset: () => { return [.49 + (s.radio * .03), .52]}, style: 'height: 30px' }]},
-        'A10': { left: 'A9', right: 'A11', forward: 'B1' },
+        'A10': { left: 'A9', right: 'A11', forward: { to: 'B1', fn: () => { c.commonBoxes.left.transition = 'left'; c.commonBoxes.right.transition = 'right' }}},
         'A11': { left: 'A10', right: 'A1', boxes: [
             { xy: [.4, .55, .4, .6], cursor: 'Z', to: () => { return s.lightOn ? 'A11b' : 'A11a' }},
             { pic: 'lightswitch2', if: () => { return s.lightOn } }] },
         'A11a': { back: 'A11', boxes: [{ xy: [.35, .54, .33, .7], cursor: 'O', fn: () => { s.lightOn = true; goTo('A11b') }}]},
         'A11b': { back: 'A11', boxes: [{ xy: [.35, .54, .33, .7], cursor: 'O', fn: () => { s.lightOn = false; goTo('A11a') }}]},
         'B1': { left: { transition: 'left', to: 'B2' }, right: 'B2', back: 'A10',
-            boxes: [{ xy: [.61, .68, .45, .62], id: 'doorknob', cursor: () => { return s.key == 2 ? 'O' : 'F' },
+            boxes: [{ xy: [.55, .7, .45, .65], id: 'doorknob', cursor: () => { return s.key == 2 ? 'O' : 'F' },
             fn: ()=> { if (s.key == 2) { goTo(s.lightOn ? 'B1b' : 'B1a') }}}, { pic: 'key', if: () => { return s.key == 2 }}] },
         'B1a': { left: 'B2', right: 'B2', forward: () => { setMusicVolume(.3); return 'C1' }, boxes: [{ xy: [.38, .41, .48, .59], to: 'B1' }] },
         'B1b': { left: 'B2', right: 'B2', forward: () => { setMusicVolume(.3); return 'D1' }, boxes: [{ xy: [.38, .41, .48, .59], to: 'B1' }] },
-        'B2': { forward: 'A5', left: 'B1', right: 'B1', boxes: [{ xy: [.65, .8, .8, 1], to: 'B2a', cursor: 'Z' }] },
+        'B2': { forward: { to: 'A5', fn: () => { c.commonBoxes.left.transition = c.commonBoxes.right.transition = 'none' }}, 
+            left: 'B1', right: 'B1', boxes: [{ xy: [.65, .8, .8, 1], to: 'B2a', cursor: 'Z' }] },
         'B2a': { back: 'B2'},
         'C1': { left: 'C4', right: 'C2' },
         'C2': { left: 'C1', right: 'C3' },
@@ -170,7 +159,11 @@ const roomData = {
         'D4': { left: 'D3', right: 'D1', boxes: [{ xy: [.2, .63, 0, .5], to: 'D4a', cursor: 'Z' }] },
         'D4a': { back: 'D4' },
         'E1': { forward: 'E2' },
-        'E2': { onEnter: () => { setFade(5); setMusic(null); wait(3, () => { goTo('E3') })}}
+        'E2': { onEnter: () => { setFade(5); setMusic(null); hideInventory(); doInSequence([2,
+            () => { goTo('E3') }, 5,
+            () => { goTo('E4') }, 7, 
+            () => { goTo('E3') }
+        ])}}
     }
 }
 
@@ -179,12 +172,11 @@ function runClock() {
     if (!s.clockOn) return
     playSound('tick'); s.time += 1;
     if (frame == 'A3a' || frame == 'A3b') refreshBoxes(); 
-
     if (s.time % 60 == 0) {
         if (frame == 'A3a') {
             playSound('cuckoo')
             goTo('A3b')
-            wait(3, () => { if (frame == 'A3b' && s.clockOn) { goTo('A3a')}})
+            wait(3, () => { if (frame == 'A3b' && s.clockOn)  goTo('A3a') })
         } 
     }
     wait(1, runClock)
@@ -192,7 +184,7 @@ function runClock() {
 
 const s = { 
     radio: 0, radioOn: true, clockOn: false, time: 58, lightOn: false, combo: [0, 0, 0, 0],
-    pig: 1, key: 0, pigZoom: false
+    pig: 0, key: 0, pigZoom: false
 }
 
 const inventory = {
