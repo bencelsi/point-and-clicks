@@ -1,0 +1,29 @@
+body { background-color: black; /* user-drag: none; */ user-select: none; }
+
+#all { position: relative; margin: auto; }
+#screen { position: absolute; display: flex; overflow: hidden; }
+#frame { position: relative; width: 100%; height: 100%; z-index: 0;	}
+#transitions { position: absolute; width: 100%; height: 100%; z-index: 5; }
+.transition { position: absolute; width: 100%; height: 100%; opacity: 1}
+#cursorBlock { position: absolute; width: 100%; height: 100%; visibility: hidden; z-index: 11; }
+#persistents { z-index: 6; }
+#inventory { position: absolute; display: block; bottom: 0; width: 100%; height: 100px; 
+    /* border: 1px orange solid;  */
+}
+.inventory { position: relative; margin: 15px; display: inline-block; z-index: 12;  text-align: center;
+    /* border: 1px red solid; */
+    img { width: 200px; z-index: 12; display: block; margin: auto; 
+        /* border: 1px yellow solid; */
+}}
+
+.box { position: absolute; z-index: 10;
+    border: 1px orangered solid;
+}
+
+#movies { z-index: 6; }
+.pic { position: absolute; left: 0px; top: 0px; z-index: 4; }
+.full { width: 100%; height: 100% }
+.fullGif { position: absolute; width: 100%; height: 100%; z-index: 6 }
+#cache img { width: 1px; height: 1px; opacity: 0; }
+
+/* #myvideo:-webkit-full-screen { width: 100%; height: 100%; } */

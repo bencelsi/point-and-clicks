@@ -95,8 +95,7 @@ function hideInventory() { inventoryDiv.style.visibility = 'hidden' }
 
 // TRANSITIONS ******************************************
 function goTo(newFrame, transitionType = 'fade') { 
-	console.log(transitionType)
-	console.log(newFrame)
+	console.log('goto' + newFrame)
 	if (newFrame == null) return
 
 	if (transitionType != 'none') { createTransition(transitionType + 'Out') }
@@ -131,8 +130,7 @@ function createTransition(transitionType) {
 function refresh() { refreshBoxes(); refreshInventory() }
 
 function refreshBoxes() {
-
-	picsDiv.innerHTML = ''; boxesDiv.innerHTML = ''
+	picsDiv.innerHTML = boxesDiv.innerHTML = ''
 	let frameData = roomData[room][frame]
 	if (frameData == null) return
 
@@ -145,9 +143,9 @@ function refreshBoxes() {
 	let boxes = frameData.boxes
 	if (boxes != null) {
 		for (let i = 0; i < boxes.length; i++) {
-			let X = boxes[i]
-			if (X.if != null && !X.if()) continue
-			makeBox(X); makePic(X) }}
+			let box = boxes[i]
+			if (box.if != null && !box.if()) continue
+			makeBox(box); makePic(box) }}
 
 	// Persistents
 	let newIds = []
@@ -169,45 +167,45 @@ function refreshBoxes() {
 	persistentIds = newIds
 }
 
-function makeBox(boxData, parent = boxesDiv) {
-	if (boxData.xy == null) return
+function makeBox(box, parent = boxesDiv) {
+	if (box.xy == null) return
 	
 	let element = document.createElement('div'); element.className = 'box'
 
-	let X = { ...c.baseBox, ...boxData }
-	for (key in X) { if (key != 'fn') X[key] = simpleEval(X[key]) }
+	box = { ...c.baseBox, ...box }
+	for (key in box) { if (key != 'fn') box[key] = simpleEval(box[key]) }
 
-	element.style.left = X.xy[0] * c.width + 'px'
-	element.style.width = (X.xy[1] - X.xy[0]) * c.width + 'px'
-	element.style.bottom = X.xy[2] * c.height + 'px'
-	element.style.height = (X.xy[3] - X.xy[2]) * c.height + 'px'
+	element.style.left = box.xy[0] * c.width + 'px'
+	element.style.width = (box.xy[1] - box.xy[0]) * c.width + 'px'
+	element.style.bottom = box.xy[2] * c.height + 'px'
+	element.style.height = (box.xy[3] - box.xy[2]) * c.height + 'px'
 
-	setCursor(element, X.cursor)
+	setCursor(element, box.cursor)
 
-	//let fn = orDefault(X.fn, null, false)
-	//let to = orDefault(X.to, null)
-	if (X.to != null && X.fn != null) { element.onclick = () => { X.fn(); goTo(X.to, X.transition) }}
-	else if (X.to != null) { element.onclick = () => { goTo(X.to, X.transition) }}
-	else if (X.fn != null) { element.onclick = X.fn }
+	//let fn = orDefault(box.fn, null, false)
+	//let to = orDefault(box.to, null)
+	if (box.to != null && box.fn != null) { element.onclick = () => { box.fn(); goTo(box.to, box.transition) }}
+	else if (box.to != null) { element.onclick = () => { goTo(box.to, box.transition) }}
+	else if (box.fn != null) { element.onclick = box.fn }
 	
-	if (X.id != null) element.id = X.id
-	if (X.subBoxes != null) {
-		for (i in X.subBoxes) makePic(X.subBoxes[i], element); makeBox(X.subBoxes[i], element)
+	if (box.id != null) element.id = box.id
+	if (box.subBoxes != null) {
+		for (i in box.subBoxes) makePic(box.subBoxes[i], element); makeBox(box.subBoxes[i], element)
 	}
 	
-	if (X.drag != null) makeDraggable(element, [])
+	if (box.drag != null) makeDraggable(element, [])
 	parent.appendChild(element)
 }
 
 // todo - consolidate into single 'makeBox' method?
 
-function makePic(X, parent = picsDiv) {
+function makePic(picData, parent = picsDiv) {
 
 	let basePic = {
 		centerOffset: false
 	}
 	
-	X = {...basePic, ...X}
+	let X = {...basePic, ...picData}
 	for (key in X) { if (key != 'fn' && key != 'while') X[key] = simpleEval(X[key]) }
 
 	let element = document.createElement('img'); element.classList.add('pic')
