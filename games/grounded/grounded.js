@@ -1,28 +1,17 @@
 /*
 TODOs:
 
+Blacken dark closet frame
 Small clockhands
 Hitbox offset
-Get songs/numbers on old computer
-Trim songs o start immediately
+Add 'click to start'
+Update radio songs , normalize volumes
 Stop cuckoo sounds
-Blacken dark closet frame
+blurry lightswitch 3 image
+no cursor on inventory div if empty
+cursors shouldn't wait on fade
 
-SOUND SYSTEM - 
-
-add stopSound()
-
-Store audios as objects
-    Options - loop?
-    on refresh, update audio volumes
-
-
-music per room or per variable
-
-ideally workable for overlapping sounds
-
-vars for 'music space'
-different songs ma
+NICE TO HAVE
 
 */
 
@@ -39,8 +28,8 @@ const config = {
     style: '',
     commonBoxes: {
 		forward: { xy: [.2, .8, 0, 1], transition: 'fade', cursor: 'f' },
-		left: { xy: [0, .2, .2, .8], transition: 'none', cursor: 'L' },
-		right: { xy: [.8, 1, .2, .8], transition: 'none', cursor: 'R' },
+		left: { xy: [0, .2, 0, 1], transition: 'none', cursor: 'L' },
+		right: { xy: [.8, 1, 0, 1], transition: 'none', cursor: 'R' },
 		back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'b' }}
 }
 
@@ -56,7 +45,8 @@ const config = {
     Light My fire (cover??)
 */
 
-const songs = ['abc', 'circlesong.m4a', 'dentist', 'heart', 'martha.m4a', 'rock.wav', 'train.wav']
+const songs = ['abc.wav', 'circlesong.m4a', 'dentist.wav', 'fire.wav', 'glidd.wav', 'heart', 'hilary.wav', 
+    'martha.m4a', 'radio.wav', 'rock.wav', 'train.wav']
 
 const roomData = {
     'room': {
@@ -70,10 +60,10 @@ const roomData = {
         'A2a': { back: 'A2', boxes: [{ xy: [.28, .34, .89, .97], cursor: 'F', to: 'A2b', fn: () => { playSound('creak') }}] },
         'A2b': { back: 'A2', boxes: [{ xy: [.28, .34, .89, .97], cursor: 'F', to: 'A2a', fn: () => { playSound('creak') }}, 
             { xy: [.57, .85, .4, .77], to: 'A2c', cursor: 'Z' },
-            { pic: () => { return 'numbers/' + s.combo[0] + '.png' }, offset: [.687, .64], style: 'width: 10px' },
-            { pic: () => { return 'numbers/' + s.combo[1] + '.png' }, offset: [.707, .64], style: 'width: 10px' },
-            { pic: () => { return 'numbers/' + s.combo[2] + '.png' }, offset: [.727, .64], style: 'width: 10px' },
-            { pic: () => { return 'numbers/' + s.combo[3] + '.png' }, offset: [.747, .64], style: 'width: 10px' }]},
+            { pic: () => { return 'numbers/' + s.combo[0] + '.jpg' }, offset: [.685, .64], style: 'width: 10px' },
+            { pic: () => { return 'numbers/' + s.combo[1] + '.jpg' }, offset: [.705, .64], style: 'width: 10px' },
+            { pic: () => { return 'numbers/' + s.combo[2] + '.jpg' }, offset: [.725, .64], style: 'width: 10px' },
+            { pic: () => { return 'numbers/' + s.combo[3] + '.jpg' }, offset: [.745, .64], style: 'width: 10px' }]},
         'A2c': { back: 'A2b', boxes: [
             { xy: [.3, .4, .5, .65], cursor: 'O', fn: () => {
                 if (comboMatches([0, 0, 0, 0])) { playSound('safe'); 
@@ -83,10 +73,10 @@ const roomData = {
             { xy: [.46, .51, .53, .63], cursor: 'O', fn: () => { comboPush([0, 1, 2]); refresh() }}, 
             { xy: [.51, .56, .53, .63], cursor: 'O', fn: () => { comboPush([1, 2, 3]); refresh() }}, 
             { xy: [.56, .61, .53, .63], cursor: 'O', fn: () => { comboPush([2, 3]); refresh() }},
-            { pic: () => { return 'numbers/' + s.combo[0] + '.png' }, offset: [.41, .63], style: 'width: 30px' },
-            { pic: () => { return 'numbers/' + s.combo[1] + '.png' }, offset: [.46, .63], style: 'width: 30px' },
-            { pic: () => { return 'numbers/' + s.combo[2] + '.png' }, offset: [.51, .63], style: 'width: 30px' },
-            { pic: () => { return 'numbers/' + s.combo[3] + '.png' }, offset: [.56, .63], style: 'width: 30px' }
+            { pic: () => { return 'numbers/' + s.combo[0] + '.jpg' }, offset: [.4, .62], style: 'width: 30px' },
+            { pic: () => { return 'numbers/' + s.combo[1] + '.jpg' }, offset: [.45, .62], style: 'width: 30px' },
+            { pic: () => { return 'numbers/' + s.combo[2] + '.jpg' }, offset: [.5, .62], style: 'width: 30px' },
+            { pic: () => { return 'numbers/' + s.combo[3] + '.jpg' }, offset: [.55, .62], style: 'width: 30px' }
         ]},
         'A2d': { back: 'A2b', boxes: [
             { xy: [.4, .55, .3, .7], cursor: () => { return s.pigZoom ? 'O' : 'Z' },
@@ -133,7 +123,7 @@ const roomData = {
             { xy: [.65, .7, .33, .4], fn: () => { s.radioOn = !s.radioOn; refresh(); setMusic(s.radioOn ? songs[s.radio] : null, false) }},
             { xy: [.5, .55, .33, .4], fn: () => { s.radio = (s.radio + 1) % 7; setMusic(songs[s.radio]); refreshBoxes() }},
             { pic: () => { return s.radioOn ? 'on' : 'off' }, offset: [.64, .4], style: 'width: 30px' },
-            { pic: () => { return 'numbers/' + (s.radio + 1) }, offset: [.5, .4], style: 'height: 30px' },
+            { pic: () => { return 'numbers/' + (s.radio + 1) + '.jpg' }, offset: [.5, .4], style: 'height: 30px' },
             { pic: 'dial', offset: () => { return [.49 + (s.radio * .03), .52]}, style: 'height: 30px' }]},
         'A10': { left: 'A9', right: 'A11', forward: { to: 'B1', fn: () => { c.commonBoxes.left.transition = 'left'; c.commonBoxes.right.transition = 'right' }}},
         'A11': { left: 'A10', right: 'A1', boxes: [
@@ -184,7 +174,7 @@ function runClock() {
 
 const s = { 
     radio: 0, radioOn: true, clockOn: false, time: 58, lightOn: false, combo: [0, 0, 0, 0],
-    pig: 0, key: 0, pigZoom: false
+    pig: 1, key: 1, pigZoom: false
 }
 
 const inventory = {

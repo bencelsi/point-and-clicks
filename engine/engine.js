@@ -4,6 +4,20 @@
 // TODO: how to cache when left/right returns fn? framesToCache, or... left: {to: 'A1', fn: ()=> {...}}
 // TODO: cache pics/gifs
 
+/*
+SOUND SYSTEM - 
+
+Store audios as objects
+    Options - loop?
+    on refresh, update audio volumes
+
+music per room or per variable
+ideally workable for overlapping sounds
+vars for 'music space'
+different songs ma
+*/
+
+
 // DOM globals:
 let boxesDiv = 			get('boxes')
 let picsDiv = 			get('pics')

@@ -11,6 +11,7 @@
 // live update for heater level
 // card in door target
 // darken front desk chair
+// hallways are broken - fix em
 
 //nice to have:
 // TODO: wait for toilet to refill before flushing
