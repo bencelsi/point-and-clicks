@@ -191,6 +191,8 @@ function refreshBoxes() {
 	persistentIds = newIds
 }
 
+let boxOffset = [.0,.0]
+
 function makeBox(box, parent = boxesDiv) {
 	if (box.xy == null) return
 	
@@ -199,9 +201,9 @@ function makeBox(box, parent = boxesDiv) {
 	box = { ...c.baseBox, ...box }
 	for (key in box) { if (key != 'fn') box[key] = simpleEval(box[key]) }
 
-	element.style.left = box.xy[0] * c.width + 'px'
-	element.style.width = (box.xy[1] - box.xy[0]) * c.width + 'px'
-	element.style.bottom = box.xy[2] * c.height + 'px'
+	element.style.left = (box.xy[0] + boxOffset[0]) * c.width + 'px'
+	element.style.width = (box.xy[1] - box.xy[0]) + boxOffset[0] * c.width + 'px'
+	element.style.bottom = (box.xy[2] + boxOffset[1]) * c.height + 'px'
 	element.style.height = (box.xy[3] - box.xy[2]) * c.height + 'px'
 
 	setCursor(element, box.cursor)
