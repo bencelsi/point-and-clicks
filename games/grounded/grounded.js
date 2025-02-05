@@ -100,7 +100,7 @@ const roomData = {
         'A7a': { back: 'A7' },
         'A8': { left: 'A7', right: 'A9', boxes: [{ xy: [.52, .61, .4, .55], cursor: 'Z', to: 'A8a' },
             {xy: [.2,.45,.1,.35], cursor: 'Z', to: 'A8c'}]},
-        'A8a': { back: 'A8', boxes: [{ xy: [.4, .6, .3, .65], fn: ()=> { goTo('A8b', 'none'); wait(.02, ()=> { goTo('A8a', 'none')})}}] },
+        'A8a': { back: 'A8', boxes: [{ xy: [.4, .6, .3, .65], fn: ()=> { goTo('A8b', 'none'); wait(.04, ()=> { goTo('A8a', 'none')})}}] },
         'A8c': { back: 'A8' },
         'A9': { left: 'A8', right: 'A10', boxes: [{ xy: [.25, .45, .6, .8], cursor: 'Z', to: 'A9a', fn: () => { setMusicVolume(1) } }] },
         'A9a': { back: { to: 'A9', fn: () => { setMusicVolume(.7) }}, boxes: [
