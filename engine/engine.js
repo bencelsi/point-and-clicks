@@ -1,37 +1,34 @@
-// TODO: 'enqueue' a click for fast clickthru
 // TODO: Add 'menu' logic, saveable state
-// TODO: Make rooms optional
-// TODO: how to cache when left/right returns fn? framesToCache, or... left: {to: 'A1', fn: ()=> {...}}
+// TODO: Make rooms optional/better
+// TODO: 'enqueue' a click for fast clickthru
+// TODO: how to cache when left/right returns fn? framesToCache?
 // TODO: cache pics/gifs
-
+//
 /*
 SOUND SYSTEM - 
-
 Store audios as objects
     Options - loop?
     on refresh, update audio volumes
-
 music per room or per variable
 ideally workable for overlapping sounds
 vars for 'music space'
 different songs ma
 */
 
-
 // DOM globals:
-let boxesDiv = 			get('boxes')
-let picsDiv = 			get('pics')
-let cacheDiv = 			get('cache') 
-let transitionsDiv = 	get('transitions')
-let frameImg = 			get('frame')
-let persistentDiv = 	get('persistents')
-let inventoryDiv = 		get('inventory')
-let moviesDiv = 		get('movies')
-let cursorBlockDiv = 	get('cursorBlock')
-let allDiv = 			get('all')
+const BOX_DIV = 			get('boxes')
+const PICS_DIV = 			get('pics')
+const CACHE_DIV = 			get('cache')
+const TRANSITION_DIV = 		get('transitions')
+const FRAME_IMG = 			get('frame')
+const PERSISTENT_DIV = 		get('persistents')
+const INVENTORY_DIV = 		get('inventory')
+const MOVIE_DIV = 			get('movies')
+const CURSOR_BLOCK_DIV = 	get('cursorBlock')
+const ALL_DIV = 			get('all')
 
 //paths
-get("favicon").href = 	GAME_PATH + '/favicon.ico'
+get('favicon').href = 	GAME_PATH + '/favicon.ico'
 const ASSET_PATH = 		GAME_PATH + '/assets/'
 const FRAME_PATH = 		ASSET_PATH + '/frames/'
 const GIF_PATH = 		ASSET_PATH + '/gifs/'
@@ -41,7 +38,6 @@ const PIC_PATH = 		ASSET_PATH + '/pics/'
 const INVENTORY_PATH = 	ASSET_PATH + '/inventory/'
 const MOV_PATH = 		ASSET_PATH + '/movies/'
 let CURSOR_PATH = 		'/cursors/'
-
 
 // Global vars:
 let music = new Audio; music.loop = true; 
@@ -61,7 +57,7 @@ function waitForData() {
 function init() {
 	c = { ...baseConfig, ...config }
 
-	document.title = (location.hostname == "" ? "." : "") + c.title
+	document.title = (location.hostname == '' ? '.' : '') + c.title
 	
 	room = c.room; 
 	frame = c.frame; 
@@ -69,20 +65,20 @@ function init() {
 
 	if (c.customCursors) CURSOR_PATH = ASSET_PATH + '/cursors/'
 
-	setCursor(allDiv, c.defaultCursor)
-	if (c.waitCursor != null) setCursor(cursorBlockDiv, c.waitCursor)
+	setCursor(ALL_DIV, c.defaultCursor)
+	if (c.waitCursor != null) setCursor(CURSOR_BLOCK_DIV, c.waitCursor)
 
-	allDiv.style.width = c.width + "px"; 
-	allDiv.style.height = c.height + 100 + "px"
-	get("screen").style.width = c.width + "px"; 
-	get("screen").style.height = c.height + "px"
-	inventoryDiv.style.width = c.width + "px"
+	ALL_DIV.style.width = c.width + 'px'; 
+	ALL_DIV.style.height = c.height + 100 + 'px'
+	get('screen').style.width = c.width + 'px'; 
+	get('screen').style.height = c.height + 'px'
+	INVENTORY_DIV.style.width = c.width + 'px'
 	updateStyle(); refreshInventory(); goTo(frame, 'none');
 	//window.onclick = launchFullScreen(get('window'))
 }
 
 function updateStyle() { // TODO: better.
-	get("style").innerHTML =  `
+	get('style').innerHTML =  `
 		body { background-color: purple }
 		@keyframes leftIn   { from { transform: translateX(0) } to { transform: translateX(${c.width}px) }}
 		@keyframes leftOut  { from { transform: translateX(0) }}
@@ -102,11 +98,13 @@ function updateStyle() { // TODO: better.
 // DOM setup  ******************************************
 function setFade(fade) { c.fadeSpeed = fade; updateStyle() }
 
-function freeze() { cursorBlockDiv.style.visibility = 'visible' }
+function freeze() { CURSOR_BLOCK_DIV.style.visibility = 'visible' }
 
-function unfreeze() { cursorBlockDiv.style.visibility = 'hidden' }
+function unfreeze() { CURSOR_BLOCK_DIV.style.visibility = 'hidden' }
 
-function hideInventory() { inventoryDiv.style.visibility = 'hidden' }
+function hideInventory() { INVENTORY_DIV.style.visibility = 'hidden' }
+
+function showInventory() { INVENTORY_DIV.style.visibility = 'visible' }
 
 // TRANSITIONS ******************************************
 function goTo(newFrame, transitionType = 'fade') { 
@@ -122,7 +120,7 @@ function goTo(newFrame, transitionType = 'fade') {
 	let img
 	if (frameData.alt != null && frameData.alt.if()) img = frameData.alt.name
 	else img = frame + '.' + (newExtension == null ? extension : newExtension)
-	frameImg.src = FRAME_PATH + room + '/' + img
+	FRAME_IMG.src = FRAME_PATH + room + '/' + img
 	
 	refreshBoxes()
 	if (transitionType != 'none') makeTransition(transitionType + 'In')
@@ -130,7 +128,7 @@ function goTo(newFrame, transitionType = 'fade') {
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
 	freeze();
 	wait(delay, () => {
-		transitionsDiv.innerHTML = ''; cacheResources(frameData)
+		TRANSITION_DIV.innerHTML = ''; cacheResources(frameData)
 		if (frameData.onEnter != null) frameData.onEnter()
 		unfreeze() })
 	}
@@ -138,23 +136,23 @@ function goTo(newFrame, transitionType = 'fade') {
 function makeTransition(transitionType) {
 	
 	let transition = document.createElement('div');
-	let cloned = frameImg.cloneNode(true)
+	let cloned = FRAME_IMG.cloneNode(true)
 	transition.appendChild(cloned) //creates duplicate img
-	let pics = picsDiv.cloneNode(true); pics.id = null
+	let pics = PICS_DIV.cloneNode(true); pics.id = null
 	transition.appendChild(pics)
 	transition.classList.add('transition')
 	transition.classList.add(transitionType)
 	if (transitionType == 'leftIn') transition.style.left = -c.width + 'px'
 	else if (transitionType == 'rightIn') transition.style.left = c.width + 'px'
 
-	transitionsDiv.appendChild(transition)
+	TRANSITION_DIV.appendChild(transition)
 }
 
 // BOXES ******************************************
 function refresh() { refreshBoxes(); refreshInventory() }
 
 function refreshBoxes() {
-	picsDiv.innerHTML = boxesDiv.innerHTML = ''
+	PICS_DIV.innerHTML = BOX_DIV.innerHTML = ''
 	let frameData = roomData[room][frame]
 	if (frameData == null) return
 
@@ -179,33 +177,33 @@ function refreshBoxes() {
 			let persistent = persistents[i]
 			if (persistent.if()) {
 				newIds.push(persistent.id)
-				if (!persistentIds.includes(persistent.id)) { makePic(persistent, persistentDiv) }}}}
+				if (!persistentIds.includes(persistent.id)) { makePic(persistent, PERSISTENT_DIV) }}}}
 	
 	for (i in persistentIds) {
 		let id = persistentIds[i]
 		if (!newIds.includes(id)) {
 			get(id).classList.add('fadeOut')
 			wait(c.fadeSpeed - .1, () => {
-				persistentDiv.removeChild(get(id)) })}}
+				PERSISTENT_DIV.removeChild(get(id)) })}}
 
 	persistentIds = newIds
 }
 
-let boxOffset = [.0,.0]
-
-function makeBox(box, parent = boxesDiv) {
+function makeBox(box, parent = BOX_DIV) {
 	if (box.xy == null) return
-	
 	let element = document.createElement('div'); element.className = 'box'
 
 	box = { ...c.baseBox, ...box }
 	for (key in box) { if (key != 'fn') box[key] = simpleEval(box[key]) }
 
-	element.style.left = (box.xy[0] + boxOffset[0]) * c.width + 'px'
-	element.style.width = (box.xy[1] - box.xy[0]) + boxOffset[0] * c.width + 'px'
-	element.style.bottom = (box.xy[2] + boxOffset[1]) * c.height + 'px'
-	element.style.height = (box.xy[3] - box.xy[2]) * c.height + 'px'
-
+	let x1 = box.xy[0] == 0 ? 0 : (box.xy[0] == 1 ? 1 : (box.xy[0] + c.boxOffset[0]))
+	let x2 = box.xy[1] == 0 ? 0 : (box.xy[1] == 1 ? 1 : (box.xy[1] + c.boxOffset[0]))
+	let y1 = box.xy[2] == 0 ? 0 : (box.xy[2] == 1 ? 1 : (box.xy[2] + c.boxOffset[1]))
+	let y2 = box.xy[3] == 0 ? 0 : (box.xy[3] == 1 ? 1 : (box.xy[3] + c.boxOffset[1]))
+	element.style.left = x1 * c.width + 'px'
+	element.style.width = (x2 - x1) * c.width + 'px'
+	element.style.bottom = y1 * c.height + 'px'
+	element.style.height = (y2 - y1) * c.height + 'px'
 	setCursor(element, box.cursor)
 
 	//let fn = orDefault(box.fn, null, false)
@@ -218,18 +216,14 @@ function makeBox(box, parent = boxesDiv) {
 	if (box.subBoxes != null) {
 		for (i in box.subBoxes) makePic(box.subBoxes[i], element); makeBox(box.subBoxes[i], element)
 	}
-	
 	if (box.drag != null) makeDraggable(element, [])
 	parent.appendChild(element)
 }
 
 // todo - consolidate into single 'makeBox' method?
 
-function makePic(picData, parent = picsDiv) {
-
-	let basePic = {
-		centerOffset: false
-	}
+function makePic(picData, parent = PICS_DIV) {
+	let basePic = { centerOffset: false }
 	
 	let X = {...basePic, ...picData}
 	for (key in X) { if (key != 'fn' && key != 'while') X[key] = simpleEval(X[key]) }
@@ -237,7 +231,7 @@ function makePic(picData, parent = picsDiv) {
 	let element = document.createElement('img'); element.classList.add('pic')
 
 	let isMovie = X.mov != null
-	if (isMovie) parent = moviesDiv
+	if (isMovie) parent = MOVIE_DIV
 	let name = isMovie ? X.mov : X.pic
 	if (name == null) return
 	element.src = (isMovie ? MOV_PATH + name + '/1' : PIC_PATH + name) + (name.includes('.') ? '' : '.png')
@@ -276,12 +270,12 @@ function makePic(picData, parent = picsDiv) {
 
 // function playMovie(X) {
 // let id = orDefault(X.id, Math.random())
-// let pic = makePic({ pic: 'movies/' + X.movie + '/1.png', offset: X.offset, id: id }, picsDiv)
+// let pic = makePic({ pic: 'movies/' + X.movie + '/1.png', offset: X.offset, id: id }, PICS_DIV)
 // movieStep({ obj: pic, path: MOV_PATH + X.movie + '/', step: 1, steps: X.steps, delay: X.delay, 
 // 		then: X.then, fate: X.fate, id: id })}
 
 function playMovie(name, totalSteps, destination) {
-	let element = makePic({ mov: name, id: name, totalSteps: totalSteps }, moviesDiv)
+	let element = makePic({ mov: name, id: name, totalSteps: totalSteps }, MOVIE_DIV)
 	console.log(element)
 	//movieStep2(obj, 1, .2, MOV_PATH + name + '/', totalSteps, destination)
 	//goTo(destination, 'none')
@@ -289,7 +283,7 @@ function playMovie(name, totalSteps, destination) {
 
 function movieStep2(element, step, delay, path, totalSteps, destination) {
 	if (step == totalSteps) {
-		moviesDiv.removeChild(element)
+		MOVIE_DIV.removeChild(element)
 		return
 	}
 	wait(delay, () => {
@@ -307,7 +301,7 @@ function movieStep(X) {
 	if (X.step > X.totalSteps) {
 		console.log('bye')
 		if (X.then != null) X.then()
-		if (X.fate == 'end') { moviesDiv.removeChild(X.element); return }
+		if (X.fate == 'end') { MOVIE_DIV.removeChild(X.element); return }
 		if (X.fate == 'stay') return
 		if (X.fate == 'loop') X.step = 0 }
 
@@ -334,38 +328,50 @@ function movieStep(X) {
 
 function refreshInventory() {
 	if (inventory == null) return
-	inventoryDiv.innerHTML = ''
+	INVENTORY_DIV.innerHTML = ''
 	Object.keys(inventory).forEach(key => { if (s[key] == 0) makeInventoryItem(key) })}
 
 function makeInventoryItem(id) {
-	let item = document.createElement('div')
-	item.classList.add('inventory') //item.classList.add('box')
-	item.style.left = '0px'; item.style.top = '0px'
+	let element = document.createElement('div')
+	element.classList.add('inventory') //item.classList.add('box')
+	element.style.left = '0px'; element.style.top = '0px'
+	let config = inventory[id]
+	
 	let img = document.createElement('img')
-	img.src = INVENTORY_PATH + inventory[id].img + '.png'
-	item.appendChild(img)
-	makeDraggable(item, inventory[id].targets)
-	inventoryDiv.appendChild(item) }
+	img.src = INVENTORY_PATH + config.img + '.png'
+	element.appendChild(img)
+	if (config.draggable == null || config.draggable) makeDraggable(element, config.targets)
+	if (config.cursor != null) setCursor(element, config.cursor)
+	if (config.fn != null) element.onclick = config.fn
+	
+	INVENTORY_DIV.appendChild(element) 
+}
 
 // Make given inventory box draggable, execute action if dropped on targetId
+
+// What kind of properties?
 function makeDraggable(item, targets) {
 	setCursor(item, 'O')
 	item.onmousedown = function(event) {
+		//freeze()
 		event.preventDefault(); setCursor(item, 'C')	
 		let itemX = parseInt(item.style.left); let itemY = parseInt(item.style.top)
 		let mouseX = event.clientX; let mouseY = event.clientY
 		document.onmousemove = function(event) {
 			event.preventDefault()
 			item.style.left = itemX + event.clientX - mouseX + 'px'
-			item.style.top = itemY + event.clientY - mouseY + 'px' };
+			item.style.top = itemY + event.clientY - mouseY + 'px' }
 		document.onmouseup = function(event) {
+			//unfreeze()
 			document.onmousemove = null; document.onmouseup = null
 			event.preventDefault()
-			for (const target of targets) {
-				if (target.if != null && target.if()) { return }
-				if (frame == target.frame) { target.fn(); return }
-				let targetObj = get(target.id)
-				if (targetObj != null && isTouching(item, targetObj)) { target.fn(); return }}
+			if (targets != null) {
+				for (const target of targets) {
+					if (target.if != null && target.if()) return
+					if (frame == target.frame) { target.fn(); return }
+					let targetObj = get(target.id)
+					if (targetObj != null && isTouching(item, targetObj)) { target.fn(); return }}
+			}
 			item.style.left = itemX; item.style.top = itemY
 			document.onmousemove = null; setCursor(item, 'O') }}}
 
@@ -375,10 +381,10 @@ function playGif(name, newFrame, delay, after = null) {
 	let gif = document.createElement('img')
 	gif.classList.add('fullGif'); freeze()
 	gif.onload = () => {
-		moviesDiv.appendChild(gif)
+		MOVIE_DIV.appendChild(gif)
 		if (newFrame != null) { goTo(newFrame, 'fade', true) }
 		wait(delay, () => {
-			moviesDiv.innerHTML = ''; unfreeze()
+			MOVIE_DIV.innerHTML = ''; unfreeze()
 			if (after != null) { after() }})}
 	gif.src = GIF_PATH + name + '.gif?a=' + Math.random() } // todo: better
 
@@ -393,12 +399,12 @@ function cacheFrame(frame) {
 	if (roomData[room][frame] == undefined) src = FRAME_PATH + frame + '.' + extension
 	else src = FRAME_PATH + room  + '/' + frame + '.' + extension
 	if (cacheSet.has(src)) return
-	if (cacheDiv.childNodes.length >= 20) {
-		let cachedImageToRemove = cacheDiv.childNodes[0]
+	if (CACHE_DIV.childNodes.length >= 20) {
+		let cachedImageToRemove = CACHE_DIV.childNodes[0]
 		cacheSet.delete(cachedImageToRemove)
-		cacheDiv.removeChild(cachedImageToRemove) }
+		CACHE_DIV.removeChild(cachedImageToRemove) }
 	let cachedImage = new Image(); cachedImage.src = src
-	cacheDiv.appendChild(cachedImage); cacheSet.add(src) }
+	CACHE_DIV.appendChild(cachedImage); cacheSet.add(src) }
 
 // SOUND ******************************************
 
@@ -411,8 +417,10 @@ function cacheFrame(frame) {
 
 //music.setAttribute('loop', true)
 function setMusic(newMusic, fade = true) {
-		if (newMusic == null) fadeOutMusic(music)
-		else if (fade) { 
+		if (newMusic == null) {
+			if (fade) fadeOutMusic(music)
+			else music.pause()
+		} else if (fade) { 
 			fadeOutMusic(music, () => {
 			music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
 			music.play(); fadeInMusic(music) })
@@ -438,17 +446,16 @@ function fadeInMusic(sound, then = null) {
     }, 150) }
 
 function playSound(name, volume = 1) {
-	for (i in sounds) {
-		let sound = sounds[i]
+	for (let sound of sounds) {
 		if (sound.paused) {
 			sound.setAttribute('id', name + 'Sound')
 			sound.setAttribute('src', SOUND_PATH + name + (name.includes('.') ? '' : '.mp3'))
 			sound.volume = volume; sound.play(); return sound }}}
 
 function stopSound(name) { 
-	let sound = get(name + 'Sound')
-	if (sound != null) sound.stop()
-	console.log(sound)
+	for (let sound of sounds) {
+		if (sound.id == name + 'Sound') sound.pause()
+	}
 }
 
 // HELPERS ******************************************
@@ -456,7 +463,7 @@ function stopSound(name) {
 function doInSequence(arr) {
 	let time = 0
 	for (const x of arr) {
-		if (typeof x === "number") time += x
+		if (typeof x == 'number') time += x
 		else wait(time, x)
 	}
 }
@@ -483,8 +490,8 @@ function simpleEval(x) { return (x instanceof Function) ? x() : x }
 function orDefault(value, def) { return (value == null) ? def : value }
 
 function isTouching(a, b) {
-	a = a.getBoundingClientRect();
-	b = b.getBoundingClientRect();
-    return Math.abs(a.x - b.x) < (a.x < b.x ? b.width : a.width) && Math.abs(a.y - b.y) < (a.y < b.y ? b.height : a.height);
+	a = a.getBoundingClientRect()
+	b = b.getBoundingClientRect()
+    return Math.abs(a.x - b.x) < (a.x > b.x ? b.width : a.width) && Math.abs(a.y - b.y) < (a.y > b.y ? b.height : a.height);
 
 }

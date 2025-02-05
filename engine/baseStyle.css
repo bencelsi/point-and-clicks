@@ -17,7 +17,7 @@ body { background-color: black; /* user-drag: none; */ user-select: none; }
     img { z-index: 12; display: block; }}
 
 .box { position: absolute; z-index: 10;
-    border: 1px orangered solid;
+    /* border: 1px orangered solid; */
 }
 
 #movies { z-index: 6; }
