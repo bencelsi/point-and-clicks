@@ -21,10 +21,10 @@ const config = {
     defaultBox: { cursor: 'O' },
     style: '',
     commonBoxes: {
-		forward: { xy: [.2, .8, 0, 1], transition: 'fade', cursor: 'f' },
+		forward: { xy: [.2, .8, 0, 1], transition: 'fade', cursor: 'F' },
 		left: { xy: [0, .2, 0, 1], transition: 'none', cursor: 'L' },
 		right: { xy: [.8, 1, 0, 1], transition: 'none', cursor: 'R' },
-		back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'b' }},
+		back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'B' }},
     boxOffset: [-.03, .02]
 }
 
