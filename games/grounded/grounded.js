@@ -156,7 +156,7 @@ function runClock() {
 }
 
 const s = { 
-    radio: 0, radioOn: true, clockOn: false, clockRunning: false, time: 58, lightOn: false, combo: [0, 0, 0, 0],
+    radio: 0, radioOn: true, clockOn: false, clockRunning: false, time: 3, lightOn: false, combo: [0, 0, 0, 0],
     pig: 1, key: 1, pigZoom: false
 }
 
