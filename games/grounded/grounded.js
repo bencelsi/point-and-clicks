@@ -105,7 +105,7 @@ const roomData = {
         'A9': { left: 'A8', right: 'A10', boxes: [{ xy: [.25, .45, .6, .8], cursor: 'Z', to: 'A9a', fn: () => { setMusicVolume(1) } }] },
         'A9a': { back: { to: 'A9', fn: () => { setMusicVolume(.7) }}, boxes: [
             { xy: [.65, .7, .33, .4], fn: () => { s.radioOn = !s.radioOn; refresh(); setMusic(s.radioOn ? songs[s.radio] : null, false) }},
-            { xy: [.5, .55, .33, .4], fn: () => { s.radio = (s.radio + 1) % 10; playSound('click'); setMusic(songs[s.radio], false); refreshBoxes() }},
+            { xy: [.48, .55, .33, .4], fn: () => { s.radio = (s.radio + 1) % 10; playSound('click'); setMusic(songs[s.radio], false); refreshBoxes() }},
             { pic: () => { return s.radioOn ? 'on' : 'off' }, offset: [.64, .4], style: 'width: 30px' },
             { pic: () => { return 'numbers/' + ((s.radio + 1) % 10) + '.jpg' }, offset: [.5, .4], style: 'height: 30px' },
             { pic: 'dial', offset: () => { return [.49 + (s.radio * .02), .52]}, style: 'height: 30px' }]},

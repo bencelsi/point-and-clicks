@@ -17,6 +17,5 @@ let baseConfig = {
 	boxOffset: [0, 0],
 	baseInventory: {
 		cursor: 'O'
-		
 	}
 }
