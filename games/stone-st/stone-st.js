@@ -1,7 +1,7 @@
 const config = {
     title: 'Stone St',
-    startRoom: 'A',
-    startFrame: 'A1',
+    room: 'A',
+    frame: 'A1',
     extension: 'jpeg',
     width: 1000,
     height: 750,

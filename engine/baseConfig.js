@@ -4,8 +4,9 @@ let baseConfig = {
 	height: 750,
 	sideSpeed: .3,
 	fadeSpeed: 1,
-    waitCursor: 'S',
+	customCursors: false,
     defaultCursor: 'N',
+	waitCursor: 'S',
 	baseBox: {	
 		cursor: 'O',
 		transition: 'fade' },

@@ -37,7 +37,7 @@ const MUSIC_PATH = 		SOUND_PATH + 'music/'
 const PIC_PATH = 		ASSET_PATH + '/pics/'
 const INVENTORY_PATH = 	ASSET_PATH + '/inventory/'
 const MOV_PATH = 		ASSET_PATH + '/movies/'
-let CURSOR_PATH = 		'/cursors/'
+let CURSOR_PATH = 		'cursors/'
 
 // Global vars:
 let music = new Audio; music.loop = true; 
@@ -63,7 +63,7 @@ function init() {
 	frame = c.frame; 
 	extension = c.extension
 
-	if (c.customCursors) CURSOR_PATH = ASSET_PATH + '/cursors/'
+	if (c.customCursors) CURSOR_PATH = ASSET_PATH + 'cursors/'
 
 	setCursor(ALL_DIV, c.defaultCursor)
 	if (c.waitCursor != null) setCursor(CURSOR_BLOCK_DIV, c.waitCursor)
@@ -459,7 +459,7 @@ function stopSound(name) {
 }
 
 // HELPERS ******************************************
-// [A, 3, B] does A, waits 3 seconds, then does B
+// [A, 3, B] means: do A, wait 3 seconds, do B
 function doInSequence(arr) {
 	let time = 0
 	for (const x of arr) {
@@ -477,7 +477,12 @@ function parseFrame(frame) {
 
 function get(id) { return document.getElementById(id) }
 
-function setCursor(element, cursor) { if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png), auto' }
+function setCursor(element, cursor) { 
+	console.log(element)
+	console.log(cursor)
+	if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png), auto'
+	console.log(element.style.cursor)
+}
 
 function launchFullScreen(element) {
 	if (element.requestFullScreen) element.requestFullScreen()
