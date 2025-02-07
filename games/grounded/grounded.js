@@ -1,7 +1,9 @@
 /*
 TODOs:
+Radio order
 
 NICE TO HAVE
+lightswitch- don't fade
 Small clockhands
 Add 'click to start'
 blurry lightswitch3 image
@@ -9,10 +11,10 @@ no cursor on inventory div if empty
 variable cuckoos
 */
 
+// CONFIG
 const config = {
     title: 'Grounded',
     width: 640, height: 480,
-    room: 'room', frame: 'A0',
     extension: 'jpeg',
     customCursors: true,
     boxCursor: 'O',
@@ -28,11 +30,24 @@ const config = {
     boxOffset: [-.03, .02]
 }
 
+// STATE
+const s = { 
+    room: 'room', frame: 'A0', radio: 0, radioOn: true, clockOn: false, clockRunning: false, time: 3, 
+    lightOn: false, combo: [0, 0, 0, 0], pig: 1, key: 1, pigZoom: false
+}
+
+const inventory = {
+    key: { img: 'key', targets: [{ id: 'doorknob', fn: () => { s.key = 2; refresh() }}, 
+        { id: 'clock', fn: () => { s.key = 1; goTo('A3c'); refreshInventory() }}]},
+    pig: { img: 'pig', targets: [{ id: 'safe', fn: () => { s.pig = 1; goTo('A2d'); refresh() }},
+        { frame: 'A6a', fn: () => { playSound('smash'); s.pig = 2; refreshInventory(); goTo('A6b'); wait(.25, ()=> { goTo('A6c') })}}]},
+}
+
 const songs = 
     ['abc.wav', 'dentist.wav', 'fire.wav', 'glidd.wav', 'obama.wav', 'hilary.wav', 'martha.wav', 'radio.wav', 'rock.wav', 'train.wav']
 
-const roomData = {
-    'room': {
+const gameData = {
+    room: {
         'A0': { boxes: [{ xy: [0, 1, 0, 1], cursor: 'N', fn: () => { setFade(3); setMusic(songs[s.radio], false); setMusicVolume(.7); 
             goTo('A1'); wait(3, () => { setFade(1) })}}]},
         'A1': { left: 'A11', right: 'A2', boxes: [{ xy: [.6, .67, .35, .51], cursor: 'Z', to: 'A1a' },
@@ -146,26 +161,15 @@ function runClock() {
     if (!s.clockOn) { s.clockRunning = false; return }
     s.clockRunning = true; s.time += 1;
     let tickVolume = .3
-    if (frame == 'A3a' || frame == 'A3b') { refreshBoxes(); tickVolume = 1 }
-    if (frame.startsWith('A') || frame.startsWith('B')) playSound('tick', tickVolume)
-    if (s.time % 60 == 0 && frame == 'A3a') {
+    if (s.frame == 'A3a' || s.frame == 'A3b') { refreshBoxes(); tickVolume = 1 }
+    if (s.frame.startsWith('A') || s.frame.startsWith('B')) playSound('tick', tickVolume)
+    if (s.time % 60 == 0 && s.frame == 'A3a') {
         playSound('cuckoo'); goTo('A3b')
-        wait(7, () => { if (frame == 'A3b' && s.clockOn) { playSound('close'); goTo('A3a') }})
+        wait(7, () => { if (s.frame == 'A3b' && s.clockOn) { playSound('close'); goTo('A3a') }})
     }
     wait(1, runClock)
 }
 
-const s = { 
-    radio: 0, radioOn: true, clockOn: false, clockRunning: false, time: 3, lightOn: false, combo: [0, 0, 0, 0],
-    pig: 1, key: 1, pigZoom: false
-}
-
-const inventory = {
-    key: { img: 'key', targets: [{ id: 'doorknob', fn: () => { s.key = 2; refresh() }}, 
-        { id: 'clock', fn: () => { s.key = 1; goTo('A3c'); refreshInventory() }}]},
-    pig: { img: 'pig', targets: [{ id: 'safe', fn: () => { s.pig = 1; goTo('A2d'); refresh() }},
-        { frame: 'A6a', fn: () => { playSound('smash'); s.pig = 2; refreshInventory(); goTo('A6b'); wait(.25, ()=> { goTo('A6c') })}}]},
-}
 
 function comboPush(vals) {
     playSound('combo')

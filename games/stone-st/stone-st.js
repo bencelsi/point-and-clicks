@@ -5,6 +5,7 @@ const config = {
     extension: 'jpeg',
     width: 1000,
     height: 750,
+    baseBox: { cursor: 'F' }
 }
 
 const roomData = {
@@ -62,8 +63,7 @@ const roomData = {
         'M3': { left: 'M2', right: 'M4' },
         'M4': { left: 'M3', right: 'M1', forward: 'L4' },
         'N1': { left: 'N4', right: 'N2' },
-        'N2': { left: 'N1', right: 'N3', forward: 'T2', boxes: [
-            { xy: [.2,.35,.1,.9], to: 'R1' }]},
+        'N2': { left: 'N1', right: 'N3', forward: 'T2', boxes: [{ xy: [.2,.35,.1,.9], to: 'R1' }]},
         'N3': { left: 'N2', right: 'N4', forward: 'J3' },
         'N4': { left: 'N3', right: 'N1', forward: 'O4' },
         'O1': { left: 'O4', right: 'O2', forward: 'Q1' },

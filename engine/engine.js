@@ -1,9 +1,9 @@
-// TODO: Add 'menu' logic, saveable state
+// TODO: Saveable state... configurable menu?
 // TODO: Make rooms optional/better
 // TODO: 'enqueue' a click for fast clickthru
 // TODO: how to cache when left/right returns fn? framesToCache?
 // TODO: cache pics/gifs
-//
+
 /*
 SOUND SYSTEM - 
 Store audios as objects
@@ -42,38 +42,28 @@ let CURSOR_PATH = 		'cursors/'
 // Global vars:
 let music = new Audio; music.loop = true; 
 let cacheSet = new Set()
-let sounds = [new Audio, new Audio, new Audio, new Audio, new Audio] // TODO: make concurrent sounds variable
+let sounds = [new Audio, new Audio, new Audio, new Audio, new Audio] // TODO: make # of sounds configurable
 let persistentIds = []
-let c;
+let c
 window.onload = waitForData()
 
-// hacky way to wait for gameData & s (state) to load
 let waitCounter = 0
 function waitForData() { 
 	try { if (waitCounter > 10) return
-		waitCounter++; baseConfig; config; roomData; s; init() } 
+		waitCounter++; baseConfig; c; s; gameData; init() } 
 	catch (e) { console.log(e); wait(.1, waitForData) }}
 
 function init() {
 	c = { ...baseConfig, ...config }
-
 	document.title = (location.hostname == '' ? '.' : '') + c.title
-	
-	room = c.room; 
-	frame = c.frame; 
 	extension = c.extension
-
 	if (c.customCursors) CURSOR_PATH = ASSET_PATH + 'cursors/'
-
 	setCursor(ALL_DIV, c.defaultCursor)
 	if (c.waitCursor != null) setCursor(CURSOR_BLOCK_DIV, c.waitCursor)
-
-	ALL_DIV.style.width = c.width + 'px'; 
-	ALL_DIV.style.height = c.height + 100 + 'px'
-	get('screen').style.width = c.width + 'px'; 
-	get('screen').style.height = c.height + 'px'
+	ALL_DIV.style.width = c.width + 'px'; ALL_DIV.style.height = c.height + 100 + 'px'
+	get('screen').style.width = c.width + 'px'; get('screen').style.height = c.height + 'px'
 	INVENTORY_DIV.style.width = c.width + 'px'
-	updateStyle(); refreshInventory(); goTo(frame, 'none');
+	updateStyle(); refreshInventory(); goTo(s.frame, 'none');
 	//window.onclick = launchFullScreen(get('window'))
 }
 
@@ -95,9 +85,43 @@ function updateStyle() { // TODO: better.
 	`
 }
 
-// DOM setup  ******************************************
-function setFade(fade) { c.fadeSpeed = fade; updateStyle() }
 
+// MENU  ******************************************
+function save() {
+	
+}
+
+function load() {
+
+}
+
+function dynamic_text() {
+	return "create your dynamic text here";
+}
+
+function download() {
+	let name ="myFile.grv"
+	let contents = JSON.stringify(s)
+	mime_type = "text/plain";
+
+	var blob = new Blob([contents], {type: mime_type});
+
+	var dlink = document.createElement('a');
+	dlink.download = name;
+	dlink.href = window.URL.createObjectURL(blob);
+	dlink.onclick = function(e) {
+		// revokeObjectURL needs a delay to work properly
+		var that = this;
+		setTimeout(function() {
+			window.URL.revokeObjectURL(that.href);
+		}, 1500);
+	};
+
+	dlink.click();
+	dlink.remove();
+}
+
+// DOM setup  ******************************************
 function freeze() { CURSOR_BLOCK_DIV.style.visibility = 'visible' }
 
 function unfreeze() { CURSOR_BLOCK_DIV.style.visibility = 'hidden' }
@@ -106,54 +130,16 @@ function hideInventory() { INVENTORY_DIV.style.visibility = 'hidden' }
 
 function showInventory() { INVENTORY_DIV.style.visibility = 'visible' }
 
-// TRANSITIONS ******************************************
-function goTo(newFrame, transitionType = 'fade') { 
-	console.log('goTo ' + newFrame)
-	if (newFrame == null) return
+function setFade(fade) { c.fadeSpeed = fade; updateStyle() }
 
-	if (transitionType != 'none') { makeTransition(transitionType + 'Out') }
-	
-	[frame, newRoom, newExtension] = parseFrame(newFrame)
-	if (newRoom != null) { room = newRoom; setMusic(newRoom) }
-	let frameData = roomData[room][frame]; 
-	if (frameData == null) frameData = {}
-	let img
-	if (frameData.alt != null && frameData.alt.if()) img = frameData.alt.name
-	else img = frame + '.' + (newExtension == null ? extension : newExtension)
-	FRAME_IMG.src = FRAME_PATH + room + '/' + img
-	
-	refreshBoxes()
-	if (transitionType != 'none') makeTransition(transitionType + 'In')
-	delay = transitionType == 'none' ? 0 : (transitionType == 'fade' ? c.fadeSpeed - .5 : c.sideSpeed)
-	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
-	freeze();
-	wait(delay, () => {
-		TRANSITION_DIV.innerHTML = ''; cacheResources(frameData)
-		if (frameData.onEnter != null) frameData.onEnter()
-		unfreeze() })
-	}
 
-function makeTransition(transitionType) {
-	
-	let transition = document.createElement('div');
-	let cloned = FRAME_IMG.cloneNode(true)
-	transition.appendChild(cloned) //creates duplicate img
-	let pics = PICS_DIV.cloneNode(true); pics.id = null
-	transition.appendChild(pics)
-	transition.classList.add('transition')
-	transition.classList.add(transitionType)
-	if (transitionType == 'leftIn') transition.style.left = -c.width + 'px'
-	else if (transitionType == 'rightIn') transition.style.left = c.width + 'px'
-
-	TRANSITION_DIV.appendChild(transition)
-}
 
 // BOXES ******************************************
 function refresh() { refreshBoxes(); refreshInventory() }
 
 function refreshBoxes() {
 	PICS_DIV.innerHTML = BOX_DIV.innerHTML = ''
-	let frameData = roomData[room][frame]
+	let frameData = gameData[s.room][s.frame]
 	if (frameData == null) return
 
 	for (let key in c.commonBoxes) {
@@ -164,23 +150,20 @@ function refreshBoxes() {
 
 	let boxes = frameData.boxes
 	if (boxes != null) {
-		for (let i = 0; i < boxes.length; i++) {
-			let box = boxes[i]
+		for (let box of boxes) {
 			if (box.if != null && !box.if()) continue
 			makeBox(box); makePic(box) }}
 
 	// Persistents
 	let newIds = []
-	let persistents = roomData[room]['persistents']
+	let persistents = gameData[s.room]['persistents']
 	if (persistents != null) {
-		for (i in persistents) {
-			let persistent = persistents[i]
+		for (let persistent of persistents) {
 			if (persistent.if()) {
 				newIds.push(persistent.id)
 				if (!persistentIds.includes(persistent.id)) { makePic(persistent, PERSISTENT_DIV) }}}}
 	
-	for (i in persistentIds) {
-		let id = persistentIds[i]
+	for (let id of persistentIds) {
 		if (!newIds.includes(id)) {
 			get(id).classList.add('fadeOut')
 			wait(c.fadeSpeed - .1, () => {
@@ -214,13 +197,11 @@ function makeBox(box, parent = BOX_DIV) {
 	
 	if (box.id != null) element.id = box.id
 	if (box.subBoxes != null) {
-		for (i in box.subBoxes) makePic(box.subBoxes[i], element); makeBox(box.subBoxes[i], element)
+		for (let subBox of box.subBoxes) makePic(subBox, element); makeBox(subBox, element)
 	}
 	if (box.drag != null) makeDraggable(element, [])
 	parent.appendChild(element)
 }
-
-// todo - consolidate into single 'makeBox' method?
 
 function makePic(picData, parent = PICS_DIV) {
 	let basePic = { centerOffset: false }
@@ -324,6 +305,44 @@ function movieStep(X) {
 // id				?					?				X
 
 
+// TRANSITIONS ******************************************
+function goTo(frame, transitionType = 'fade') {
+	console.log('goTo ' + frame)
+	if (frame == null) return
+	if (transitionType != 'none') { makeTransition(transitionType + 'Out') }
+	[s.frame, newRoom, newExtension] = parseFrame(frame)
+	if (newRoom != null) { s.room = newRoom; setMusic(newRoom) }
+	let frameData = gameData[s.room][s.frame];
+	if (frameData == null) frameData = {}
+	let img
+	if (frameData.alt != null && Data.alt.if()) img = frameData.alt.name
+	else img = s.frame + '.' + (newExtension == null ? extension : newExtension)
+	FRAME_IMG.src = FRAME_PATH + s.room + '/' + img
+	
+	refreshBoxes()
+	if (transitionType != 'none') makeTransition(transitionType + 'In')
+	delay = transitionType == 'none' ? 0 : (transitionType == 'fade' ? c.fadeSpeed - .5 : c.sideSpeed)
+	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
+	freeze();
+	wait(delay, () => {
+		TRANSITION_DIV.innerHTML = ''; cacheResources(frameData)
+		if (frameData.onEnter != null) frameData.onEnter()
+		unfreeze() })
+}
+
+function makeTransition(transitionType) {
+	let transition = document.createElement('div');
+	let cloned = FRAME_IMG.cloneNode(true)
+	transition.appendChild(cloned) //creates duplicate img
+	let pics = PICS_DIV.cloneNode(true); pics.id = null
+	transition.appendChild(pics)
+	transition.classList.add('transition')
+	transition.classList.add(transitionType)
+	if (transitionType == 'leftIn') transition.style.left = -c.width + 'px'
+	else if (transitionType == 'rightIn') transition.style.left = c.width + 'px'
+	TRANSITION_DIV.appendChild(transition)
+}
+
 // INVENTORY ••••••••••••••••••••••••••••••••••••••••••••••••••
 
 function refreshInventory() {
@@ -336,20 +355,16 @@ function makeInventoryItem(id) {
 	element.classList.add('inventory') //item.classList.add('box')
 	element.style.left = '0px'; element.style.top = '0px'
 	let config = inventory[id]
-	
 	let img = document.createElement('img')
 	img.src = INVENTORY_PATH + config.img + '.png'
 	element.appendChild(img)
 	if (config.draggable == null || config.draggable) makeDraggable(element, config.targets)
 	if (config.cursor != null) setCursor(element, config.cursor)
 	if (config.fn != null) element.onclick = config.fn
-	
-	INVENTORY_DIV.appendChild(element) 
+	INVENTORY_DIV.appendChild(element)
 }
 
-// Make given inventory box draggable, execute action if dropped on targetId
-
-// What kind of properties?
+// Make given object draggable, execute action if dropped on targetId
 function makeDraggable(item, targets) {
 	setCursor(item, 'O')
 	item.onmousedown = function(event) {
@@ -368,16 +383,16 @@ function makeDraggable(item, targets) {
 			if (targets != null) {
 				for (const target of targets) {
 					if (target.if != null && target.if()) return
-					if (frame == target.frame) { target.fn(); return }
+					if (s.frame == target.frame) { target.fn(); return }
 					let targetObj = get(target.id)
 					if (targetObj != null && isTouching(item, targetObj)) { target.fn(); return }}
 			}
 			item.style.left = itemX; item.style.top = itemY
 			document.onmousemove = null; setCursor(item, 'O') }}}
 
-// GIFS ••••••••••••••••••••••••••••••••••••••••••••••••••
+// GIFS ******************************************
 function playGif(name, newFrame, delay, after = null) {
-	//cacheFrame(gameData.rooms[room][newFrame]) //todo - parse here
+	//cacheFrame(gameData.rooms[s.room][newFrame]) //todo - parse here
 	let gif = document.createElement('img')
 	gif.classList.add('fullGif'); freeze()
 	gif.onload = () => {
@@ -388,16 +403,15 @@ function playGif(name, newFrame, delay, after = null) {
 			if (after != null) { after() }})}
 	gif.src = GIF_PATH + name + '.gif?a=' + Math.random() } // todo: better
 
-// CACHING
+// CACHING ******************************************
 function cacheResources(frameData) {
 	cacheFrame(frameData.left); cacheFrame(frameData.right); cacheFrame(frameData.forward); cacheFrame(frameData.back)
-	for (i in frameData.boxes) { cacheFrame(frameData.boxes[i].to) }}
+	for (let box of frameData.boxes) { cacheFrame(box.to) }}
 
 function cacheFrame(frame) {
 	if (frame == null || frame instanceof Function) return
-	let src
-	if (roomData[room][frame] == undefined) src = FRAME_PATH + frame + '.' + extension
-	else src = FRAME_PATH + room  + '/' + frame + '.' + extension
+	let src = (gameData[s.room][frame] == null) ? FRAME_PATH + frame + '.' + extension : 
+		FRAME_PATH + s.room  + '/' + frame + '.' + extension
 	if (cacheSet.has(src)) return
 	if (CACHE_DIV.childNodes.length >= 20) {
 		let cachedImageToRemove = CACHE_DIV.childNodes[0]
@@ -407,26 +421,24 @@ function cacheFrame(frame) {
 	CACHE_DIV.appendChild(cachedImage); cacheSet.add(src) }
 
 // SOUND ******************************************
-
 // MUSIC ENGINE: 
 // var that tracks
 // add var music var: 0 (no music),
 // when that var changes
 // possible future options: music start
 // todo: add variable length gaps
-
-//music.setAttribute('loop', true)
+// music.setAttribute('loop', true)
 function setMusic(newMusic, fade = true) {
-		if (newMusic == null) {
-			if (fade) fadeOutMusic(music)
-			else music.pause()
-		} else if (fade) { 
-			fadeOutMusic(music, () => {
-			music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
-			music.play(); fadeInMusic(music) })
-		} else {
-			music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
-			music.play() }}
+	if (newMusic == null) {
+		if (fade) fadeOutMusic(music)
+		else music.pause()
+	} else if (fade) { 
+		fadeOutMusic(music, () => {
+		music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
+		music.play(); fadeInMusic(music) })
+	} else {
+		music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
+		music.play() }}
 
 function setMusicVolume(volume) { music.volume = volume }
 
@@ -459,6 +471,7 @@ function stopSound(name) {
 }
 
 // HELPERS ******************************************
+
 // [A, 3, B] means: do A, wait 3 seconds, do B
 function doInSequence(arr) {
 	let time = 0
@@ -477,12 +490,7 @@ function parseFrame(frame) {
 
 function get(id) { return document.getElementById(id) }
 
-function setCursor(element, cursor) { 
-	console.log(element)
-	console.log(cursor)
-	if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png), auto'
-	console.log(element.style.cursor)
-}
+function setCursor(element, cursor) { if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png), auto' }
 
 function launchFullScreen(element) {
 	if (element.requestFullScreen) element.requestFullScreen()
@@ -495,8 +503,6 @@ function simpleEval(x) { return (x instanceof Function) ? x() : x }
 function orDefault(value, def) { return (value == null) ? def : value }
 
 function isTouching(a, b) {
-	a = a.getBoundingClientRect()
-	b = b.getBoundingClientRect()
+	a = a.getBoundingClientRect(); b = b.getBoundingClientRect()
     return Math.abs(a.x - b.x) < (a.x > b.x ? b.width : a.width) && Math.abs(a.y - b.y) < (a.y > b.y ? b.height : a.height);
-
 }
