@@ -1,14 +1,13 @@
 const config = {
     title: 'Bush St.',
-    room: 'A',
-    frame: 101,
     customCursors: false,
     extension: 'jpg',
-    width: 840,
-    height: 750,
+    width: 840, height: 750,
 }
 
-const roomData = {
+const s = { room: 'A', frame: 101 }
+
+const gameData = {
     A: {
         //100: { left: 103, right: 102, forward: 101 },
         101: { left: 103, right: 102, forward: 1 },
@@ -40,5 +39,3 @@ const roomData = {
         24:{ left: 23, right: 21 }
     }
 }
-
-const s = {}

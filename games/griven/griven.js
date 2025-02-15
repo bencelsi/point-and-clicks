@@ -42,7 +42,7 @@
 
 const config = { 
     title: 'Griven', 
-    room: 'opening', frame: 'menu', extension: 'png', width: 1000, height: 750,
+    extension: 'png', width: 1000, height: 750,
     customCursors: true,
     defaultCursor: 'N',
     boxCursor: 'O',
@@ -57,6 +57,35 @@ const config = {
 		back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'B', id: 'backBox' }},
     boxOffset: [-.02,.02]
 }
+
+// STATE or, use history.pushState() 
+const s = {   room: 'opening', frame: 'menu',
+/*inventory*/ brochure: 0, smallKey: 1, pipe: 1, coffee: 1, card: 0, pig: 1, goldKey: 1,
+/*lobby*/     lightsOn: false, cabinetDown: false, drawers: [false, false, false, false], clock1: 350, clock2: 359,
+/*clock*/     clockUnlocked: false, gearsOk: true, clockOn: false, jesusCount: 0, gears: [0, 3, 2, 1, 3, 2, 1, 2, 3, 3, 3],
+/*cafe*/      cafeUnlocked: true, saladZoom: 0, salads: [3, 3, 3, 3, 3],
+/*plumbing*/  plumbUnlocked: false, plumbOpen: false, valves: [false, true, true, true, true, true], floorValve: 10, heaterLevel: 0,
+/*elevator*/  elevatorFloor: 5, elevatorGoal: 5, elevatorMoving: false, elevatorFixed: false, circuits: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+/*hall/room*/ hallPosition: 0, hallDirection: 0, floor: 1, fire: false, speakerVolume: 0, shower: 0, steamLevel: 0, 
+/*office*/    officeUnlocked: false, otherLeft: true, bobbSpeech: false }
+
+// non-saveable state
+let waitId = 0; let combo = []
+
+const inventory = {
+    brochure: { img: 'brochure', draggable: false, cursor: 'Z', fn: () => { brochureBack = room + '/' + frame; hideInventory(); goTo('brochure/0') }},
+    smallKey: { img: 'smallkeyFree', targets: [{ id: 'keyhole', fn: () => { s.smallKey = 2; refresh(); 
+        if (frame == 'D4') { freeze(); makePic({ pic: 'smallKey1'}); wait(1, () => { goTo('D3'); unfreeze() })}}}]},
+    pipe: { img: 'pipeFree', targets: [{ id: 'pipe2', fn: () => { s.pipe = 2; refresh() }},
+        { id: 'pipe3', fn: () => { s.pipe = 3; refresh()} }]},
+    coffee: { img: 'coffeeFree', targets: [{ frame: 'stairs/B5a', fn: () => { s.coffee = 3; refresh() }}]},
+    card: { img: 'cardFree', targets: [{ id: 'cardSlot', fn: () => { s.card = [s.floor, s.hallPosition, s.hallDirection]; refresh() }}]},
+    pig: { img: 'pigFree', targets: [{ id: 'pigWindow', fn: () => { playSound('pigFalls'); s.pig = 2; s.goldKey = 2; refresh() }},
+        { if: () => { return room == 'stairs' && frame.startsWith('A') },
+        fn: () => { playSound('pigFalls'); s.pig = 3; s.goldKey = 3; refreshInventory() }}]},
+    goldKey: { state: 1, img: 'goldKeyFree', targets: [{ id: 'goldKeyhole', fn: () => { s.goldKey = 4; refresh() }}]}}
+
+var brochureBack
 
 const elevatorBoxes = [
     { xy: [.81, .84, .06, .1], fn: () => { setElevatorFloor(1)} }, { xy: [.87, .9, .06, .1], fn: () => { setElevatorFloor(2)} },
@@ -79,10 +108,10 @@ const keypadButtons = [
 
 function closeBrochure () {
     showInventory()
-    goTo(saved_location)
+    goTo(brochureBack)
 }
 
-const roomData = {
+const gameData = {
 'opening': {
     'menu': { onEnter: () => { hideInventory() }, boxes: [{ xy: [0, 1, 0, 1], to: 'A0' }]},
     'A0': { onEnter: () => { doInSequence([
@@ -539,47 +568,9 @@ function clockOn() { wait(10, () => {
     if (frame == 'E4' && room == 'lobby') refreshBoxes()
     clockOn() })}
 
-// non-saveable state
-let waitId = 0; let combo = []
 // TODO: store variants as separate var? some level of indirection beyond frame and image.
 
-// STATE or, use history.pushState() 
-const s = {
-/*inventory*/ brochure: 0, smallKey: 1, pipe: 1, coffee: 1, card: 0, pig: 1, goldKey: 1,
-/*lobby*/     lightsOn: false, cabinetDown: false, drawers: [false, false, false, false], clock1: 350, clock2: 359,
-/*clock*/     clockUnlocked: false, gearsOk: true, clockOn: false, jesusCount: 0, gears: [0, 3, 2, 1, 3, 2, 1, 2, 3, 3, 3],
-/*cafe*/      cafeUnlocked: true, saladZoom: 0, salads: [3, 3, 3, 3, 3],
-/*plumbing*/  plumbUnlocked: false, plumbOpen: false, valves: [false, true, true, true, true, true], floorValve: 10, heaterLevel: 0,
-/*elevator*/  elevatorFloor: 5, elevatorGoal: 5, elevatorMoving: false, elevatorFixed: false, circuits: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-/*hall/room*/ hallPosition: 0, hallDirection: 0, floor: 1, fire: false, speakerVolume: 0, shower: 0, steamLevel: 0, 
-/*office*/    officeUnlocked: false, otherLeft: true, bobbSpeech: false }
-
-// official start state.
-const s_final = {
-/*inventory*/ brochure: 1, smallKey: 1, pipe: 1, coffee: 1, card: 1, pig: 1, goldKey: 1,
-/*lobby*/     lightsOn: false, cabinetDown: false, drawers: [false, false, false, false], clock1: 350, clock2: 359,
-/*clock*/     clockUnlocked: false, gearsOk: false, clockOn: false, jesusCount: 0, gears: [0, 3, 2, 1, 3, 2, 1, 2, 3, 3, 3],
-/*cafe*/      cafeUnlocked: false, saladZoom: 0, salads: [3, 3, 3, 3, 3],
-/*plumbing*/  plumbUnlocked: false, plumbOpen: false, valves: [false, true, true, true, true, true], floorValve: 10, heaterLevel: 0,
-/*elevator*/  elevatorFloor: 5, elevatorGoal: 5, elevatorMoving: false, elevatorFixed: false, circuits: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-/*hall/room*/ hallPosition: 0, hallDirection: 0, floor: 1, fire: false, speakerVolume: 0, shower: 0, steamLevel: 0, 
-/*office*/    officeUnlocked: false, otherLeft: true, bobbSpeech: false }
-
-var saved_location
-const inventory = {
-    brochure: { img: 'brochure', draggable: false, cursor: 'Z', fn: () => { saved_location = room + '/' + frame; hideInventory(); goTo('brochure/0') }},
-    smallKey: { img: 'smallkeyFree', targets: [{ id: 'keyhole', fn: () => { s.smallKey = 2; refresh(); 
-        if (frame == 'D4') { freeze(); makePic({ pic: 'smallKey1'}); wait(1, () => { goTo('D3'); unfreeze() })}}}]},
-    pipe: { img: 'pipeFree', targets: [{ id: 'pipe2', fn: () => { s.pipe = 2; refresh() }},
-        { id: 'pipe3', fn: () => { s.pipe = 3; refresh()} }]},
-    coffee: { img: 'coffeeFree', targets: [{ frame: 'stairs/B5a', fn: () => { s.coffee = 3; refresh() }}]},
-    card: { img: 'cardFree', targets: [{ id: 'cardSlot', fn: () => { s.card = [s.floor, s.hallPosition, s.hallDirection]; refresh() }}]},
-    pig: { img: 'pigFree', targets: [{ id: 'pigWindow', fn: () => { playSound('pigFalls'); s.pig = 2; s.goldKey = 2; refresh() }},
-        { if: () => { return room == 'stairs' && frame.startsWith('A') },
-        fn: () => { playSound('pigFalls'); s.pig = 3; s.goldKey = 3; refreshInventory() }}]},
-    goldKey: { state: 1, img: 'goldKeyFree', targets: [{ id: 'goldKeyhole', fn: () => { s.goldKey = 4; refresh() }}]}}
-
-///////// HELPER
+///////// HELPERS
 function checkCircuits() {
     s.elevatorFixed = (s.circuits[0] == 2 && s.circuits[1] == 0 && s.circuits[2] == 0 && s.circuits[3] == 1 
         && s.circuits[4] == 1 && s.circuits[5] == 0 && s.circuits[6] == 1 && s.circuits[8] == 0 && s.circuits[9] == 1)
@@ -634,6 +625,17 @@ function setElevatorFloor(newFloor) {
     s.elevatorMoving = true; playSound('elevatorClose'); goTo('A2d')
     wait(2, () => { moveElevator() })}
 
+function openElevator() {
+    if (room == 'elevator') { playSound('elevatorOpen')
+        if (frame == 'A2d') goTo(s.elevatorFloor == 1 ? 'A2a' : (s.elevatorFloor == 10 ? 'A2c' : 'A2b')) }
+    else if (s.elevatorFloor == s.floor) {
+        if (room == 'lobby' && (frame == 'C1' || frame == 'C1a')) { playSound('elevatorOpen'); goTo('C1b') }
+        else if (room == 'hall' && (frame == 'B1' || frame == 'B1a')) { playSound('elevatorOpen'); goTo('B1b') }}
+    s.elevatorMoving = false }
+
+
+// THREADS
+
 function moveElevator() {
     if (!s.elevatorFixed) { openElevator(); return }
     if (room == 'elevator') playSound('elevatorBell')
@@ -644,10 +646,3 @@ function moveElevator() {
         if (s.elevatorGoal == s.elevatorFloor) { openElevator(); return }
         moveElevator() })}
 
-function openElevator() {
-    if (room == 'elevator') { playSound('elevatorOpen')
-        if (frame == 'A2d') goTo(s.elevatorFloor == 1 ? 'A2a' : (s.elevatorFloor == 10 ? 'A2c' : 'A2b')) }
-    else if (s.elevatorFloor == s.floor) {
-        if (room == 'lobby' && (frame == 'C1' || frame == 'C1a')) { playSound('elevatorOpen'); goTo('C1b') }
-        else if (room == 'hall' && (frame == 'B1' || frame == 'B1a')) { playSound('elevatorOpen'); goTo('B1b') }}
-    s.elevatorMoving = false }

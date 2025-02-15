@@ -1,8 +1,11 @@
 /*
+Saveable state....
+how to incorporate threads (runClock) in saveable state?
+on load... if clockOn, kick off actions (ie runClock)
+
+
 TODOs:
 Radio order
-
-NICE TO HAVE
 lightswitch- don't fade
 Small clockhands
 Add 'click to start'
@@ -11,7 +14,6 @@ no cursor on inventory div if empty
 variable cuckoos
 */
 
-// CONFIG
 const config = {
     title: 'Grounded',
     width: 640, height: 480,
@@ -30,7 +32,6 @@ const config = {
     boxOffset: [-.03, .02]
 }
 
-// STATE
 const s = { 
     room: 'room', frame: 'A0', radio: 0, radioOn: true, clockOn: false, clockRunning: false, time: 3, 
     lightOn: false, combo: [0, 0, 0, 0], pig: 1, key: 1, pigZoom: false
@@ -156,7 +157,19 @@ const gameData = {
     }
 }
 
-/////// THREADS
+// HELPERS
+
+function comboPush(vals) {
+    playSound('combo')
+    for (i in vals) s.combo[vals[i]] = (s.combo[vals[i]] + 1) % 10
+}
+
+function comboMatches(goal) {
+    for (i in goal) if (s.combo[i] != goal[i]) return false
+    return true
+}
+
+// THREADS
 function runClock() {
     if (!s.clockOn) { s.clockRunning = false; return }
     s.clockRunning = true; s.time += 1;
@@ -168,15 +181,4 @@ function runClock() {
         wait(7, () => { if (s.frame == 'A3b' && s.clockOn) { playSound('close'); goTo('A3a') }})
     }
     wait(1, runClock)
-}
-
-
-function comboPush(vals) {
-    playSound('combo')
-    for (i in vals) s.combo[vals[i]] = (s.combo[vals[i]] + 1) % 10
-}
-
-function comboMatches(goal) {
-    for (i in goal) if (s.combo[i] != goal[i]) return false
-    return true
 }

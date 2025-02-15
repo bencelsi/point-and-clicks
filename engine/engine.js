@@ -1,7 +1,6 @@
 // TODO: Saveable state... configurable menu?
 // TODO: Make rooms optional/better
 // TODO: 'enqueue' a click for fast clickthru
-// TODO: how to cache when left/right returns fn? framesToCache?
 // TODO: cache pics/gifs
 
 /*
@@ -14,6 +13,8 @@ ideally workable for overlapping sounds
 vars for 'music space'
 different songs ma
 */
+
+
 
 // DOM globals:
 const BOX_DIV = 			get('boxes')
@@ -45,9 +46,9 @@ let cacheSet = new Set()
 let sounds = [new Audio, new Audio, new Audio, new Audio, new Audio] // TODO: make # of sounds configurable
 let persistentIds = []
 let c
-window.onload = waitForData()
 
 let waitCounter = 0
+window.onload = waitForData()
 function waitForData() { 
 	try { if (waitCounter > 10) return
 		waitCounter++; baseConfig; c; s; gameData; init() } 
@@ -95,20 +96,12 @@ function load() {
 
 }
 
-function dynamic_text() {
-	return "create your dynamic text here";
-}
-
 function download() {
 	let name ="myFile.grv"
 	let contents = JSON.stringify(s)
-	mime_type = "text/plain";
-
-	var blob = new Blob([contents], {type: mime_type});
-
 	var dlink = document.createElement('a');
 	dlink.download = name;
-	dlink.href = window.URL.createObjectURL(blob);
+	dlink.href = window.URL.createObjectURL(new Blob([contents], { type: "text/plain" }));
 	dlink.onclick = function(e) {
 		// revokeObjectURL needs a delay to work properly
 		var that = this;
@@ -116,7 +109,6 @@ function download() {
 			window.URL.revokeObjectURL(that.href);
 		}, 1500);
 	};
-
 	dlink.click();
 	dlink.remove();
 }
@@ -406,6 +398,7 @@ function playGif(name, newFrame, delay, after = null) {
 // CACHING ******************************************
 function cacheResources(frameData) {
 	cacheFrame(frameData.left); cacheFrame(frameData.right); cacheFrame(frameData.forward); cacheFrame(frameData.back)
+	if (frameData.boxes == null) return
 	for (let box of frameData.boxes) { cacheFrame(box.to) }}
 
 function cacheFrame(frame) {

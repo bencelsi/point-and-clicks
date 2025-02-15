@@ -1,11 +1,20 @@
 const config = {
 	title: 'Dead End',
-	room: 'A',
-	frame: '0a',
 	extension: 'png',
 }
 
-const roomData = {
+const s = {
+	room: 'A', frame: '0a', power: true, key: 0,
+}
+
+const inventory = {
+	key: { img: 'burger', targets: [
+			{ id: 'frontDoor', fn: () => { inventory['key'].state = 2; refreshCustomBoxes(); refreshInventory() }}
+		],
+	}
+}
+
+const gameData = {
 	A: {
 		'0a': { forward: '0b' },
 		'0b': { forward: '0c' },
@@ -109,16 +118,5 @@ const roomData = {
 		'7f': { left: '7e', right: '7g' },
 		'7g': { left: '7f', right: '7h' },
 		'7h': { left: '7g', right: '7a' },
-	}
-}
-
-const s = {
-	power: true, key: 0,
-}
-
-const inventory = {
-	key: { img: 'burger', targets: [
-			{ id: 'frontDoor', fn: () => { inventory['key'].state = 2; refreshCustomBoxes(); refreshInventory() }}
-		],
 	}
 }
