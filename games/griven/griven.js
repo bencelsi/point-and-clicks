@@ -51,11 +51,11 @@ const config = {
     inventoryCursor: 'O',
     inventoryDragCursor: null,
     commonBoxes: {
-		left: { xy: [0, .2, .2, .8], transition: 'left', cursor: 'L' },
-		right: { xy: [.8, 1, .2, .8], transition: 'right', cursor: 'R' },
-		forward: { xy: [.25, .75, .25, .75], transition: 'fade', cursor: 'F', id: 'forwardBox' },
-		back: { xy: [0, 1, 0, .2], transition: 'fade', cursor: 'B', id: 'backBox' }},
-    boxOffset: [-.02,.02]
+		left: { xy: [0, .2, .2, .8], transition: LEFT, cursor: 'L' },
+		right: { xy: [.8, 1, .2, .8], transition: RIGHT, cursor: 'R' },
+		forward: { xy: [.25, .75, .25, .75], transition: FADE, cursor: 'F', id: 'forwardBox' },
+		back: { xy: [0, 1, 0, .2], transition: FADE, cursor: 'B', id: 'backBox' }},
+    boxOffset: [-.02, .02]
 }
 
 // STATE or, use history.pushState() 
@@ -392,15 +392,15 @@ const gameData = {
         right: { fn: hallRight, to: () => { return s.hallPosition == 2 ? 'A7' : (s.hallPosition == 6 ? 'A9' : 'A5')}},
         forward: {fn: hallForward, to: 'A4' }},
     'A4': { left: { fn: hallLeft, to: 'A5' }, right: { fn: hallRight, to: 'A5' }},
-    'A5': { left: { fn: () => { hallLeft(); goTo(getHall(), 'left') }}, right: { fn: () => { hallRight(); goTo(getHall(), 'right') }},
+    'A5': { left: { fn: () => { hallLeft(); goTo(getHall(), LEFT) }}, right: { fn: () => { hallRight(); goTo(getHall(), RIGHT) }},
         boxes: [{ to: () => { return (is209() && cardHere()) ? 'A5a' : 'A10' }, fn: () => { if (is209() && cardHere()) playSound('doorOpen') }, xy: [.6, .67, .32, .45], 
             cursor: () => { return (is209() && cardHere()) ? 'O' : 'Z'}}, 
         { pic: 'card1', if: cardHere },
         { pic: () => { return 'roomFloor' + s.floor }, offset: [.44,.94]},
         { pic: () => { return 'room' + (s.hallPosition + (s.hallDirection == 1 ? 1 : 4) 
             + (s.hallPosition < 4 ? 0 : 2) - (s.hallPosition % 4 == 3 ? 1 : 0))}, offset: [.46,.94] }]},
-    'A5a': { left: { fn: () => { playSound('doorClose'); hallLeft(); goTo(getHall(), 'left') }}, 
-        right: { fn: () => { playSound('doorClose'); hallRight(); goTo(getHall(), 'right') }},
+    'A5a': { left: { fn: () => { playSound('doorClose'); hallLeft(); goTo(getHall(), LEFT) }}, 
+        right: { fn: () => { playSound('doorClose'); hallRight(); goTo(getHall(), RIGHT) }},
         forward: 'room/A2', boxes: [{ pic: 'roomFloor2', offset: [.44,.94] }, { pic: 'room9', offset: [.46,.94] }]},
     'A6': { left: { fn: hallLeft, to: 'A2' }, right: { fn: hallRight, to: 'A3' }, forward: 'stairs/A4' },
     'A7': { left: { fn: hallLeft, to: 'A3' }, right: { fn: hallRight, to: 'A2' }, forward: 'B2'},

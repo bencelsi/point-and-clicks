@@ -14,22 +14,20 @@ vars for 'music space'
 different songs ma
 */
 
-
-
 // DOM globals:
 const BOX_DIV = 			get('boxes')
 const PICS_DIV = 			get('pics')
 const CACHE_DIV = 			get('cache')
-const TRANSITION_DIV = 		get('transitions')
+const TRANS_DIV = 		    get('transitions')
 const FRAME_IMG = 			get('frame')
 const PERSISTENT_DIV = 		get('persistents')
 const INVENTORY_DIV = 		get('inventory')
 const MOVIE_DIV = 			get('movies')
 const CURSOR_BLOCK_DIV = 	get('cursorBlock')
 const ALL_DIV = 			get('all')
+const FAVICON =				get('favicon')
 
 //paths
-get('favicon').href = 	GAME_PATH + '/favicon.ico'
 const ASSET_PATH = 		GAME_PATH + '/assets/'
 const FRAME_PATH = 		ASSET_PATH + '/frames/'
 const GIF_PATH = 		ASSET_PATH + '/gifs/'
@@ -39,7 +37,7 @@ const PIC_PATH = 		ASSET_PATH + '/pics/'
 const INVENTORY_PATH = 	ASSET_PATH + '/inventory/'
 const MOV_PATH = 		ASSET_PATH + '/movies/'
 let CURSOR_PATH = 		'cursors/'
-
+get('favicon').href = 	ASSET_PATH + '/favicon.ico'
 
 // Global vars:
 let music = new Audio; music.loop = true; 
@@ -65,7 +63,7 @@ function init() {
 	ALL_DIV.style.width = c.width + 'px'; ALL_DIV.style.height = c.height + 100 + 'px'
 	get('screen').style.width = c.width + 'px'; get('screen').style.height = c.height + 'px'
 	INVENTORY_DIV.style.width = c.width + 'px'
-	updateStyle(); refreshInventory(); goTo(s.frame, 'none');
+	updateStyle(); refreshInventory(); goTo(s.frame, NONE);
 	//window.onclick = launchFullScreen(get('window'))
 }
 
@@ -252,7 +250,7 @@ function playMovie(name, totalSteps, destination) {
 	let element = makePic({ mov: name, id: name, totalSteps: totalSteps }, MOVIE_DIV)
 	console.log(element)
 	//movieStep2(obj, 1, .2, MOV_PATH + name + '/', totalSteps, destination)
-	//goTo(destination, 'none')
+	//goTo(destination, NONE)
 }
 
 function movieStep2(element, step, delay, path, totalSteps, destination) {
@@ -271,7 +269,7 @@ function movieStep(X) {
 	if (get(X.id) == null || (X.while != null && !X.while())) return
 	X.step++;
 
-	if (X.destination != null && X.step >= X.totalSteps) { goTo(X.destination, 'none') }
+	if (X.destination != null && X.step >= X.totalSteps) { goTo(X.destination, NONE) }
 	if (X.step > X.totalSteps) {
 		console.log('bye')
 		if (X.then != null) X.then()
@@ -301,10 +299,10 @@ function movieStep(X) {
 // TRANSITIONS ******************************************
 
 
-function goTo(frame, transitionType = 'fade') {
+function goTo(frame, transType = FADE) {
 	console.log('goTo ' + frame)
 	if (frame == null) return
-	if (transitionType != 'none') { makeTransition(transitionType + 'Out') }
+	if (transType != NONE) { makeTrans(transType, false) }
 	[s.frame, newRoom, newExtension] = parseFrame(frame)
 	if (newRoom != null) { s.room = newRoom; setMusic(newRoom) }
 	let frameData = gameData[s.room][s.frame];
@@ -315,32 +313,29 @@ function goTo(frame, transitionType = 'fade') {
 	FRAME_IMG.src = FRAME_PATH + s.room + '/' + img
 	
 	refreshBoxes()
-	if (transitionType != 'none') makeTransition(transitionType, true)
-	delay = transitionType == 'none' ? 0 : (transitionType == FADE ? c.fadeSpeed - .5 : c.sideSpeed)
+	if (transType != NONE) makeTrans(transType, true)
+	delay = transType == NONE ? 0 : (transType == FADE ? c.fadeSpeed - .5 : c.sideSpeed)
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
 	freeze();
 	wait(delay, () => {
-		TRANSITION_DIV.innerHTML = ''; cacheResources(frameData)
+		TRANS_DIV.innerHTML = ''; cacheResources(frameData)
 		if (frameData.onEnter != null) frameData.onEnter()
 		unfreeze() })
 }
-// Transition Types:
-const LEFT = "left"
-const RIGHT = "right"
-const FADE = "fade"
-const NONE = "none"
 
-function makeTransition(transitionType, isIn) {
-	let transition = document.createElement('div');
+function makeTrans(transType, isIn) {
+	let transDiv = document.createElement('div');
 	let cloned = FRAME_IMG.cloneNode(true)
-	transition.appendChild(cloned) //creates duplicate img
+	transDiv.appendChild(cloned) //creates duplicate img
 	let pics = PICS_DIV.cloneNode(true); pics.id = null
-	transition.appendChild(pics)
-	transition.classList.add('transition')
-	transition.classList.add(transitionType)
-	if (transitionType == 'leftIn') transition.style.left = -c.width + 'px'
-	else if (transitionType == 'rightIn') transition.style.left = c.width + 'px'
-	TRANSITION_DIV.appendChild(transition)
+	transDiv.appendChild(pics)
+	transDiv.classList.add('transition')
+	transDiv.classList.add(transType + (isIn ? 'In' : 'Out'))
+	if (isIn) {
+		if (transType == LEFT) transDiv.style.left = -c.width + 'px'
+		else if (transType == RIGHT) transDiv.style.left = c.width + 'px'
+	}
+	TRANS_DIV.appendChild(transDiv)
 }
 
 // INVENTORY ••••••••••••••••••••••••••••••••••••••••••••••••••
@@ -397,7 +392,7 @@ function playGif(name, newFrame, delay, after = null) {
 	gif.classList.add('fullGif'); freeze()
 	gif.onload = () => {
 		MOVIE_DIV.appendChild(gif)
-		if (newFrame != null) { goTo(newFrame, 'fade', true) }
+		if (newFrame != null) { goTo(newFrame, FADE, true) }
 		wait(delay, () => {
 			MOVIE_DIV.innerHTML = ''; unfreeze()
 			if (after != null) { after() }})}

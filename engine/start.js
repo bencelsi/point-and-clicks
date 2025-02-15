@@ -1,3 +1,8 @@
+// Transition Types:
+const LEFT = 	'left'
+const RIGHT = 	'right'
+const FADE = 	'fade'
+const NONE = 	'none'
 
 // hacky solution to get around js module / CORS shenanigans locally
 const GAME_NAME = new URLSearchParams(window.location.search).get('game');
@@ -27,4 +32,5 @@ function addStyle(fileName) {
 }
 
 // shared functions
+
 function wait(duration, then) { return setTimeout(() => { then() }, duration * 1000) }
