@@ -40,6 +40,7 @@ const INVENTORY_PATH = 	ASSET_PATH + '/inventory/'
 const MOV_PATH = 		ASSET_PATH + '/movies/'
 let CURSOR_PATH = 		'cursors/'
 
+
 // Global vars:
 let music = new Audio; music.loop = true; 
 let cacheSet = new Set()
@@ -298,6 +299,8 @@ function movieStep(X) {
 
 
 // TRANSITIONS ******************************************
+
+
 function goTo(frame, transitionType = 'fade') {
 	console.log('goTo ' + frame)
 	if (frame == null) return
@@ -312,8 +315,8 @@ function goTo(frame, transitionType = 'fade') {
 	FRAME_IMG.src = FRAME_PATH + s.room + '/' + img
 	
 	refreshBoxes()
-	if (transitionType != 'none') makeTransition(transitionType + 'In')
-	delay = transitionType == 'none' ? 0 : (transitionType == 'fade' ? c.fadeSpeed - .5 : c.sideSpeed)
+	if (transitionType != 'none') makeTransition(transitionType, true)
+	delay = transitionType == 'none' ? 0 : (transitionType == FADE ? c.fadeSpeed - .5 : c.sideSpeed)
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
 	freeze();
 	wait(delay, () => {
@@ -321,8 +324,13 @@ function goTo(frame, transitionType = 'fade') {
 		if (frameData.onEnter != null) frameData.onEnter()
 		unfreeze() })
 }
+// Transition Types:
+const LEFT = "left"
+const RIGHT = "right"
+const FADE = "fade"
+const NONE = "none"
 
-function makeTransition(transitionType) {
+function makeTransition(transitionType, isIn) {
 	let transition = document.createElement('div');
 	let cloned = FRAME_IMG.cloneNode(true)
 	transition.appendChild(cloned) //creates duplicate img
