@@ -2,7 +2,8 @@ const config = {
     title: 'Bush St.',
     customCursors: false,
     extension: 'jpg',
-    width: 840, height: 750,
+    width: 840, 
+    height: 750,
 }
 
 const s = { room: 'A', frame: 101 }

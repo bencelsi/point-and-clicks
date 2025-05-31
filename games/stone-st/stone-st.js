@@ -1,14 +1,17 @@
 const config = {
     title: 'Stone St',
-    room: 'A',
-    frame: 'A1',
     extension: 'jpeg',
     width: 1000,
     height: 750,
     baseBox: { cursor: 'F' }
 }
 
-const roomData = {
+const s = {
+    room: 'A',
+    frame: 'A1',
+}
+
+const gameData = {
     'A': {
         'A1': { forward: 'A1a' },
         'A1a': { forward: 'B1' },
@@ -112,5 +115,3 @@ const roomData = {
         'Y4': { left: 'Y3', right: 'Y1', forward: 'T4' },
     },
 }
-
-const s = {}

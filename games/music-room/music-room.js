@@ -1,12 +1,19 @@
 const config = {
     title: 'Music Room',
-    width: 640, height: 480,
-    room: 'room', frame: 'B1',
+    
     customCursors: false,
     extension: 'jpeg',
+    width: 640,
+    height: 480,
+    baseBox: { cursor: 'F' }
 }
 
-const roomData = {
+const s = {
+    room: 'room',
+    frame: 'B1',
+}
+
+const gameData = {
     'room': {
         'A1': { left: 'A4', right: 'A2' },
         'A2': { left: 'A1', right: 'A3', forward: 'B2' },
@@ -45,5 +52,3 @@ const roomData = {
         'G6': { back: 'G3'}
     }
 }
-
-const s = []

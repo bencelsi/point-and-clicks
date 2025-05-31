@@ -1,12 +1,16 @@
 const config = {
 	title: "The Swamp",
-	room: "A", frame: 1,
 	extension: "jpg",
 	width: 840,
     height: 750,
 }
 
-const roomData = { 
+const s = {
+	room: "A",
+	frame: 1,
+}
+
+const gameData = { 
 	'A': {
 		0: { left: 4, right: 2, forward: 1 },
 		1: { left: 4, right: 2, forward: 5 },
@@ -59,5 +63,3 @@ const roomData = {
 		48:{ left: 47, right: 45 }
 	}
 }
-
-const s = {}

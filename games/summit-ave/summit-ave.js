@@ -1,13 +1,16 @@
 const config = {
     title: 'Summit Ave',
-    room: 'light',
-    frame: '1a',
     extension: 'jpeg',
     width: 1000,
     height: 750,
 }
 
-const roomData = {
+const s = {
+    room: 'light',
+    frame: '1a',
+}
+
+const gameData = {
     light: {
         '1a': { forward: '1b' },
         '1b': { forward: '2a' },
@@ -177,5 +180,3 @@ const roomData = {
         '21d': { left: '21c', right: '21a' }
     }
 }
-
-const s = {}
