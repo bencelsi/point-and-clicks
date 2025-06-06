@@ -1,6 +1,5 @@
 const config = {
     title: 'Music Room',
-    
     customCursors: false,
     extension: 'jpeg',
     width: 640,
@@ -45,8 +44,8 @@ const gameData = {
             { xy: [0, .5, .45, 1], cursor: 'F', to: 'G2' },
             { xy: [.5, .8, .45, .85], cursor: 'F', to: 'G3' }
         ]},
-        'G2': { back: 'G1' },
-        'G3': { back: 'G1', forward: 'G6', boxes: [ { xy: [.2, .25, .5, .65], cursor: 'F', to: 'G4' }]},
+        'G2': { back: 'G1', right: 'G3' },
+        'G3': { back: 'G1', left: 'G1', forward: 'G6', boxes: [ { xy: [.2, .25, .5, .65], cursor: 'F', to: 'G4' }]},
         'G4': { back: 'G1', forward: 'G5', boxes: [ { xy: [.15, .25, .55, .7], cursor: 'F', to: 'G3' }]},
         'G5': { back: 'G4'},
         'G6': { back: 'G3'}
