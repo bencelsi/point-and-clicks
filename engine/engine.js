@@ -308,7 +308,7 @@ function goTo(frame, transType = FADE) {
 	let frameData = gameData[s.room][s.frame];
 	if (frameData == null) frameData = {}
 	let img
-	if (frameData.alt != null && Data.alt.if()) img = frameData.alt.name
+	if (frameData.alt != null && frameData.alt.if()) img = frameData.alt.name
 	else img = s.frame + '.' + (newExtension == null ? extension : newExtension)
 	FRAME_IMG.src = FRAME_PATH + s.room + '/' + img
 	

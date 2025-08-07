@@ -73,15 +73,15 @@ const s = {   room: 'opening', frame: 'menu',
 let waitId = 0; let combo = []
 
 const inventory = {
-    brochure: { img: 'brochure', draggable: false, cursor: 'Z', fn: () => { brochureBack = room + '/' + frame; hideInventory(); goTo('brochure/0') }},
+    brochure: { img: 'brochure', draggable: false, cursor: 'Z', fn: () => { brochureBack = s.room + '/' + s.frame; hideInventory(); goTo('brochure/0') }},
     smallKey: { img: 'smallkeyFree', targets: [{ id: 'keyhole', fn: () => { s.smallKey = 2; refresh(); 
-        if (frame == 'D4') { freeze(); makePic({ pic: 'smallKey1'}); wait(1, () => { goTo('D3'); unfreeze() })}}}]},
+        if (s.frame == 'D4') { freeze(); makePic({ pic: 'smallKey1'}); wait(1, () => { goTo('D3'); unfreeze() })}}}]},
     pipe: { img: 'pipeFree', targets: [{ id: 'pipe2', fn: () => { s.pipe = 2; refresh() }},
         { id: 'pipe3', fn: () => { s.pipe = 3; refresh()} }]},
     coffee: { img: 'coffeeFree', targets: [{ frame: 'stairs/B5a', fn: () => { s.coffee = 3; refresh() }}]},
     card: { img: 'cardFree', targets: [{ id: 'cardSlot', fn: () => { s.card = [s.floor, s.hallPosition, s.hallDirection]; refresh() }}]},
     pig: { img: 'pigFree', targets: [{ id: 'pigWindow', fn: () => { playSound('pigFalls'); s.pig = 2; s.goldKey = 2; refresh() }},
-        { if: () => { return room == 'stairs' && frame.startsWith('A') },
+        { if: () => { return room == 'stairs' && s.frame.startsWith('A') },
         fn: () => { playSound('pigFalls'); s.pig = 3; s.goldKey = 3; refreshInventory() }}]},
     goldKey: { state: 1, img: 'goldKeyFree', targets: [{ id: 'goldKeyhole', fn: () => { s.goldKey = 4; refresh() }}]}}
 
@@ -95,7 +95,7 @@ const elevatorBoxes = [
     { xy: [.81, .84, .48, .52], fn: () => { setElevatorFloor(9)} }, { xy: [.87, .9, .48, .52], fn: () => { setElevatorFloor(10)} },
     { xy: [.81, .9, .52, .6], to: 'A3' }, { xy: [.92, 1, .2, .8], to: 'A1', cursor: 'r', transition: 'r' },
     { pic: () => { return 'elevator' + s.floor }, offset: [.82, .97], scale: '6'},
-    { pic: () => { return 'floor' + s.floor }, offset: [.471, .65], scale: '6', if: () => { return frame == 'A2b'}}]
+    { pic: () => { return 'floor' + s.floor }, offset: [.471, .65], scale: '6', if: () => { return s.frame == 'A2b'}}]
 
 const outerElevatorBox = { pic: () => { return  'elevator' + s.elevatorFloor }, offset: [.275, .842], scale: '4' }
 
@@ -503,7 +503,7 @@ const gameData = {
         { mov: 'shower', steps: 8, delay: .075, fate: 'loop', if: () => { 
             return ((s.floorValve == 2 && s.shower == 1) || showerHot()) }}]},
     'D5': { back: 'D1' },
-    'persistents': [{ if: () => { return frame.startsWith('D') }, pic: 'steam/0', style: 'opacity: 0', id: 'steam' }]},
+    'persistents': [{ if: () => { return s.frame.startsWith('D') }, pic: 'steam/0', style: 'opacity: 0', id: 'steam' }]},
 'top': {
     'A1': { left: 'A4', right: 'A2', boxes: [outerElevatorBox,
         { to: 'A1a', fn: () => { playSound('elevatorOpen') }, xy: [.28, .31, .48, .52]}]},
@@ -565,7 +565,7 @@ function clockOn() { wait(10, () => {
     if (s.clock1 == 0 && s.clock2 == 0) { // todo - vary volume, elevator, plumbingroom... vary # of dings???
         if (room == 'lobby' || room == 'pool' || room == 'clockroom') playSound('clock')
         s.cafeUnlocked = true }
-    if (frame == 'E4' && room == 'lobby') refreshBoxes()
+    if (s.frame == 'E4' && s.room == 'lobby') refreshBoxes()
     clockOn() })}
 
 // TODO: store variants as separate var? some level of indirection beyond frame and image.
@@ -627,10 +627,10 @@ function setElevatorFloor(newFloor) {
 
 function openElevator() {
     if (room == 'elevator') { playSound('elevatorOpen')
-        if (frame == 'A2d') goTo(s.elevatorFloor == 1 ? 'A2a' : (s.elevatorFloor == 10 ? 'A2c' : 'A2b')) }
+        if (s.frame == 'A2d') goTo(s.elevatorFloor == 1 ? 'A2a' : (s.elevatorFloor == 10 ? 'A2c' : 'A2b')) }
     else if (s.elevatorFloor == s.floor) {
-        if (room == 'lobby' && (frame == 'C1' || frame == 'C1a')) { playSound('elevatorOpen'); goTo('C1b') }
-        else if (room == 'hall' && (frame == 'B1' || frame == 'B1a')) { playSound('elevatorOpen'); goTo('B1b') }}
+        if (s.room == 'lobby' && (s.frame == 'C1' || s.frame == 'C1a')) { playSound('elevatorOpen'); goTo('C1b') }
+        else if (s.room == 'hall' && (s.frame == 'B1' || s.frame == 'B1a')) { playSound('elevatorOpen'); goTo('B1b') }}
     s.elevatorMoving = false }
 
 
@@ -638,10 +638,10 @@ function openElevator() {
 
 function moveElevator() {
     if (!s.elevatorFixed) { openElevator(); return }
-    if (room == 'elevator') playSound('elevatorBell')
+    if (s.room == 'elevator') playSound('elevatorBell')
     wait(2, () => { 
         s.elevatorFloor += (s.elevatorGoal > s.elevatorFloor ? 1 : -1)
-        if (room == 'elevator') s.floor = s.elevatorFloor
+        if (s.room == 'elevator') s.floor = s.elevatorFloor
         refreshBoxes()
         if (s.elevatorGoal == s.elevatorFloor) { openElevator(); return }
         moveElevator() })}
