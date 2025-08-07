@@ -19,7 +19,7 @@ const config = {
 }
 
 // STATE or, use history.pushState() 
-const s = {   room: 'lobby', frame: 'A1', //room: 'opening', frame: 'menu',
+const s = {    room: 'opening', frame: 'menu', //room: 'lobby', frame: 'A1',
 /*inventory*/ brochure: 0, smallKey: 4, pipe: 4, coffee: 4, card: [2, 7, 1], pig: 10, goldKey: 4,
 /*lobby*/     lightsOn: false, cabinetDown: false, drawers: [false, false, false, false], clock1: 350, clock2: 359,
 /*clock*/     clockUnlocked: true, gearsOk: true, clockOn: true, jesusCount: 0, gears: [0, 3, 2, 1, 3, 2, 1, 2, 3, 3, 3],
