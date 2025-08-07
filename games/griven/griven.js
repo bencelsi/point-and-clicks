@@ -11,6 +11,7 @@
 // hallways are broken - fix em
 // Invetory sizing?
 // Fix target sizing (no offset?)
+// Reformat - so you can comment out lines w/o breaking everything!
 
 // NICE TO HAVE:
 // WASD keys
