@@ -99,8 +99,8 @@ const gameData = {
     'A4': { left: 'A3', right: 'A1' },
     'A5': { back: 'A2' },
     'B1': { left: 'B4', right: 'B2', forward: { fn: () => {
-        playGif('grandUp', 'C1', 10 * .15)
-        //playSound('grandUp'); makePic({mov: 'grandUp', totalSteps: 10, delay: .2, destination: 'C1'})
+        playSound('grandUp'); playGif('grandUp', 'C1', 10 * .15)
+        // makePic({mov: 'grandUp', totalSteps: 10, delay: .2, destination: 'C1'})
     }},
        
         boxes: [{ to: 'D1', xy: [.15, .23, .4, .56], cursor: 'F' }, { to: 'E1', xy: [.84, .95, .4, .58], cursor: 'F' }]},
@@ -170,12 +170,12 @@ const gameData = {
     'G1': { left: 'G2', right: 'G2', forward: 'H1' },
     'G2': { left: 'G1', right: 'G1', forward: 'E3', back: 'H3' },
     'H1': { left: 'H4', right: 'H2', boxes: [{ to: 'I1', xy: [.35, .48, .23, .55], cursor: 'F' }]},
-    'H2': { left: 'H1', right: 'H3', boxes: [{ to: 'pool/A2', xy: [.25, .48, .23, .73] } ]},
+    'H2': { left: 'H1', right: 'H3', boxes: [{ to: 'pool/A2', xy: [.25, .48, .23, .73], cursor: 'F' } ]},
     'H3': { left: 'H2', right: 'H4', boxes: [{ to: 'G2', xy: [.25, .5, .2, .6], cursor: 'F' }]},
     'H4': { left: 'H3', right: 'H1', boxes: [{ xy: [.57, .7, .4, .63], to: () => { if (s.cafeUnlocked) return 'H4a' },
         fn: () => { playSound(s.cafeUnlocked ? 'doorOpen' : 'doorLocked') }}]},
     'H4a': { left: { to: 'H3', fn: () => { playSound('doorClose') }}, right: { to: 'H1', fn: () => { playSound('doorClose') }}, 
-        boxes: [{ to: 'cafe/A4', xy: [.4, .85, .2, .8] }]},
+        boxes: [{ to: 'cafe/A4', xy: [.4, .85, .2, .8], cursor: 'F' }]},
     'I1': { left: 'I4', right: 'I2', boxes: [{ to: 'I5', xy: [.57, .8, .53, .68], cursor: 'Z' }]},
     'I2': { left: 'I1', right: 'I3', boxes: [{ xy: [.39, .43, .53, .64], fn: () => { 
             playSound('toilet' + (s.valves[0] ? 'Flush' : 'Empty')); makePic({ pic: 'toiletHandle', life: .7}); 
@@ -191,7 +191,8 @@ const gameData = {
         { pic: 'poolPig', if: () => { return s.pig == 2 & s.goldKey != 2  }}]},
     'A2': { left: 'A1', right: 'A3', forward: 'A5' },
     'A3': { left: 'A2', right: 'A4', boxes: [
-        { xy: [.54, .65, .3, .51], to: () => { return s.clockUnlocked ? 'A3a' : 'A6' }, cursor: () => { return s.clockUnlocked ? 'O' : 'Z' }}]},
+        { xy: [.54, .65, .3, .51], to: () => { 
+            if (s.clockUnlocked) { playSound('doorOpen'); return 'A3a' } return 'A6' }, cursor: () => { return s.clockUnlocked ? 'O' : 'Z' }}]},
     'A3a':{ left: { to: 'A2', fn: () => { playSound('doorClose') }},
             right: { to: 'A4', fn: () => { playSound('doorClose') }}, boxes: [{ to: 'B3', xy: [.54, .65, .3, .51], cursor: 'F' }]},
     'A4': { left: 'A3', right: 'A1', forward: 'lobby/H4' },
@@ -234,7 +235,9 @@ const gameData = {
         { to: () => { return s.plumbUnlocked ? 'A1a' : 'A6' }, xy: [.3, .35, .5, .6], cursor: () => { return s.plumbUnlocked ? 'O' : 'Z' },
           fn: () => { if (s.plumbUnlocked) playSound('doorOpen') }}]},
     'A1a': { left: { to: 'A4', fn: () => { playSound('doorClose') }}, right: { to: 'A2', fn: () => { playSound('doorClose') }}, 
-        boxes: [{ to: 'A5', xy: [.28, .46, .28, .75] }, { to: 'A7', xy: [.62, .78, .42, .6] }]},
+        boxes: [
+            { to: 'A5', xy: [.28, .46, .28, .75], cursor: 'F'}, 
+            { to: 'A7', xy: [.62, .78, .42, .6], cursor: 'Z' }]},
     'A2': { left: 'A1', right: 'A3', forward: { to: 'lobby/H2', fn: () => { playSound('doorClose'); return 'lobby/H2' }}},
     'A3': { left: 'A2', right: 'A4' },
     'A4': { left: 'A3', right: 'A1', forward: 'B4' },
@@ -468,19 +471,19 @@ const gameData = {
 'top': {
     'A1': { left: 'A4', right: 'A2', boxes: [outerElevatorBox,
         { to: 'A1a', fn: () => { playSound('elevatorOpen') }, xy: [.28, .31, .48, .52]}]},
-    'A1a': { left: { to: 'A4', fn: () => { playSound('elevatorClose') }}}, 
-        right: { to: 'A2', fn: () => { playSound('elevatorClose') }, boxes: [outerElevatorBox,
+    'A1a': { left: { to: 'A4', fn: () => { playSound('elevatorClose') }}, 
+        right: { to: 'A2', fn: () => { playSound('elevatorClose') }}, boxes: [outerElevatorBox,
         { to: 'A1', fn: () => { playSound('elevatorClose') }, xy: [.28, .31, .48, .52] },
-        { to: 'elevator/A1', xy: [.35, .66, .17, .88] }]},
+        { to: 'elevator/A1', xy: [.35, .66, .17, .88], cursor: 'F' }]},
     'A2': { left: 'A1', right: 'A3' },
     'A3': { left: 'A2', right: 'A4', forward: 'B2' },
     'A4': { left: 'A3', right: 'A1' },
     'B1': { left: 'B2', right: 'B2', forward: 'A1' },
     'B2': { left: 'B1', right: 'B1', forward: 'C2' },
     'C1': { left: 'C2', right: 'C2', forward: 'B1' },
-    'C2': { left: 'C1', right: 'C1', boxes: [{ to: 'C3', xy: [.6, .65, .51, .63] }]},
+    'C2': { left: 'C1', right: 'C1', boxes: [{ fn: () => { playSound('doorOpen'); goTo('C2a') }, xy: [.6, .65, .51, .63] }]},
     'C2a':{ left: 'C1', right: 'C1', boxes: [
-        { to: 'D3', fn: () => { playSound('doorClose') }, xy: [.35, .65, .22, .82] }]},
+        { to: 'D3', fn: () => { playSound('doorClose') }, xy: [.35, .65, .22, .82], cursor: 'F' }]},
     'C3': { boxes: keypadButtons, back: 'C2' },    
     'D1': { left: 'D4', right: 'D2', boxes: [{ xy: [.4, .6, .3, .75], to: 'C1', fn: () => { playSound('doorOpen') }}]},
     'D2': { left: 'D1', right: 'D3', onEnter: () => { if (s.bobbSpeech) return 
@@ -599,7 +602,7 @@ function openElevator() {
 // THREADS
 
 function moveElevator() {
-    s.elevatorMoving = true
+    //s.elevatorMoving = true
     if (!s.elevatorFixed) { openElevator(); return }
     if (s.room == 'elevator') playSound('elevatorBell')
     wait(2, () => { 
