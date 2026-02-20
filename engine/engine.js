@@ -39,6 +39,9 @@ const MOV_PATH = 		ASSET_PATH + '/movies/'
 let CURSOR_PATH = 		'cursors/'
 get('favicon').href = 	ASSET_PATH + '/favicon.ico'
 
+
+const CURSOR_EXT = 'png'
+
 // Global vars:
 let music = new Audio; music.loop = true; 
 let cacheSet = new Set()
@@ -486,7 +489,7 @@ function parseFrame(frame) {
 
 function get(id) { return document.getElementById(id) }
 
-function setCursor(element, cursor) { if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.png), auto' }
+function setCursor(element, cursor) { if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.' + CURSOR_EXT + '), auto' }
 
 function launchFullScreen(element) {
 	if (element.requestFullScreen) element.requestFullScreen()
