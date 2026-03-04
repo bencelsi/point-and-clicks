@@ -222,14 +222,14 @@ const gameData = {
         
         { pic: 'gearTray0' }, { pic: 'gearTray2' }, { pic: 'gearTray4' }, { pic: 'gearTray6' }, 
         { pic: 'gearTray1' }, { pic: 'gearTray3' }, { pic: 'gearTray5' }]},
-    'A4': { alt: { name: 'A4.gif', if: () => { return s.clockOn }}, left: 'A3', right: 'A1', forward: 'A7' },
+    'A4': { img: () => { return s.clockOn ? 'A4.gif' : 'A4.png' }, left: 'A3', right: 'A1', forward: 'A7' },
     'A5': { back: () => { s.jesusCount++; if (s.jesusCount == 3) { 
         doInSequence([
             () => { freeze(); setMusic(null); playSound('jesus') }, 2,
             () => { goTo('A2a') }, 8, () => { goTo('A2'); setMusic('clockroom'); unfreeze() }
         ])} else { return 'A2' }}},
     'A6': { back: 'A2' },
-    'A7': { alt: { name: 'A7.gif', if: () => { return s.clockOn }}, back: 'A4' }},
+    'A7': { img: () => { return s.clockOn ? 'A7.gif' : 'A7.png' }, back: 'A4' }},
 'cafe': { //zcafe
     'A1': { left: 'A4', right: 'A2', boxes: [{ to: 'A7', xy: [.62, .78, .42, .6], cursor: 'Z' }, 
         { to: () => { return s.plumbUnlocked ? 'A1a' : 'A6' }, xy: [.3, .35, .5, .6], cursor: () => { return s.plumbUnlocked ? 'O' : 'Z' },

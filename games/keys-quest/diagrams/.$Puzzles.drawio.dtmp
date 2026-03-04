@@ -1,0 +1,183 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.5.2 Chrome/142.0.7444.265 Electron/39.6.1 Safari/537.36" version="29.5.2" pages="2">
+  <diagram name="Page-1" id="d3r5s1pnBcOu8WGyTlnB">
+    <mxGraphModel dx="1452" dy="2139" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-5" edge="1" parent="1" source="OBh2geQGLQN7vvx21qa6-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="OBh2geQGLQN7vvx21qa6-4" value="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="OBh2geQGLQN7vvx21qa6-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=light-dark(#6d8764, #808080);strokeColor=#3A5431;fontColor=#ffffff;" value="&lt;a href=&quot;https://emojipedia.org/mirror&quot; aria-label=&quot;Mirror&quot; aria-describedby=&quot;mirror&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;🪞&lt;/font&gt;&lt;/a&gt;" vertex="1">
+          <mxGeometry height="60" width="60" x="436.25" y="363.75" as="geometry" />
+        </mxCell>
+        <mxCell id="OBh2geQGLQN7vvx21qa6-4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="MIRRORED &lt;br&gt;WORLD" vertex="1">
+          <mxGeometry height="40" width="90" x="587.81" y="373.75" as="geometry" />
+        </mxCell>
+        <mxCell id="NKw-noz0VpLf91itfJVp-3" edge="1" parent="1" source="OBh2geQGLQN7vvx21qa6-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="NKw-noz0VpLf91itfJVp-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="OBh2geQGLQN7vvx21qa6-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="&lt;a href=&quot;https://emojipedia.org/camera&quot; aria-label=&quot;Camera&quot; aria-describedby=&quot;camera&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;📷&lt;/font&gt;&lt;span class=&quot;EmojisList_emojis-list-item-title__exqtM&quot;&gt;&lt;/span&gt;&lt;/a&gt;" vertex="1">
+          <mxGeometry height="60" width="90" x="155" y="490" as="geometry" />
+        </mxCell>
+        <mxCell id="vCmj258QUR8kUgfajec9-3" edge="1" parent="1" source="OBh2geQGLQN7vvx21qa6-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.75;exitDx=0;exitDy=0;" target="m0_tNnKU8fGxL3dRX5u_-6" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-6" edge="1" parent="1" source="OBh2geQGLQN7vvx21qa6-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="NbiodJkmKiwysvXiCSau-26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="OBh2geQGLQN7vvx21qa6-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="UPSIDE DOWN/&lt;br&gt;SIDEWAYS&lt;br&gt;&lt;br&gt;could lead to...&lt;br&gt;CD ROM&lt;div&gt;Photos&lt;br&gt;Door&lt;br&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="105" width="168.75" x="381.88" y="-41.25" as="geometry" />
+        </mxCell>
+        <mxCell id="OBh2geQGLQN7vvx21qa6-12" parent="1" style="rounded=1;whiteSpace=wrap;html=1;" value="Computer World&lt;br&gt;8-bit world?&lt;div&gt;Inversion world?&lt;/div&gt;&lt;div&gt;Complete Buggy World?&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100.75" width="150.62" x="980" y="-59.5" as="geometry" />
+        </mxCell>
+        <mxCell id="OBh2geQGLQN7vvx21qa6-13" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=light-dark(#e3c800, #383200);fontColor=#000000;strokeColor=#B09500;" value="&lt;a href=&quot;https://emojipedia.org/light-bulb&quot; style=&quot;text-decoration-line: none;&quot; id=&quot;docs-internal-guid-76b0c706-7fff-6535-98fe-9f7111c84a49&quot;&gt;&lt;span style=&quot;font-family: &amp;quot;Source Code Pro&amp;quot;, monospace; color: rgb(17, 85, 204); background-color: transparent; font-weight: 700; font-variant-numeric: normal; font-variant-east-asian: normal; font-variant-alternates: normal; font-variant-position: normal; font-variant-emoji: normal; text-decoration-line: underline; text-decoration-skip-ink: none; vertical-align: baseline; white-space-collapse: preserve;&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;💡&lt;/font&gt;&lt;/span&gt;&lt;/a&gt;" vertex="1">
+          <mxGeometry height="67.5" width="81.25" x="150" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="OBh2geQGLQN7vvx21qa6-14" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;" value="&lt;a href=&quot;https://emojipedia.org/mantelpiece-clock&quot; aria-label=&quot;Mantelpiece Clock&quot; aria-describedby=&quot;mantelpiece-clock&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;🕰️&lt;/font&gt;&lt;/a&gt;" vertex="1">
+          <mxGeometry height="60" width="66.25" x="913.75" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-34" edge="1" parent="1" source="m0_tNnKU8fGxL3dRX5u_-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="m0_tNnKU8fGxL3dRX5u_-2" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-14" edge="1" parent="1" source="m0_tNnKU8fGxL3dRX5u_-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="NbiodJkmKiwysvXiCSau-25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m0_tNnKU8fGxL3dRX5u_-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=light-dark(#00BFFA, #8ae4ff);fontColor=#000000;strokeColor=#C73500;" value="&lt;a href=&quot;https://emojipedia.org/window&quot; aria-label=&quot;Window&quot; aria-describedby=&quot;window&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;🪟&lt;/font&gt;&lt;/a&gt;" vertex="1">
+          <mxGeometry height="70" width="90" x="190" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="m0_tNnKU8fGxL3dRX5u_-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Melt item ...&lt;br&gt;&amp;nbsp;CD?" vertex="1">
+          <mxGeometry height="50" width="92.5" x="420" y="81.25" as="geometry" />
+        </mxCell>
+        <mxCell id="m0_tNnKU8fGxL3dRX5u_-4" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="NIGHT WORLD" vertex="1">
+          <mxGeometry height="60" width="120" x="910" y="346.25" as="geometry" />
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-13" edge="1" parent="1" source="m0_tNnKU8fGxL3dRX5u_-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="OBh2geQGLQN7vvx21qa6-14" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m0_tNnKU8fGxL3dRX5u_-14" edge="1" parent="1" source="m0_tNnKU8fGxL3dRX5u_-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="m0_tNnKU8fGxL3dRX5u_-13" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="m0_tNnKU8fGxL3dRX5u_-12" parent="1" style="ellipse;whiteSpace=wrap;html=1;" value="&lt;font style=&quot;font-size: 20px; color: rgb(0, 255, 237);&quot;&gt;Menu&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="70" x="47.5" y="-210" as="geometry" />
+        </mxCell>
+        <mxCell id="m0_tNnKU8fGxL3dRX5u_-13" parent="1" style="whiteSpace=wrap;html=1;" value="?" vertex="1">
+          <mxGeometry height="37.5" width="40" x="200" y="-198.75" as="geometry" />
+        </mxCell>
+        <mxCell id="m0_tNnKU8fGxL3dRX5u_-15" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#330066;" value="Ending - full psychedelic" vertex="1">
+          <mxGeometry height="100" width="180" x="690" y="540" as="geometry" />
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-14" edge="1" parent="1" source="vCmj258QUR8kUgfajec9-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="OBh2geQGLQN7vvx21qa6-9" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="vCmj258QUR8kUgfajec9-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=light-dark(#a20025, #ff0000);fontColor=#ffffff;strokeColor=#6F0000;" value="&lt;a href=&quot;https://emojipedia.org/bicycle&quot; aria-label=&quot;Bicycle&quot; aria-describedby=&quot;bicycle&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;🚲&lt;/font&gt;&lt;/a&gt;" vertex="1">
+          <mxGeometry height="55" width="100" x="200.00000000000006" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="vCmj258QUR8kUgfajec9-7" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=light-dark(#60a917, #ffd080);fontColor=#ffffff;strokeColor=#2D7600;" value="&lt;a href=&quot;https://emojipedia.org/speech-balloon&quot; aria-label=&quot;Speech Balloon&quot; aria-describedby=&quot;speech-balloon&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;💬&lt;/font&gt;&lt;/a&gt;" vertex="1">
+          <mxGeometry height="67.5" width="95" x="155" y="296.25" as="geometry" />
+        </mxCell>
+        <mxCell id="vCmj258QUR8kUgfajec9-9" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#1ba1e2;fontColor=#ffffff;strokeColor=#006EAF;" value="&lt;a href=&quot;https://emojipedia.org/magnifying-glass-tilted-left&quot; aria-label=&quot;Magnifying Glass Tilted Left&quot; aria-describedby=&quot;magnifying-glass-tilted-left&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;🔍&lt;/font&gt;&lt;/a&gt;&lt;a href=&quot;https://emojipedia.org/bubbles&quot; aria-label=&quot;Bubbles&quot; aria-describedby=&quot;bubbles&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;🫧&lt;/font&gt;&lt;/a&gt;" vertex="1">
+          <mxGeometry height="78.75" width="90" x="237.5" y="-120" as="geometry" />
+        </mxCell>
+        <mxCell id="vCmj258QUR8kUgfajec9-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4B00B9;fontColor=#ffffff;strokeColor=#3700CC;" value="&lt;a href=&quot;https://emojipedia.org/optical-disk&quot; aria-label=&quot;Optical Disk&quot; aria-describedby=&quot;optical-disk&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;💿&lt;/font&gt;&lt;/a&gt;&lt;br&gt;&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;GameWorld&lt;/font&gt;" vertex="1">
+          <mxGeometry height="62.5" width="88.75" x="850" y="-35" as="geometry" />
+        </mxCell>
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-16" edge="1" parent="1" source="NKw-noz0VpLf91itfJVp-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="NbiodJkmKiwysvXiCSau-24">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NKw-noz0VpLf91itfJVp-2" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="&lt;div&gt;Photo World/Dream/Item&lt;/div&gt;" vertex="1">
+          <mxGeometry height="42.5" width="110" x="300" y="498.75" as="geometry" />
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-2" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=light-dark(#60a917, #ab9717);fontColor=#ffffff;strokeColor=#2D7600;" value="&lt;a href=&quot;https://emojipedia.org/door&quot; aria-label=&quot;Door&quot; aria-describedby=&quot;door&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;🚪&lt;/font&gt;&lt;/a&gt;" vertex="1">
+          <mxGeometry height="70" width="77.5" x="720" y="260" as="geometry" />
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-32" edge="1" parent="1" source="NbiodJkmKiwysvXiCSau-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.953;exitY=0.588;exitDx=0;exitDy=0;exitPerimeter=0;" target="NbiodJkmKiwysvXiCSau-25">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="121" y="251" />
+            </Array>
+            <mxPoint x="132.96000000000004" y="257.5000000000001" as="sourcePoint" />
+            <mxPoint x="310" y="225.6" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-36" edge="1" parent="1" source="NbiodJkmKiwysvXiCSau-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.35;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="m0_tNnKU8fGxL3dRX5u_-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="125" y="142" />
+              <mxPoint x="170" y="142" />
+              <mxPoint x="170" y="175" />
+            </Array>
+            <mxPoint x="660" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-7" edge="1" parent="1" source="NbiodJkmKiwysvXiCSau-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="vCmj258QUR8kUgfajec9-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="170" />
+              <mxPoint x="170" y="77" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-5" parent="1" style="shape=box;whiteSpace=wrap;html=1;fillColor=#00AA16;fontColor=#ffffff;strokeColor=#2D7600;size=0.16091954022988506;" value="&lt;font style=&quot;color: rgb(255, 255, 255);&quot;&gt;&lt;b style=&quot;&quot;&gt;&lt;span style=&quot;font-size: 30px;&quot;&gt;Start&lt;/span&gt;&lt;br&gt;&lt;font size=&quot;1&quot;&gt;(Key Hunting...)&lt;/font&gt;&lt;/b&gt;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="670" width="85" x="40" y="-130" as="geometry" />
+        </mxCell>
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-8" edge="1" parent="1" source="NbiodJkmKiwysvXiCSau-24" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" target="OBh2geQGLQN7vvx21qa6-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-24" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=light-dark(#60A917,#FF8000);fontColor=#ffffff;strokeColor=#2D7600;" value="&lt;a href=&quot;https://emojipedia.org/fire&quot; aria-label=&quot;Fire&quot; aria-describedby=&quot;fire&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;🔥&lt;/font&gt;&lt;/a&gt;" vertex="1">
+          <mxGeometry height="51.25" width="60" x="325" y="423.75" as="geometry" />
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-40" edge="1" parent="1" source="NbiodJkmKiwysvXiCSau-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="NbiodJkmKiwysvXiCSau-39" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-18" edge="1" parent="1" source="NbiodJkmKiwysvXiCSau-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="w1OF2eCOHj5OxLgnigGy-17" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-25" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=light-dark(#60A917,#FF8000);fontColor=#ffffff;strokeColor=#2D7600;" value="&lt;a href=&quot;https://emojipedia.org/rainbow&quot; aria-label=&quot;Rainbow&quot; aria-describedby=&quot;rainbow&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 50px;&quot;&gt;🌈&lt;/font&gt;&lt;/a&gt;&lt;span style=&quot;font-size: 25px;&quot;&gt;1&lt;/span&gt;" vertex="1">
+          <mxGeometry height="70" width="77.5" x="290" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-26" parent="1" style="whiteSpace=wrap;html=1;rounded=1;" value="Attic Item" vertex="1">
+          <mxGeometry height="40" width="80" x="650" y="-50" as="geometry" />
+        </mxCell>
+        <mxCell id="NbiodJkmKiwysvXiCSau-39" parent="1" style="whiteSpace=wrap;html=1;" value="Item? dance party?" vertex="1">
+          <mxGeometry height="43.25" width="71.87" x="605.94" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="m0_tNnKU8fGxL3dRX5u_-6" parent="1" style="whiteSpace=wrap;html=1;" value="More light-switches" vertex="1">
+          <mxGeometry height="90" width="69.69" x="760" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-10" edge="1" parent="1" source="w1OF2eCOHj5OxLgnigGy-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="NbiodJkmKiwysvXiCSau-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=light-dark(#60A917,#FF8000);fontColor=#ffffff;strokeColor=#2D7600;" value="&lt;a href=&quot;https://emojipedia.org/rainbow&quot; aria-label=&quot;Rainbow&quot; aria-describedby=&quot;rainbow&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 50px;&quot;&gt;🌈&lt;/font&gt;&lt;/a&gt;&lt;font style=&quot;font-size: 25px;&quot;&gt;2&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="77.5" x="522.5" y="215" as="geometry" />
+        </mxCell>
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#4B00B9;fontColor=#ffffff;strokeColor=#3700CC;" value="&lt;a href=&quot;https://emojipedia.org/desktop-computer&quot; aria-label=&quot;Desktop Computer&quot; aria-describedby=&quot;desktop-computer&quot; class=&quot;Link_link-wrapper__0xpcE Emoji_emoji__vbZHi __variable_e5a5aa EmojisList_emojis-list-item__F5NKC&quot; target=&quot;_self&quot; data-src=&quot;&quot; data-underline=&quot;false&quot;&gt;&lt;font style=&quot;font-size: 40px;&quot;&gt;🖥️&lt;/font&gt;&lt;/a&gt;&lt;br&gt;(Journal)" vertex="1">
+          <mxGeometry height="62.5" width="88.75" x="47.5" y="577.5" as="geometry" />
+        </mxCell>
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-15" edge="1" parent="1" source="OBh2geQGLQN7vvx21qa6-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.097;entryY=0.643;entryDx=0;entryDy=0;entryPerimeter=0;" target="w1OF2eCOHj5OxLgnigGy-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="w1OF2eCOHj5OxLgnigGy-17" parent="1" style="whiteSpace=wrap;html=1;fillColor=light-dark(#60A917,#FF8000);strokeColor=#2D7600;fontColor=#ffffff;" value="Some item?" vertex="1">
+          <mxGeometry height="38.12" width="80" x="370" y="311.88" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="mLjGiJUjw-_BlsLsrCs8" name="Page-2">
+    <mxGraphModel dx="2084" dy="883" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="nuMV2ZkqKpglBqQ10V5P-1" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=none;" value="Upside-Down" vertex="1">
+          <mxGeometry height="410" width="410" x="-20" y="140" as="geometry" />
+        </mxCell>
+        <mxCell id="nuMV2ZkqKpglBqQ10V5P-2" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=none;" value="Mirror" vertex="1">
+          <mxGeometry height="410" width="410" x="130" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="nuMV2ZkqKpglBqQ10V5P-3" parent="1" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=none;" value="Night" vertex="1">
+          <mxGeometry height="410" width="410" x="260" y="130" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -5,6 +5,8 @@
 
 /*
 SOUND SYSTEM - 
+
+
 Store audios as objects
     Options - loop?
     on refresh, update audio volumes
@@ -25,19 +27,20 @@ const INVENTORY_DIV = 		get('inventory')
 const MOVIE_DIV = 			get('movies')
 const CURSOR_BLOCK_DIV = 	get('cursorBlock')
 const ALL_DIV = 			get('all')
+let CURSOR = 				get('cursor')
 const FAVICON =				get('favicon')
 
 //paths
-const ASSET_PATH = 		GAME_PATH + '/assets/'
-const FRAME_PATH = 		ASSET_PATH + '/frames/'
-const GIF_PATH = 		ASSET_PATH + '/gifs/'
-const SOUND_PATH = 		ASSET_PATH + '/sound/'
+const ASSET_PATH = 		GAME_PATH + 'assets/'
+const FRAME_PATH = 		ASSET_PATH + 'frames/'
+const GIF_PATH = 		ASSET_PATH + 'gifs/'
+const SOUND_PATH = 		ASSET_PATH + 'sound/'
 const MUSIC_PATH = 		SOUND_PATH + 'music/'
-const PIC_PATH = 		ASSET_PATH + '/pics/'
-const INVENTORY_PATH = 	ASSET_PATH + '/inventory/'
-const MOV_PATH = 		ASSET_PATH + '/movies/'
+const PIC_PATH = 		ASSET_PATH + 'pics/'
+const INVENTORY_PATH = 	ASSET_PATH + 'inventory/'
+const MOV_PATH = 		ASSET_PATH + 'movies/'
 let CURSOR_PATH = 		'cursors/'
-get('favicon').href = 	ASSET_PATH + '/favicon.ico'
+get('favicon').href = 	ASSET_PATH + 'favicon.ico'
 
 
 const CURSOR_EXT = 'png'
@@ -48,6 +51,8 @@ let cacheSet = new Set()
 let sounds = [new Audio, new Audio, new Audio, new Audio, new Audio] // TODO: make # of sounds configurable
 let persistentIds = []
 let c
+let boxes = []
+
 
 let waitCounter = 0
 window.onload = waitForData()
@@ -61,13 +66,14 @@ function init() {
 	document.title = (location.hostname == '' ? '.' : '') + c.title
 	extension = c.extension
 	if (c.customCursors) CURSOR_PATH = ASSET_PATH + 'cursors/'
-	setCursor(ALL_DIV, c.defaultCursor)
-	if (c.waitCursor != null) setCursor(CURSOR_BLOCK_DIV, c.waitCursor)
+	setCursorForItem(ALL_DIV, c.defaultCursor)
+	if (c.waitCursor != null) setCursorForItem(CURSOR_BLOCK_DIV, c.waitCursor)
 	ALL_DIV.style.width = c.width + 'px'; ALL_DIV.style.height = c.height + 100 + 'px'
 	get('screen').style.width = c.width + 'px'; get('screen').style.height = c.height + 'px'
 	INVENTORY_DIV.style.width = c.width + 'px'
 	updateStyle(); refreshInventory(); goTo(s.frame, NONE);
 	//window.onclick = launchFullScreen(get('window'))
+	FAVICON.href = GAME_PATH + 'favicon.ico'
 }
 
 function updateStyle() { // TODO: better.
@@ -84,8 +90,7 @@ function updateStyle() { // TODO: better.
 		.rightIn  { animation:rightIn ${c.sideSpeed}s} 
 		.rightOut { animation:rightOut ${c.sideSpeed}s; transform: translateX(-${c.width}px) } 
 		.fadeIn   { animation:fadeIn ${c.fadeSpeed}s; } 
-		.fadeOut  { animation:fadeOut ${c.fadeSpeed}s; opacity: 0 }
-	`
+		.fadeOut  { animation:fadeOut ${c.fadeSpeed}s; opacity: 0 }`
 }
 
 
@@ -129,7 +134,8 @@ function setFade(fade) { c.fadeSpeed = fade; updateStyle() }
 
 
 // BOXES ******************************************
-function refresh() { refreshBoxes(); refreshInventory() }
+function refresh() { refreshBoxes(); refreshInventory(); 
+	if (c.useCursorImg) refreshCursorState() }
 
 function refreshBoxes() {
 	PICS_DIV.innerHTML = BOX_DIV.innerHTML = ''
@@ -181,20 +187,33 @@ function makeBox(box, parent = BOX_DIV) {
 	element.style.width = (x2 - x1) * c.width + 'px'
 	element.style.bottom = y1 * c.height + 'px'
 	element.style.height = (y2 - y1) * c.height + 'px'
-	setCursor(element, box.cursor)
+	setCursorForItem(element, box.cursor)
 
 	//let fn = orDefault(box.fn, null, false)
 	//let to = orDefault(box.to, null)
-	if (box.to != null && box.fn != null) { element.onclick = () => { box.fn(); goTo(box.to, box.transition) }}
-	else if (box.to != null) { element.onclick = () => { goTo(box.to, box.transition) }}
-	else if (box.fn != null) { element.onclick = box.fn }
+	let fn = null
+	let transition = box.transition
+	if (s.mirror) {
+		if (transition == 'left') transition = 'right'
+		else if (transition == 'right') transition = 'left'
+	}
+	if (box.to != null && box.fn != null) { fn = () => { box.fn(); goTo(box.to, transition) }}
+	else if (box.to != null) { fn = () => { goTo(box.to, transition) }}
+	else if (box.fn != null) { fn = box.fn }
 	
+	element.onmousedown = fn
+
 	if (box.id != null) element.id = box.id
 	if (box.subBoxes != null) {
 		for (let subBox of box.subBoxes) makePic(subBox, element); makeBox(subBox, element)
 	}
 	if (box.drag != null) makeDraggable(element, [])
+	if (box.html != null) element.innerHTML = box.html
+	console.log(box.html)
+
 	parent.appendChild(element)
+	
+	boxes.push(element)
 }
 
 function makePic(picData, parent = PICS_DIV) {
@@ -305,36 +324,47 @@ function movieStep(X) {
 function goTo(frame, transType = FADE) {
 	console.log('goTo ' + frame)
 	if (frame == null) return
+	boxes = []
+	// Make outgoing transition
 	if (transType != NONE) { makeTrans(transType, false) }
 	[s.frame, newRoom, newExtension] = parseFrame(frame)
 	if (newRoom != null) { s.room = newRoom; setMusic(newRoom) }
 	let frameData = gameData[s.room][s.frame];
 	if (frameData == null) frameData = {}
 	let img
-	if (frameData.alt != null && frameData.alt.if()) img = frameData.alt.name
+	if (frameData.img != null) { img = simpleEval(frameData.img); console.log('okurrrr') }
 	else img = s.frame + '.' + (newExtension == null ? extension : newExtension)
+	console.log(frameData.img) 
+	console.log(frameData) 
+	
 	FRAME_IMG.src = FRAME_PATH + s.room + '/' + img
 	
-	refreshBoxes()
+	refreshBoxes();
+	if (c.useCursorImg) refreshCursorState()
+
+	// Make incoming transition
 	if (transType != NONE) makeTrans(transType, true)
 	delay = transType == NONE ? 0 : (transType == FADE ? c.fadeSpeed - .5 : c.sideSpeed)
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
 	freeze();
 	wait(delay, () => {
-		TRANS_DIV.innerHTML = ''; cacheResources(frameData)
+		TRANS_DIV.innerHTML = ''; 
+		cacheResources(frameData)
 		if (frameData.onEnter != null) frameData.onEnter()
 		unfreeze() })
 }
 
-function makeTrans(transType, isIn) {
+function makeTrans(transType, isIncoming) {
 	let transDiv = document.createElement('div');
 	let cloned = FRAME_IMG.cloneNode(true)
+	//cloned.id = null
 	transDiv.appendChild(cloned) //creates duplicate img
 	let pics = PICS_DIV.cloneNode(true); pics.id = null
 	transDiv.appendChild(pics)
 	transDiv.classList.add('transition')
-	transDiv.classList.add(transType + (isIn ? 'In' : 'Out'))
-	if (isIn) {
+	transDiv.classList.add(transType + (isIncoming ? 'In' : 'Out'))
+	transDiv.id = transType + (isIncoming ? 'In' : 'Out')
+	if (isIncoming) {
 		if (transType == LEFT) transDiv.style.left = -c.width + 'px'
 		else if (transType == RIGHT) transDiv.style.left = c.width + 'px'
 	}
@@ -342,7 +372,6 @@ function makeTrans(transType, isIn) {
 }
 
 // INVENTORY ••••••••••••••••••••••••••••••••••••••••••••••••••
-
 function refreshInventory() {
 	if (inventory == null) return
 	INVENTORY_DIV.innerHTML = ''
@@ -357,17 +386,17 @@ function makeInventoryItem(id) {
 	img.src = INVENTORY_PATH + config.img + '.png'
 	element.appendChild(img)
 	if (config.draggable == null || config.draggable) makeDraggable(element, config.targets)
-	if (config.cursor != null) setCursor(element, config.cursor)
+	if (config.cursor != null) setCursorForItem(element, config.cursor)
 	if (config.fn != null) element.onclick = config.fn
 	INVENTORY_DIV.appendChild(element)
 }
 
 // Make given object draggable, execute action if dropped on targetId
 function makeDraggable(item, targets) {
-	setCursor(item, 'O')
+	setCursorForItem(item, 'O')
 	item.onmousedown = function(event) {
 		//freeze()
-		event.preventDefault(); setCursor(item, 'C')	
+		event.preventDefault(); setCursorForItem(item, 'C')	
 		let itemX = parseInt(item.style.left); let itemY = parseInt(item.style.top)
 		let mouseX = event.clientX; let mouseY = event.clientY
 		document.onmousemove = function(event) {
@@ -386,7 +415,7 @@ function makeDraggable(item, targets) {
 					if (targetObj != null && isTouching(item, targetObj)) { target.fn(); return }}
 			}
 			item.style.left = itemX; item.style.top = itemY
-			document.onmousemove = null; setCursor(item, 'O') }}}
+			document.onmousemove = null; setCursorForItem(item, 'O') }}}
 
 // GIFS ******************************************
 function playGif(name, newFrame, delay, after = null) {
@@ -489,7 +518,20 @@ function parseFrame(frame) {
 
 function get(id) { return document.getElementById(id) }
 
-function setCursor(element, cursor) { if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.' + CURSOR_EXT + '), auto' }
+// map from hitbox to cursor
+// on each mouse move, check hitboxes
+ 
+function setCursorForItem(element, cursor) { 
+	if (c.useCursorImg) {
+		element.setAttribute('cursor', cursor)
+	} else {
+		if (cursor != null) element.style.cursor = 'url(' + CURSOR_PATH + cursor + '.' + CURSOR_EXT + '), auto' 
+	}
+}
+
+function setCursor(cursor) {
+	CURSOR.src = CURSOR_PATH + cursor + '.' + CURSOR_EXT
+}
 
 function launchFullScreen(element) {
 	if (element.requestFullScreen) element.requestFullScreen()
@@ -505,3 +547,89 @@ function isTouching(a, b) {
 	a = a.getBoundingClientRect(); b = b.getBoundingClientRect()
     return Math.abs(a.x - b.x) < (a.x > b.x ? b.width : a.width) && Math.abs(a.y - b.y) < (a.y > b.y ? b.height : a.height);
 }
+
+function requestFullscreen() {
+	if (!document.fullscreenElement) {
+		let elem = document.body;
+		if (elem.requestFullscreen) {
+			elem.requestFullscreen();
+		} else if (elem.webkitRequestFullscreen) { /* Safari */
+			elem.webkitRequestFullscreen();
+		} else if (elem.mozRequestFullScreen) { /* Firefox */
+			elem.mozRequestFullScreen();
+		}
+	}
+	return document.fullscreenElement
+}
+
+// CURSOR 
+// useCursorImg - uses an img as a cursor, instead of default
+
+if (c.useCursorImg) {
+	ALL_DIV.style.cursor = 'url(cursors/0.png), auto' 
+	
+	//CURSOR.src = CURSOR_PATH + "/F.png"
+	document.addEventListener("mousemove", (e) => { refreshCursor(e)});
+	//window.addEventListener("resize", (e) => { refreshCursor(e) })
+}
+let lastMouseEvent
+
+function refreshCursor(e) {
+	lastMouseEvent = e
+	// POSITION
+	if (s.mirror) {
+		let rect = ALL_DIV.getBoundingClientRect()
+		
+		cursor.style.left = (2 * rect.x) + (rect.right - rect.left) - e.clientX + 'px'
+		cursor.style.top = 700 - e.clientY + 'px'
+	} else {
+		cursor.style.left = `${e.clientX}px`;
+		cursor.style.top = `${e.clientY}px`;
+	}
+	
+	//console.log(e.clientX)
+
+	// STATE 
+	refreshCursorState()
+}
+
+function refreshCursorState() {
+	let found = false
+	for (box of boxes) {
+		if (isOverlap(lastMouseEvent, box)) {
+			setCursor(box.getAttribute('cursor'))
+			found = true
+			break
+		}
+	}
+	if (!found) {
+		setCursor(c.defaultCursor)
+	}
+}
+
+document.addEventListener("click", (e) => {
+	console.log('click')
+	
+	for (box of boxes) {
+		if (isOverlap(e, box)) {
+			if (box.oncontextmenu != null) box.oncontextmenu()
+			break;
+		}
+	}
+})
+
+
+function isOverlap(e, box) {
+	if (e == null) return false
+	let X = e.clientX
+	if (s.mirror) {
+		let all = ALL_DIV.getBoundingClientRect()
+		let midpoint = all.x + ((all.right - all.left) / 2)
+		X = 2 * midpoint - e.clientX
+	}
+	let rect = box.getBoundingClientRect()
+	return X >= rect.left && X <= rect.right &&
+    	e.clientY >= rect.top && e.clientY <= rect.bottom;
+}
+
+

@@ -1,4 +1,8 @@
-body { background-color: black; /* user-drag: none; */ user-select: none; }
+
+html { height: 100%;
+    margin: 0; padding: 0;}
+body { background-color: black; /* user-drag: none; */ user-select: none; min-height: 100%;
+    margin: 0; padding: 0; color:aquamarine; text-align: center;}
 
 #all { position: relative; margin: auto; }
 #screen { position: absolute; display: flex; overflow: hidden; }
@@ -27,3 +31,14 @@ body { background-color: black; /* user-drag: none; */ user-select: none; }
 #cache img { width: 1px; height: 1px; opacity: 0; }
 
 /* #myvideo:-webkit-full-screen { width: 100%; height: 100%; } */
+
+#cursor {
+    z-index: 15;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 32px;
+    pointer-events: none; /*don't block clicks*/
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s linear;
+}
