@@ -559,7 +559,7 @@ function requestFullscreen() {
 			elem.mozRequestFullScreen();
 		}
 	}
-	return document.fullscreenElement
+	return 
 }
 
 // CURSOR 
