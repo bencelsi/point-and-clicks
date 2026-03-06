@@ -11,7 +11,7 @@ const config = {
     style: '',
 }
 
-const s = { room: 'room', frame: 'Start',
+const s = { room: 'room', frame: 'Start3',
 	mirror: false
 }
 
@@ -20,14 +20,20 @@ const inventory = {}
 const gameData = {
 	
     'room': {
-		'Start': { boxes: [
+		'Start3': { boxes: [
 			{ xy: [0, 1, 0, 1], cursor: 'F', to: 'Menu', fn: () => 
-				{ requestFullscreen(); playSound('joanna.mp3'); }}
+				{ requestFullscreen(); setMusic('music/joanna.mp3', false); }}
 			]},
 		'Menu': {
 		 	boxes: [
-				{ xy: [.35, .65, .48, .6], cursor: 'F', to: 'K2'},
-				{ xy: [.35, .65, .3, .44], cursor: 'F', to: 'Options'},	
+				{ xy: [.35, .65, .4, .6], cursor: 'F', fn: async () => { 
+					freeze(); setFade(3); goTo('Black'); setMusic(null);
+					await d(3); playSound('rooster.m4a'); 
+					await d(3); playSound('wow'); 
+					await d(5); setFade(15); goTo('K1'); setMusic('music/kool'); 
+					unfreeze(); await d(15); setFade(1)
+				}},
+				{ xy: [.35, .65, .2, .3], cursor: 'F', to: 'Options'},	
 			]
 	 	},
 		'Options': {

@@ -35,7 +35,6 @@ const ASSET_PATH = 		GAME_PATH + 'assets/'
 const FRAME_PATH = 		ASSET_PATH + 'frames/'
 const GIF_PATH = 		ASSET_PATH + 'gifs/'
 const SOUND_PATH = 		ASSET_PATH + 'sound/'
-const MUSIC_PATH = 		SOUND_PATH + 'music/'
 const PIC_PATH = 		ASSET_PATH + 'pics/'
 const INVENTORY_PATH = 	ASSET_PATH + 'inventory/'
 const MOV_PATH = 		ASSET_PATH + 'movies/'
@@ -56,10 +55,10 @@ let boxes = []
 
 let waitCounter = 0
 window.onload = waitForData()
-function waitForData() { 
+async function waitForData() { 
 	try { if (waitCounter > 10) return
 		waitCounter++; baseConfig; c; s; gameData; init() } 
-	catch (e) { console.log(e); wait(.1, waitForData) }}
+	catch (e) { console.log(e); await d(.1); waitForData() }}
 
 function init() {
 	c = { ...baseConfig, ...config }
@@ -131,13 +130,11 @@ function showInventory() { INVENTORY_DIV.style.visibility = 'visible' }
 
 function setFade(fade) { c.fadeSpeed = fade; updateStyle() }
 
-
-
 // BOXES ******************************************
 function refresh() { refreshBoxes(); refreshInventory(); 
 	if (c.useCursorImg) refreshCursorState() }
 
-function refreshBoxes() {
+async function refreshBoxes() {
 	PICS_DIV.innerHTML = BOX_DIV.innerHTML = ''
 	let frameData = gameData[s.room][s.frame]
 	if (frameData == null) return
@@ -166,8 +163,8 @@ function refreshBoxes() {
 	for (let id of persistentIds) {
 		if (!newIds.includes(id)) {
 			get(id).classList.add('fadeOut')
-			wait(c.fadeSpeed - .1, () => {
-				PERSISTENT_DIV.removeChild(get(id)) })}}
+			await d(c.fadeSpeed - .1);
+			PERSISTENT_DIV.removeChild(get(id)) }}
 
 	persistentIds = newIds
 }
@@ -216,7 +213,7 @@ function makeBox(box, parent = BOX_DIV) {
 	boxes.push(element)
 }
 
-function makePic(picData, parent = PICS_DIV) {
+async function makePic(picData, parent = PICS_DIV) {
 	let basePic = { centerOffset: false }
 	
 	let X = {...basePic, ...picData}
@@ -258,7 +255,7 @@ function makePic(picData, parent = PICS_DIV) {
 			fate: orDefault(X.fate, 'end'), 
 			id: X.id })}
 	
-	if (X.life != null) wait(X.life, () => { parent.removeChild(element) })
+	if (X.life != null) { await d(X.life); parent.removeChild(element) }
 	
 	return element }
 
@@ -275,18 +272,18 @@ function playMovie(name, totalSteps, destination) {
 	//goTo(destination, NONE)
 }
 
-function movieStep2(element, step, delay, path, totalSteps, destination) {
+async function movieStep2(element, step, delay, path, totalSteps, destination) {
 	if (step == totalSteps) {
 		MOVIE_DIV.removeChild(element)
 		return
 	}
-	wait(delay, () => {
-		step++; element.src = path + step + '.png'
-		movieStep2(element, step, delay, path, totalSteps, destination)
-	})
+	await d(delay)
+	step++; element.src = path + step + '.png'
+	movieStep2(element, step, delay, path, totalSteps, destination)
+
 }
 
-function movieStep(X) {
+async function movieStep(X) {
 	console.log(X)
 	if (get(X.id) == null || (X.while != null && !X.while())) return
 	X.step++;
@@ -299,10 +296,10 @@ function movieStep(X) {
 		if (X.fate == 'stay') return
 		if (X.fate == 'loop') X.step = 0 }
 
-	wait(X.delay, () => { 
-		X.element.src = X.path + X.step + '.png';
-		console.log(X)
-		movieStep(X) })}
+	await d(X.delay)
+	X.element.src = X.path + X.step + '.png';
+	console.log(X)
+	movieStep(X) }
 
 //                  box? (div)         	pic? (img)		mov
 // xy (required)	X									
@@ -321,14 +318,14 @@ function movieStep(X) {
 // TRANSITIONS ******************************************
 
 
-function goTo(frame, transType = FADE) {
+async function goTo(frame, transType = FADE) {
 	console.log('goTo ' + frame)
 	if (frame == null) return
 	boxes = []
 	// Make outgoing transition
 	if (transType != NONE) { makeTrans(transType, false) }
 	[s.frame, newRoom, newExtension] = parseFrame(frame)
-	if (newRoom != null) { s.room = newRoom; setMusic(newRoom) }
+	if (newRoom != null) { s.room = newRoom; setMusic('music/' + newRoom) }
 	let frameData = gameData[s.room][s.frame];
 	if (frameData == null) frameData = {}
 	let img
@@ -347,11 +344,11 @@ function goTo(frame, transType = FADE) {
 	delay = transType == NONE ? 0 : (transType == FADE ? c.fadeSpeed - .5 : c.sideSpeed)
 	 // if we wait full fade speed, it makes moving forward annoying. TODO: better.
 	freeze();
-	wait(delay, () => {
-		TRANS_DIV.innerHTML = ''; 
-		cacheResources(frameData)
-		if (frameData.onEnter != null) frameData.onEnter()
-		unfreeze() })
+	await d(delay)
+	TRANS_DIV.innerHTML = ''; 
+	cacheResources(frameData)
+	if (frameData.onEnter != null) frameData.onEnter()
+	unfreeze()
 }
 
 function makeTrans(transType, isIncoming) {
@@ -422,12 +419,12 @@ function playGif(name, newFrame, delay, after = null) {
 	//cacheFrame(gameData.rooms[s.room][newFrame]) //todo - parse here
 	let gif = document.createElement('img')
 	gif.classList.add('fullGif'); freeze()
-	gif.onload = () => {
+	gif.onload = async () => {
 		MOVIE_DIV.appendChild(gif)
-		if (newFrame != null) { goTo(newFrame, FADE, true) }
-		wait(delay, () => {
-			MOVIE_DIV.innerHTML = ''; unfreeze()
-			if (after != null) { after() }})}
+		if (newFrame != null) goTo(newFrame, FADE, true)
+		await d(delay)
+		MOVIE_DIV.innerHTML = ''; unfreeze()
+		if (after != null) after() }
 	gif.src = GIF_PATH + name + '.gif?a=' + Math.random() } // todo: better
 
 // CACHING ******************************************
@@ -462,10 +459,10 @@ function setMusic(newMusic, fade = true) {
 		else music.pause()
 	} else if (fade) { 
 		fadeOutMusic(music, () => {
-		music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
+		music.setAttribute('src', SOUND_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
 		music.play(); fadeInMusic(music) })
 	} else {
-		music.setAttribute('src', MUSIC_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
+		music.setAttribute('src', SOUND_PATH + newMusic + (newMusic.includes('.') ? '' : '.mp3')); 
 		music.play() }}
 
 function setMusicVolume(volume) { music.volume = volume }
@@ -499,15 +496,6 @@ function stopSound(name) {
 }
 
 // HELPERS ******************************************
-
-// [A, 3, B] means: do A, wait 3 seconds, do B
-function doInSequence(arr) {
-	let time = 0
-	for (const x of arr) {
-		if (typeof x == 'number') time += x
-		else wait(time, x)
-	}
-}
 
 function parseFrame(frame) {
 	if (typeof frame != 'string') return [frame, null, null]
@@ -631,5 +619,3 @@ function isOverlap(e, box) {
 	return X >= rect.left && X <= rect.right &&
     	e.clientY >= rect.top && e.clientY <= rect.bottom;
 }
-
-

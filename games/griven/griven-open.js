@@ -40,8 +40,8 @@ const musicMap = {
 
 const inventory = {
     brochure: { img: 'brochure', draggable: false, cursor: 'Z', fn: () => { brochureBack = s.room + '/' + s.frame; hideInventory(); goTo('brochure/0') }},
-    smallKey: { img: 'smallkeyFree', targets: [{ id: 'keyhole', fn: () => { s.smallKey = 2; refresh(); 
-        if (s.frame == 'D4') { freeze(); makePic({ pic: 'smallKey1'}); wait(1, () => { goTo('D3'); unfreeze() })}}}]},
+    smallKey: { img: 'smallkeyFree', targets: [{ id: 'keyhole', fn: async () => { s.smallKey = 2; refresh(); 
+        if (s.frame == 'D4') { freeze(); makePic({ pic: 'smallKey1'}); await d(1); goTo('D3'); unfreeze() }}}]},
     pipe: { img: 'pipeFree', targets: [{ id: 'pipe2', fn: () => { s.pipe = 2; refresh() }},
         { id: 'pipe3', fn: () => { s.pipe = 3; refresh()} }]},
     coffee: { img: 'coffeeFree', targets: [{ frame: 'stairs/B5a', fn: () => { s.coffee = 3; refresh() }}]},
@@ -80,13 +80,13 @@ function closeBrochure () {
 const gameData = {
 'opening': {
     'menu': { onEnter: () => { hideInventory() }, boxes: [{ xy: [0, 1, 0, 1], to: 'A0' }]},
-    'A0': { onEnter: () => { doInSequence([
-        () => { freeze(); setMusic(null); playSound('music/opening'); setFade(4); goTo('A1') }, 4,
-        () => { playGif('opening', 'A2', 4) }, 4,
-        () => { playSound('music/title') }, 2, 
-        () => { goTo('A3') }, 4,
-        () => { showInventory(); goTo('lobby/A1') }, 4,
-        () => { setFade(1); unfreeze() }])}}},
+    'A0': { onEnter: async () => {
+        freeze(); setMusic(null); playSound('music/opening'); setFade(4); goTo('A1');
+        await d(4); playGif('opening', 'A2', 4);
+        await d(4); playSound('music/title'); 
+        await d(2); goTo('A3'); 
+        await d(4); showInventory(); goTo('lobby/A1'); 
+        await d(4); setFade(1); unfreeze() }}},
 'brochure': { 0: { right: { to: 1, fn: () => { playSound('page') }}, back: { fn: closeBrochure }}, 
     1: { left: { to: 0, fn: () => { playSound('page') }}, right: { to: 2, fn: () => { playSound('page') }}, back: { fn: closeBrochure }},
     2: { left: { to: 1, fn: () => { playSound('page') }}, right: { to: 3, fn: () => { playSound('page') }}, back: { fn: closeBrochure }},
@@ -164,8 +164,8 @@ const gameData = {
         { pic: 'clockHand2', offset: [.48, .73], style: () => { 
             return 'transform: rotate(' + s.clock2 + 'deg); transform-origin: center bottom' }}]},
     'F1': { left: 'F2', right: 'F2', forward: { fn: () => {
-        s.floor = 2; playSound('stairsUp'); playGif('stairsBottomUp', 'stairs/C1', 13 * .15, () => {
-        wait(.5, () => { playSound('stairsUp'); playGif('stairsMiddleUp1', 'stairs/A1', 9 * .15) })})}}},
+        s.floor = 2; playSound('stairsUp'); playGif('stairsBottomUp', 'stairs/C1', 13 * .15, async () => {
+        await d(.5); playSound('stairsUp'); playGif('stairsMiddleUp1', 'stairs/A1', 9 * .15) })}}},
     'F2': { left: 'F1', right: 'F1', forward: 'D2' },
     'G1': { left: 'G2', right: 'G2', forward: 'H1' },
     'G2': { left: 'G1', right: 'G1', forward: 'E3', back: 'H3' },
@@ -208,8 +208,8 @@ const gameData = {
 'clockroom' : {
     'A1': { left: 'A4', right: 'A2', forward: { fn: () => { playGif('ladderDown', 'pool/B1', 10 * .15) }}},
     'A2': { left: 'A1', right: 'A3', boxes: [{ xy: [.29, .34, .42, .48], if: () => { return !s.clockOn }, 
-        fn: () => { playSound('gearsRunning'); s.clockOn = true; refreshBoxes()
-        if (s.gearsOk) { clockOn() } else { freeze(); wait(4.5, () => { s.clockOn = false; refreshBoxes(); unfreeze() })}}},
+        fn: async () => { playSound('gearsRunning'); s.clockOn = true; refreshBoxes()
+        if (s.gearsOk) { clockOn() } else { freeze(); await d(4.5); s.clockOn = false; refreshBoxes(); unfreeze() }}},
         //{ mov: 'gear1', steps: 3, fate: 'loop', if: () => { return s.clockOn }, while: () => { return s.clockOn }},
         { pic: 'lever', if: () => { return s.clockOn } },
         { xy: [.48, .6, .22, .3], to: 'A5' },
@@ -223,11 +223,11 @@ const gameData = {
         { pic: 'gearTray0' }, { pic: 'gearTray2' }, { pic: 'gearTray4' }, { pic: 'gearTray6' }, 
         { pic: 'gearTray1' }, { pic: 'gearTray3' }, { pic: 'gearTray5' }]},
     'A4': { img: () => { return s.clockOn ? 'A4.gif' : 'A4.png' }, left: 'A3', right: 'A1', forward: 'A7' },
-    'A5': { back: () => { s.jesusCount++; if (s.jesusCount == 3) { 
-        doInSequence([
-            () => { freeze(); setMusic(null); playSound('jesus') }, 2,
-            () => { goTo('A2a') }, 8, () => { goTo('A2'); setMusic('clockroom'); unfreeze() }
-        ])} else { return 'A2' }}},
+    'A5': { back: async () => { s.jesusCount++; 
+        if (s.jesusCount == 3) {
+            freeze(); setMusic(null); playSound('jesus'); await d(2); goTo('A2a');
+            await d(8); goTo('A2'); setMusic('music/clockroom'); unfreeze() 
+        } else { return 'A2' }}},
     'A6': { back: 'A2' },
     'A7': { img: () => { return s.clockOn ? 'A7.gif' : 'A7.png' }, back: 'A4' }},
 'cafe': { //zcafe
@@ -335,8 +335,8 @@ const gameData = {
     'A4': { left: 'A3', right: 'A1' },
     'B1': { left: 'B4', right: 'B2', forward: 'B5' },
     'B2': { left: 'B1', right: 'B3', boxes: [{ pic: 'floor10', offset: [.87, .98] }]},
-    'B3': { left: 'B2', right: 'B4', forward: () => { if (s.coffee == 3) waitId = wait(60, () => { 
-        s.coffee = 4; s.card = [s.floor, s.hallPosition, s.hallDirection] })
+    'B3': { left: 'B2', right: 'B4', forward: async () => { if (s.coffee == 3) waitId = await d(60); 
+        s.coffee = 4; s.card = [s.floor, s.hallPosition, s.hallDirection]
         s.floor--; playSound('stairsDown'); playGif('stairsTopDown', 'C1', 9 * .15, () => {
         playSound('stairsDown'); playGif('stairsMiddleDown1', 'A3', 10 * .15) })}},
     'B4': { left: 'B3', right: 'B1' },
@@ -486,52 +486,44 @@ const gameData = {
         { to: 'D3', fn: () => { playSound('doorClose') }, xy: [.35, .65, .22, .82], cursor: 'F' }]},
     'C3': { boxes: keypadButtons, back: 'C2' },    
     'D1': { left: 'D4', right: 'D2', boxes: [{ xy: [.4, .6, .3, .75], to: 'C1', fn: () => { playSound('doorOpen') }}]},
-    'D2': { left: 'D1', right: 'D3', onEnter: () => { if (s.bobbSpeech) return 
-        freeze(); wait(1, () => { goTo('D5'); setMusic(null);
-            wait(305, () => { s.bobbSpeech = true; s.otherLeft = false; goTo('D2'); unfreeze() })})}},
+    'D2': { left: 'D1', right: 'D3', onEnter: async () => { if (s.bobbSpeech) return 
+        freeze(); await d(1); goTo('D5'); setMusic(null);
+            await d(305); s.bobbSpeech = true; s.otherLeft = false; goTo('D2'); unfreeze() }},
     'D3': { left: 'D2', right: { to: 'D4' }, 
-        boxes: [{ xy: [.57, .61, .44, .49], fn: () => { playSound('doorLocked'); return
-        // doInSequence([
-        //     () => { freeze(); setMusic(null); playSound('music/end'); hideInventory(); playGif('exit6', 'D6') }, 2,
-        //     () => { setFade(7); goTo('E1') }, 5,
-        //     () => { let scream = playSound('scream'); playGif('fall', 'E2'); 
-        //         wait(4.2, () => { scream.pause(); playSound('splat'); goTo('credits/1') })}])
-        }}]},
+        boxes: [{ xy: [.57, .61, .44, .49], fn: () => { playSound('doorLocked') }}]},
     'D4': { left: 'D3', right: 'D1' }},
 'credits': {
-    1: { onEnter: () => { setFade(4);
-        doInSequence([ 4, 
-            () => { goTo(2) }, 3, () => { goTo(3) }, 3, () => { goTo(4) }, 4, () => { goTo(5) }, 4, 
-            () => { goTo(6) }, 4, () => { goTo(7) }, 4, () => { goTo(8) }, 4, () => { setFade(.2) }, .2, 
-            () => { goTo(9) }, .2, () => { goTo(10) }, () => { goTo(11) }, .2, () => { goTo(12) }, .2,
-            () => { goTo(13) }, .2, () => { goTo(14) }, .2, () => { goTo(15) }, .2, () => { goTo(16) }, .2, 
-            () => { goTo(17) }, .2, () => { goTo(18) }, .2, () => { goTo(19) }, 3, () => { goTo(20); setFade(20) }, 5,
-            () => { goTo('top/D6'); setMusic(null) }, 20, () => { goTo('opening/A1') }
-        ])
-}}}}
+    1: { onEnter: async ()=> {
+        setFade(4); await d(4); goTo(2); await d(3); goTo(3); await d(3); goTo(4); await d(4); goTo(5);
+        await d(4); goTo(6); await d(4); goTo(7); await d(4); goTo(8); await d(4); setFade(.2); 
+        await d(.2); goTo(9); await d(.2); goTo(10); goTo(11); await d(.2); goTo(12); await d(.2);
+        goTo(13); await d(.2); goTo(14); await d(.2); goTo(15); await d(.2); goTo(16); await d(.2); 
+        goTo(17); await d(.2); goTo(18); await d(.2); goTo(19); await d(3); goTo(20); setFade(20); 
+        await d(5); goTo('top/D6'); setMusic(null); await d(20); goTo('opening/A1') }}}
+}
 
-function showerStep() { //TODO - this should be triggered by any potential change? or, just never stop?
+async function showerStep() { //TODO - this should be triggered by any potential change? or, just never stop?
     if (s.steamLevel == 0 && !showerHot()) return
-    wait(.2, () => { let steam = get('steam'); let mirror = get('mirror')
+    await d(.2); let steam = get('steam'); let mirror = get('mirror')
         if (showerHot()) { s.steamLevel = Math.min(s.steamLevel + 1, 70); s.heaterLevel = Math.max(s.heaterLevel - 1, 0) }
         else s.steamLevel = Math.max(s.steamLevel - 1, 0)
         if (mirror != null) mirror.style.opacity = inRange(0, (2 * s.steamLevel) - 30, 60) + '%'
         if (steam != null) { steam.src = PIC_PATH + '/steam/' + Math.floor(Math.random() * 9) + '.png'; 
             steam.style.opacity = s.steamLevel + '%' }
-        showerStep() })}
+        showerStep() }
 
 function inRange(min, val, max) { return val < min ? min : (val > max ? max : val) }
 
 function showerHot() { return s.heaterLevel > 0 && s.floorValve == 2 && s.valves[2] && !s.valves[4] && s.valves[5] && s.shower == 2 }
 
-function clockOn() { wait(10, () => {
+async function clockOn() { await d(10);
     s.clock1 = (s.clock1 + 1) % 360
     if (s.clock1 % 12 == 0) s.clock2 = (s.clock2 + 1) % 360
     if (s.clock1 == 0 && s.clock2 == 0) { // todo - vary volume, elevator, plumbingroom... vary # of dings???
         if (s.room == 'lobby' || s.room == 'pool' || s.room == 'clockroom') playSound('clock')
         s.cafeUnlocked = true }
     if (s.frame == 'E4' && s.room == 'lobby') refreshBoxes()
-    clockOn() })}
+    clockOn() }
 
 // TODO: store variants as separate var? some level of indirection beyond frame and image.
 
@@ -547,12 +539,12 @@ function changeDrawer(n) {
         playSound('cabinetDown2'); s.lightsOn = false; s.cabinetDown = true }
     refreshBoxes() }
 
-function pushKeypad(n) {
+async function pushKeypad(n) {
     playSound('beep'); combo.push(n); if (combo.length > 5) combo.shift()
     if (s.room == 'pool' && comboIs([3, 5, 2, 9, 9])) { playSound('doorOpen'); goTo('A3a'); s.clockUnlocked = true }
     else if (s.room == 'cafe' && comboIs([8, 7, 0, 1, 2])) { playSound('doorOpen'); goTo('A1a'); s.plumbUnlocked = s.plumbOpen = true }
-    else if (true) { goTo('C2'); freeze(); setMusic(null);
-        wait(1, () => { s.officeUnlocked = true; goTo('C2a'); playSound('doorOpen'); unfreeze() })}}
+    else { goTo('C2'); freeze(); setMusic(null);
+        await d(1); s.officeUnlocked = true; goTo('C2a'); playSound('doorOpen'); unfreeze() }}
 
 function comboIs(goal) { for (i in goal) { if (combo[i] != goal[i]) return false } return true }
 
@@ -584,11 +576,12 @@ function callElevator() {
     if (s.elevatorMoving) return
     moveElevator() }
 
-function setElevatorFloor(newFloor) {
+async function setElevatorFloor(newFloor) {
     playSound('button'); if (!s.elevatorFixed || newFloor == s.elevatorFloor) return
     s.elevatorGoal = newFloor; if (s.elevatorMoving) return
     s.elevatorMoving = true; playSound('elevatorClose'); goTo('A2d')
-    wait(2, () => { moveElevator() })}
+    await d(2)
+    moveElevator() }
 
 function openElevator() {
     if (s.room == 'elevator') { playSound('elevatorOpen')
@@ -601,14 +594,14 @@ function openElevator() {
 
 // THREADS
 
-function moveElevator() {
+async function moveElevator() {
     //s.elevatorMoving = true
     if (!s.elevatorFixed) { openElevator(); return }
     if (s.room == 'elevator') playSound('elevatorBell')
-    wait(2, () => { 
-        s.elevatorFloor += (s.elevatorGoal > s.elevatorFloor ? 1 : -1)
-        if (s.room == 'elevator') s.floor = s.elevatorFloor
-        refreshBoxes()
-        if (s.elevatorGoal == s.elevatorFloor) { openElevator(); return }
-        moveElevator() })}
+    await d(2); 
+    s.elevatorFloor += (s.elevatorGoal > s.elevatorFloor ? 1 : -1)
+    if (s.room == 'elevator') s.floor = s.elevatorFloor
+    refreshBoxes()
+    if (s.elevatorGoal == s.elevatorFloor) { openElevator(); return }
+    moveElevator() }
 
