@@ -163,9 +163,9 @@ const gameData = {
             return 'transform: rotate(' + s.clock1 + 'deg); transform-origin: center bottom' }},
         { pic: 'clockHand2', offset: [.48, .73], style: () => { 
             return 'transform: rotate(' + s.clock2 + 'deg); transform-origin: center bottom' }}]},
-    'F1': { left: 'F2', right: 'F2', forward: { fn: () => {
-        s.floor = 2; playSound('stairsUp'); playGif('stairsBottomUp', 'stairs/C1', 13 * .15, async () => {
-        await d(.5); playSound('stairsUp'); playGif('stairsMiddleUp1', 'stairs/A1', 9 * .15) })}}},
+    'F1': { left: 'F2', right: 'F2', forward: { fn: async () => {
+        s.floor = 2; playSound('stairsUp'); playGif('stairsBottomUp', 'stairs/C1', 13 * .15);
+        await d(.5); playSound('stairsUp'); playGif('stairsMiddleUp1', 'stairs/A1', 9 * .15) }}},
     'F2': { left: 'F1', right: 'F1', forward: 'D2' },
     'G1': { left: 'G2', right: 'G2', forward: 'H1' },
     'G2': { left: 'G1', right: 'G1', forward: 'E3', back: 'H3' },
@@ -323,22 +323,22 @@ const gameData = {
 },
 'stairs': { //zstairs
     'A1': { left: 'A4', right: 'A2', forward: { fn: () => { s.floor++; playSound('stairsUp')
-        playGif('stairsMiddleUp2', 'C1', 9 * .15, () => { 
-            if (s.floor == 10) { clearTimeout(waitId); playGif('stairsTopUp', 'B1', 10 * .15) }
-            else playGif('stairsMiddleUp1', 'A1', 9 * .15) })}}},
+        playGif('stairsMiddleUp2', 'C1', 9 * .15);
+        if (s.floor == 10) { clearTimeout(waitId); playGif('stairsTopUp', 'B1', 10 * .15) }
+        else playGif('stairsMiddleUp1', 'A1', 9 * .15) }}},
     'A2': { left: 'A1', right: 'A3', forward: { to: 'hall/A7', fn: () => { s.hallDirection = 1; s.hallPosition = 2 }}, 
         boxes: [{ pic: () => { return 'floor' + s.floor }, offset: [.865, .91] }]},
     'A3': { left: 'A2', right: 'A4', forward: { fn: () => { s.floor--; playSound('stairsDown')
-        playGif('stairsMiddleDown2', 'C1', 9 * .15, () => { playSound('stairsDown');
+        playGif('stairsMiddleDown2', 'C1', 9 * .15); playSound('stairsDown');
         if (s.floor == 1) playGif('stairsBottomDown', 'lobby/F2', 9 * .15)
-        else playGif('stairsMiddleDown1', 'A3', 10 * .15) })}}},
+        else playGif('stairsMiddleDown1', 'A3', 10 * .15) }}},
     'A4': { left: 'A3', right: 'A1' },
     'B1': { left: 'B4', right: 'B2', forward: 'B5' },
     'B2': { left: 'B1', right: 'B3', boxes: [{ pic: 'floor10', offset: [.87, .98] }]},
     'B3': { left: 'B2', right: 'B4', forward: async () => { if (s.coffee == 3) waitId = await d(60); 
         s.coffee = 4; s.card = [s.floor, s.hallPosition, s.hallDirection]
-        s.floor--; playSound('stairsDown'); playGif('stairsTopDown', 'C1', 9 * .15, () => {
-        playSound('stairsDown'); playGif('stairsMiddleDown1', 'A3', 10 * .15) })}},
+        s.floor--; playSound('stairsDown'); playGif('stairsTopDown', 'C1', 9 * .15);
+        playSound('stairsDown'); playGif('stairsMiddleDown1', 'A3', 10 * .15) }},
     'B4': { left: 'B3', right: 'B1' },
     'B5': { back: 'B1', boxes: [{ to: 'B5a', fn: () => { playSound('drawer') }, xy: [.37, .52, .63, .78] }]},
     'B5a':{ back: { to: 'B1', fn: () => { playSound('drawer') }}, boxes: [

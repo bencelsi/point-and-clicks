@@ -1,7 +1,7 @@
 const config = {
     title: 'KeysQuest!',
     width: 640, height: 480,
-    extension: 'png',
+    ext: 'png',
     boxCursor: 'O',
     defaultCursor: 'N',
 	customCursors: true,
@@ -11,42 +11,61 @@ const config = {
     style: '',
 }
 
-const s = { room: 'room', frame: 'Start3',
-	mirror: false
-}
+let s = { frame: 'M/2', mirror: false, gameStarted: true, resumeFrame: 'A1' }
 
 const inventory = {}
 
+async function startGame() {
+	freeze(); s.gameStarted = true;
+	setFade(3); goTo('Black'); setMusic(null);
+	await d(3); playSound('rooster.m4a'); await d(3); setFade(15); goTo('K2'); playSound('wow');
+	await d(5); setMusic('music/kool'); setFade(1)
+	unfreeze();
+}
+
 const gameData = {
+	//boxes that span frames
+	'persistentBoxes': [
+		// menu button
+		{ xy: [0,.1,.9,1], cursor: 'L',
+		if: () => { return !s.frame.startsWith('M/')}, 
+		fn: () => { s.resumeFrame = s.frame; goTo('M/2') }}
+	],
 	
-    'room': {
-		'Start3': { boxes: [
-			{ xy: [0, 1, 0, 1], cursor: 'F', to: 'Menu', fn: () => 
+    'frames': {
+		'M/0': { boxes: [
+			{ xy: [0, 1, 0, 1], cursor: 'F', to: 'M/1' , fn: () => 
 				{ requestFullscreen(); setMusic('music/joanna.mp3', false); }}
 			]},
-		'Menu': {
+		'M/1': {
 		 	boxes: [
-				{ xy: [.35, .65, .4, .6], cursor: 'F', fn: async () => { 
-					freeze(); setFade(3); goTo('Black'); setMusic(null);
-					await d(3); playSound('rooster.m4a'); 
-					await d(3); playSound('wow'); 
-					await d(5); setFade(15); goTo('K1'); setMusic('music/kool'); 
-					unfreeze(); await d(15); setFade(1)
-				}},
-				{ xy: [.35, .65, .2, .3], cursor: 'F', to: 'Options'},	
-			]
-	 	},
-		'Options': {
+				// New Game ()
+				{ xy: [.35, .65, .5, .6], cursor: 'F', fn: () => {  startGame() }},
+				// Load Game
+				{ xy: [.35, .65, .25, .35], cursor: 'F', fn: () => {  load() }},
+				// Options
+				{ xy: [.35, .65, 0, .1], cursor: 'F', to: 'M/Options' }]},
+		'M/2': {
 			boxes: [
-				{ xy: [0, .2, .8, 1], cursor: 'L', to: "Menu"},
+				// Resume Game
+				{ xy: [.31, .69, .5, .6], cursor: 'F', fn: () => { goTo(s.resumeFrame) }},
+				// Save Game (Save file 'START.kq' is in your Downloads folder)
+				{ xy: [.35, .65, .38, .49], cursor: 'F',fn: save },
+				// Load Game (Select save file to load)
+				{ xy: [.35, .65, .26, .37], cursor: 'F', fn: load },
+				// New Game (Are you sure you want to start a new game? Any unsaved progressed will be lost.)
+				{ xy: [.35, .65, .14, .25],  cursor: 'F'},
+				// Options
+				{ xy: [.35, .65, .02, .13], cursor: 'F', to: 'M/Options' }]},
+		'M/Options': {
+			boxes: [
+				{ xy: [0, .2, .8, 1], cursor: 'L', to: () => { return s.gameStarted ? 'M/2' : 'M/1' }},
 				{ xy: [.4, 0, .6, 0], cursor: 'N', html: "Volume <input type='range'>"},
 				{ xy: [.4, 0, .4, 0], cursor: 'N', html: "Show Secret Options<input type='checkbox'>"},
 				{ xy: [.4, 0, .5, 0], cursor: 'N', html: 
-					"Graphics Quality <select><option>Not Very Good</option><option>Also Not Very Good</option></select>"
-				},
+					"Graphics Quality <select><option>Not Very Good</option><option>Also Not Very Good</option></select>" },
 				{ xy: [.4, 0, .3, 0], cursor: 'N', html: 
-					"Photosensitivity Mode <select><option>On</option><option>Off</option></select>"
-				}
+					"Photosensitivity Mode <select><option>On</option><option>Off</option></select>" }
 			]
 		},
 
@@ -134,3 +153,46 @@ document.addEventListener("mousedown", () => {
 document.addEventListener("mouseup", () => {
 	playSound('md.mp3', .1)
 })
+
+
+
+// MENU  ******************************************
+function save() {
+	let name ="save.kq"
+	let contents = JSON.stringify(s)
+	console.log(s)
+	console.log(contents)
+	var dlink = document.createElement('a');
+	dlink.download = name;
+	dlink.href = window.URL.createObjectURL(new Blob([contents], { type: "text/plain" }));
+	dlink.onclick = async () => {
+		// revokeObjectURL needs a delay to work properly
+		var that = this; await d(1.5)
+		window.URL.revokeObjectURL(that.href)
+	}
+	dlink.click(); dlink.remove();
+}
+
+function load() {
+  const input = document.createElement("input");
+  input.type = "file"; input.accept = "application/kq";
+  input.onchange = function (event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      try {
+        const jsonObject = JSON.parse(e.target.result);
+        console.log("Parsed JSON:", jsonObject);
+		s = jsonObject
+		goTo(s.resumeFrame)
+      } catch (err) {
+		alert('Unable to load save file. Sorry')
+        console.error("File is not valid JSON:", err);
+      }
+    };
+    reader.onerror = function () { console.error("Error reading file"); };
+    reader.readAsText(file);
+  };
+  input.click();
+}

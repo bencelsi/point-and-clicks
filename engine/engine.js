@@ -5,8 +5,6 @@
 
 /*
 SOUND SYSTEM - 
-
-
 Store audios as objects
     Options - loop?
     on refresh, update audio volumes
@@ -63,7 +61,7 @@ async function waitForData() {
 function init() {
 	c = { ...baseConfig, ...config }
 	document.title = (location.hostname == '' ? '.' : '') + c.title
-	extension = c.extension
+	ext = c.ext
 	if (c.customCursors) CURSOR_PATH = ASSET_PATH + 'cursors/'
 	setCursorForItem(ALL_DIV, c.defaultCursor)
 	if (c.waitCursor != null) setCursorForItem(CURSOR_BLOCK_DIV, c.waitCursor)
@@ -77,7 +75,6 @@ function init() {
 
 function updateStyle() { // TODO: better.
 	get('style').innerHTML =  `
-		body { background-color: purple }
 		@keyframes leftIn   { from { transform: translateX(0) } to { transform: translateX(${c.width}px) }}
 		@keyframes leftOut  { from { transform: translateX(0) }}
 		@keyframes rightIn  { from { transform: translateX(0) } to { transform: translateX(-${c.width}px) }}
@@ -92,32 +89,6 @@ function updateStyle() { // TODO: better.
 		.fadeOut  { animation:fadeOut ${c.fadeSpeed}s; opacity: 0 }`
 }
 
-
-// MENU  ******************************************
-function save() {
-	
-}
-
-function load() {
-
-}
-
-function download() {
-	let name ="myFile.grv"
-	let contents = JSON.stringify(s)
-	var dlink = document.createElement('a');
-	dlink.download = name;
-	dlink.href = window.URL.createObjectURL(new Blob([contents], { type: "text/plain" }));
-	dlink.onclick = function(e) {
-		// revokeObjectURL needs a delay to work properly
-		var that = this;
-		setTimeout(function() {
-			window.URL.revokeObjectURL(that.href);
-		}, 1500);
-	};
-	dlink.click();
-	dlink.remove();
-}
 
 // DOM setup  ******************************************
 function freeze() { CURSOR_BLOCK_DIV.style.visibility = 'visible' }
@@ -135,8 +106,8 @@ function refresh() { refreshBoxes(); refreshInventory();
 	if (c.useCursorImg) refreshCursorState() }
 
 async function refreshBoxes() {
-	PICS_DIV.innerHTML = BOX_DIV.innerHTML = ''
-	let frameData = gameData[s.room][s.frame]
+	PICS_DIV.innerHTML = ''; BOX_DIV.innerHTML = ''
+	let frameData = gameData['frames'][s.frame]
 	if (frameData == null) return
 
 	for (let key in c.commonBoxes) {
@@ -152,21 +123,28 @@ async function refreshBoxes() {
 			makeBox(box); makePic(box) }}
 
 	// Persistents
-	let newIds = []
-	let persistents = gameData[s.room]['persistents']
-	if (persistents != null) {
-		for (let persistent of persistents) {
-			if (persistent.if()) {
-				newIds.push(persistent.id)
-				if (!persistentIds.includes(persistent.id)) { makePic(persistent, PERSISTENT_DIV) }}}}
+	// let newIds = []
+	// let persistents = gameData[s.room]['persistents']
+	// if (persistents != null) {
+	// 	for (let persistent of persistents) {
+	// 		if (persistent.if()) {
+	// 			newIds.push(persistent.id)
+	// 			if (!persistentIds.includes(persistent.id)) { makePic(persistent, PERSISTENT_DIV) }}}}
 	
-	for (let id of persistentIds) {
-		if (!newIds.includes(id)) {
-			get(id).classList.add('fadeOut')
-			await d(c.fadeSpeed - .1);
-			PERSISTENT_DIV.removeChild(get(id)) }}
+	// for (let id of persistentIds) {
+	// 	if (!newIds.includes(id)) {
+	// 		get(id).classList.add('fadeOut')
+	// 		await d(c.fadeSpeed - .1);
+	// 		PERSISTENT_DIV.removeChild(get(id)) }}
 
-	persistentIds = newIds
+	// persistentIds = newIds
+
+	//Persistent boxes
+	for (let persistentBox of gameData.persistentBoxes) {
+		if (persistentBox.if == null || persistentBox.if()) {
+			makeBox(persistentBox);
+		}
+	}
 }
 
 function makeBox(box, parent = BOX_DIV) {
@@ -174,7 +152,7 @@ function makeBox(box, parent = BOX_DIV) {
 	let element = document.createElement('div'); element.className = 'box'
 
 	box = { ...c.baseBox, ...box }
-	for (key in box) { if (key != 'fn') box[key] = simpleEval(box[key]) }
+	for (key in box) { if (key != 'fn') box[key] = tryEval(box[key]) }
 
 	let x1 = box.xy[0] == 0 ? 0 : (box.xy[0] == 1 ? 1 : (box.xy[0] + c.boxOffset[0]))
 	let x2 = box.xy[1] == 0 ? 0 : (box.xy[1] == 1 ? 1 : (box.xy[1] + c.boxOffset[0]))
@@ -217,7 +195,7 @@ async function makePic(picData, parent = PICS_DIV) {
 	let basePic = { centerOffset: false }
 	
 	let X = {...basePic, ...picData}
-	for (key in X) { if (key != 'fn' && key != 'while') X[key] = simpleEval(X[key]) }
+	for (key in X) { if (key != 'fn' && key != 'while') X[key] = tryEval(X[key]) }
 
 	let element = document.createElement('img'); element.classList.add('pic')
 
@@ -317,24 +295,25 @@ async function movieStep(X) {
 
 // TRANSITIONS ******************************************
 
-
 async function goTo(frame, transType = FADE) {
 	console.log('goTo ' + frame)
 	if (frame == null) return
 	boxes = []
+
 	// Make outgoing transition
 	if (transType != NONE) { makeTrans(transType, false) }
-	[s.frame, newRoom, newExtension] = parseFrame(frame)
-	if (newRoom != null) { s.room = newRoom; setMusic('music/' + newRoom) }
-	let frameData = gameData[s.room][s.frame];
+	s.frame = frame
+	//[s.frame, newRoom, newExtension] = parseFrame(frame)
+	//if (newRoom != null) { s.room = newRoom; setMusic('music/' + newRoom) }
+	let frameData = gameData['frames'][s.frame];
 	if (frameData == null) frameData = {}
-	let img
-	if (frameData.img != null) { img = simpleEval(frameData.img); console.log('okurrrr') }
-	else img = s.frame + '.' + (newExtension == null ? extension : newExtension)
-	console.log(frameData.img) 
-	console.log(frameData) 
 	
-	FRAME_IMG.src = FRAME_PATH + s.room + '/' + img
+	console.log(frameData.img) 
+	console.log(frameData)
+	
+	let img = 
+	FRAME_IMG.src = FRAME_PATH + '/' + 
+		(frameData.img == null ? s.frame + '.' + ext : tryEval(frameData.img));
 	
 	refreshBoxes();
 	if (c.useCursorImg) refreshCursorState()
@@ -415,16 +394,16 @@ function makeDraggable(item, targets) {
 			document.onmousemove = null; setCursorForItem(item, 'O') }}}
 
 // GIFS ******************************************
-function playGif(name, newFrame, delay, after = null) {
+function playGif(name, newFrame, delay = null) {
 	//cacheFrame(gameData.rooms[s.room][newFrame]) //todo - parse here
 	let gif = document.createElement('img')
 	gif.classList.add('fullGif'); freeze()
 	gif.onload = async () => {
 		MOVIE_DIV.appendChild(gif)
 		if (newFrame != null) goTo(newFrame, FADE, true)
-		await d(delay)
-		MOVIE_DIV.innerHTML = ''; unfreeze()
-		if (after != null) after() }
+		if (delay != null) await d(delay)
+		MOVIE_DIV.innerHTML = ''; 
+		unfreeze() }
 	gif.src = GIF_PATH + name + '.gif?a=' + Math.random() } // todo: better
 
 // CACHING ******************************************
@@ -435,8 +414,7 @@ function cacheResources(frameData) {
 
 function cacheFrame(frame) {
 	if (frame == null || frame instanceof Function) return
-	let src = (gameData[s.room][frame] == null) ? FRAME_PATH + frame + '.' + extension : 
-		FRAME_PATH + s.room  + '/' + frame + '.' + extension
+	let src = FRAME_PATH + frame + '.' + ext;
 	if (cacheSet.has(src)) return
 	if (CACHE_DIV.childNodes.length >= 20) {
 		let cachedImageToRemove = CACHE_DIV.childNodes[0]
@@ -497,13 +475,6 @@ function stopSound(name) {
 
 // HELPERS ******************************************
 
-function parseFrame(frame) {
-	if (typeof frame != 'string') return [frame, null, null]
-	let room = newExt = null
-	if (frame.includes('/')) { let roomFrame = frame.split('/'); room = roomFrame[0]; frame = roomFrame[1] }
-	if (frame.includes('.')) { let frameExt = frame.split('/'); frame = frameExt[0]; newExt = frameExt[1] }
-	return [frame, room, newExt] }
-
 function get(id) { return document.getElementById(id) }
 
 // map from hitbox to cursor
@@ -527,7 +498,7 @@ function launchFullScreen(element) {
 	else if (element.webkitRequestFullScreen) element.webkitRequestFullScreen() }
 
 // If x is a function, returns the result of evaluating x, otherwise returns x
-function simpleEval(x) { return (x instanceof Function) ? x() : x }	
+function tryEval(x) { return (x instanceof Function) ? x() : x }	
 
 function orDefault(value, def) { return (value == null) ? def : value }
 
@@ -619,3 +590,14 @@ function isOverlap(e, box) {
 	return X >= rect.left && X <= rect.right &&
     	e.clientY >= rect.top && e.clientY <= rect.bottom;
 }
+
+
+
+/*
+DEBUG TOOLS
+
+B - toggle show boxes
+M - toggle mute music
+
+
+*/

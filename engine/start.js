@@ -34,9 +34,4 @@ function addStyle(fileName) {
 }
 
 // shared functions
-
-function wait(duration, then) { return setTimeout(() => { then() }, duration * 1000) }
-
-function d(seconds) {
-    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
-}
+function d(seconds) { return new Promise(resolve => setTimeout(resolve, seconds * 1000)) }

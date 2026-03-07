@@ -195,9 +195,9 @@ const gameData = {
             return 'transform: rotate(' + s.clock1 + 'deg); transform-origin: center bottom' }},
         { pic: 'clockHand2', offset: [.48, .73], style: () => { 
             return 'transform: rotate(' + s.clock2 + 'deg); transform-origin: center bottom' }}]},
-    'F1': { left: 'F2', right: 'F2', forward: { fn: () => {
-        s.floor = 2; playSound('stairsUp'); playGif('stairsBottomUp', 'stairs/C1', 13 * .15, async () => {
-        await d(.5); playSound('stairsUp'); playGif('stairsMiddleUp1', 'stairs/A1', 9 * .15) })}}},
+    'F1': { left: 'F2', right: 'F2', forward: { fn: async () => {
+        s.floor = 2; playSound('stairsUp'); playGif('stairsBottomUp', 'stairs/C1', 13 * .15);
+        await d(.5); playSound('stairsUp'); playGif('stairsMiddleUp1', 'stairs/A1', 9 * .15) }}},
     'F2': { left: 'F1', right: 'F1', forward: 'D2' },
     'G1': { left: 'G2', right: 'G2', forward: 'H1' },
     'G2': { left: 'G1', right: 'G1', forward: 'E3', back: 'H3' },
@@ -369,16 +369,16 @@ const gameData = {
     'A2': { left: 'A1', right: 'A3', forward: { to: 'hall/A7', fn: () => { s.hallDirection = 1; s.hallPosition = 2 }}, 
         boxes: [{ pic: () => { return 'floor' + s.floor }, offset: [.865, .91] }]},
     'A3': { left: 'A2', right: 'A4', forward: { fn: () => { s.floor--; playSound('stairsDown')
-        playGif('stairsMiddleDown2', 'C1', 9 * .15, () => { playSound('stairsDown');
+        playGif('stairsMiddleDown2', 'C1', 9 * .15); playSound('stairsDown');
         if (s.floor == 1) playGif('stairsBottomDown', 'lobby/F2', 9 * .15)
-        else playGif('stairsMiddleDown1', 'A3', 10 * .15) })}}},
+        else playGif('stairsMiddleDown1', 'A3', 10 * .15) }}},
     'A4': { left: 'A3', right: 'A1' },
     'B1': { left: 'B4', right: 'B2', forward: 'B5' },
     'B2': { left: 'B1', right: 'B3', boxes: [{ pic: 'floor10', offset: [.87, .98] }]},
-    'B3': { left: 'B2', right: 'B4', forward: async()=> { if (s.coffee == 3) waitId = await d(60)
+    'B3': { left: 'B2', right: 'B4', forward: async () => { if (s.coffee == 3) waitId = await d(60)
         s.coffee = 4; s.card = [s.floor, s.hallPosition, s.hallDirection] 
-        s.floor--; playSound('stairsDown'); playGif('stairsTopDown', 'C1', 9 * .15, () => {
-        playSound('stairsDown'); playGif('stairsMiddleDown1', 'A3', 10 * .15) })}},
+        s.floor--; playSound('stairsDown'); playGif('stairsTopDown', 'C1', 9 * .15);
+        playSound('stairsDown'); playGif('stairsMiddleDown1', 'A3', 10 * .15) }},
     'B4': { left: 'B3', right: 'B1' },
     'B5': { back: 'B1', boxes: [{ to: 'B5a', fn: () => { playSound('drawer') }, xy: [.37, .52, .63, .78] }]},
     'B5a':{ back: { to: 'B1', fn: () => { playSound('drawer') }}, boxes: [
@@ -505,7 +505,9 @@ const gameData = {
         { mov: 'shower', steps: 8, delay: .075, fate: 'loop', if: () => { 
             return ((s.floorValve == 2 && s.shower == 1) || showerHot()) }}]},
     'D5': { back: 'D1' },
-    'persistents': [{ if: () => { return s.frame.startsWith('D') }, pic: 'steam/0', style: 'opacity: 0', id: 'steam' }]},
+    // TODO: move to 'persistent boxes'...
+    'persistents': [{ if: () => { return s.frame.startsWith('D') }, pic: 'steam/0', style: 'opacity: 0', id: 'steam' }]
+},
 'top': {
     'A1': { left: 'A4', right: 'A2', boxes: [outerElevatorBox,
         { to: 'A1a', fn: () => { playSound('elevatorOpen') }, xy: [.28, .31, .48, .52]}]},
@@ -524,7 +526,7 @@ const gameData = {
         { to: 'D3', fn: () => { playSound('doorClose'); playSound('bobb/left') }, xy: [.35, .65, .22, .82] }]},
     'C3': { boxes: keypadButtons, back: 'C2' },    
     'D1': { left: 'D4', right: 'D2', boxes: [{ xy: [.4, .6, .3, .75], fn: () => { playSound('doorLocked') }}]},
-    'D2': { left: 'D1', right: 'D3', onEnter: async ()=> { if (s.bobbSpeech) return 
+    'D2': { left: 'D1', right: 'D3', onEnter: async () => { if (s.bobbSpeech) return 
         freeze(); await d(1); goTo('D5'); setMusic(null); playSound('bobb/speech')
             await d(30); s.bobbSpeech = true; s.otherLeft = false; goTo('D2'); unfreeze() }},
     'D3': { left: 'D2', right: { to: 'D4', to: () => { if (s.otherLeft) { playSound('bobb/otherLeft'); s.otherLeft = false }}}, 
@@ -537,7 +539,7 @@ const gameData = {
                 await d(4.2); scream.pause(); playSound('splat'); goTo('credits/1') }}]},
     'D4': { left: 'D3', right: 'D1' }},
 'credits':{
-    1: { onEnter: async ()=> {
+    1: { onEnter: async () => {
         setFade(4); await d(4); goTo(2); await d(3); goTo(3); await d(3); goTo(4); await d(4); goTo(5);
         await d(4); goTo(6); await d(4); goTo(7); await d(4); goTo(8); await d(4); setFade(.2); 
         await d(.2); goTo(9); await d(.2); goTo(10); goTo(11); await d(.2); goTo(12); await d(.2);
